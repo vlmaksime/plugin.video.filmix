@@ -1,0 +1,187 @@
+# Kodi Media Center language file
+# Addon Name: Filmix
+# Addon id: plugin.video.filmix
+# Addon Provider: vl.maksime
+
+msgid ""
+msgstr ""
+
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+
+msgctxt "#30001"
+msgid "Search"
+msgstr "Поиск"
+
+msgctxt "#30002"
+msgid "Watch Later"
+msgstr "Смотреть позже"
+
+msgctxt "#30003"
+msgid "Watch History"
+msgstr "История просмотра"
+
+msgctxt "#30004"
+msgid "Unfinished"
+msgstr "Просматриваемые"
+
+msgctxt "#30005"
+msgid "Movies"
+msgstr "Фильмы"
+
+msgctxt "#30006"
+msgid "TV Series"
+msgstr "Сериалы"
+
+msgctxt "#30007"
+msgid "Cartoons"
+msgstr "Мультфильмы"
+
+msgctxt "#30008"
+msgid "Cartoon Series"
+msgstr "Мультсериалы"
+
+msgctxt "#30009"
+msgid "Favorites"
+msgstr "Избранное"
+
+msgctxt "#30011"
+msgid "New Search..."
+msgstr "Новый поиск..."
+
+msgctxt "#30012"
+msgid "Next page..."
+msgstr "Следующая страница..."
+
+msgctxt "#30013"
+msgid "Previous page..."
+msgstr "Предыдущая страница..."
+
+msgctxt "#30014"
+msgid "Nothing found!"
+msgstr "Ничего не найдено!"
+
+msgctxt "#30015"
+msgid "Page"
+msgstr "Стр."
+
+msgctxt "#30016"
+msgid "Empty"
+msgstr "Пусто"
+
+msgctxt "#30017"
+msgid "Episode"
+msgstr "Серия"
+
+msgctxt "#30018"
+msgid "Season"
+msgstr "Сезон"
+
+msgctxt "#30019"
+msgid "Popular"
+msgstr "Популярное"
+
+msgctxt "#30020"
+msgid "Top Views"
+msgstr "Сейчас смотрят"
+msgctxt "#30041"
+msgid "Connection error"
+msgstr "Ошибка подключения"
+
+msgctxt "#30042"
+msgid "Video not found"
+msgstr "Видео не найдено"
+
+msgctxt "#30043"
+msgid "Trailer not found"
+msgstr "Трейлер не найден"
+
+msgctxt "#30044"
+msgid "You have successfully logged in"
+msgstr "Вы успешно вошли в систему"
+
+msgctxt "#30045"
+msgid "You have successfully logged out"
+msgstr "Вы успешно вышли из системы"
+
+msgctxt "#30046"
+msgid "Incorrect login or password!"
+msgstr "Неправильный логин или пароль!"
+
+msgctxt "#30200"
+msgid "General"
+msgstr "Общие"
+
+msgctxt "#30201"
+msgid "File names for saving with 'Add To Lib'"
+msgstr "Имена файлов для распознования в 'Add To Lib'"
+
+msgctxt "#30202"
+msgid "Search history length"
+msgstr "Длина истории поиска"
+
+msgctxt "#30203"
+msgid "Results per page"
+msgstr "Результатов на страницу"
+
+msgctxt "#30204"
+msgid "Safe Search"
+msgstr "Безопасный поиск"
+
+msgctxt "#30210"
+msgid "Video Quality"
+msgstr "Качество видео"
+
+
+msgctxt "#30220"
+msgid "Rating source"
+msgstr "Источник рейтинга"
+
+msgctxt "#30222"
+msgid "KinoPoisk"
+msgstr "КиноПоиск"
+
+msgctxt "#30300"
+msgid "My profile"
+msgstr "Мой профиль"
+
+msgctxt "#30301"
+msgid "Login"
+msgstr "Войти"
+
+msgctxt "#30302"
+msgid "Logout"
+msgstr "Выйти"
+
+msgctxt "#30303"
+msgid "Login"
+msgstr "Логин"
+
+msgctxt "#30304"
+msgid "Password"
+msgstr "Пароль"
+
+msgctxt "#30306"
+msgid "Your name"
+msgstr "Ваше имя"
+
+msgctxt "#30309"
+msgid "PRO Date"
+msgstr "Срок подписки"
+
+msgctxt "#30312"
+msgid "None"
+msgstr "Нет"
+
+msgctxt "#30313"
+msgid "Male"
+msgstr "Мужской"
+
+msgctxt "#30314"
+msgid "Female"
+msgstr "Женский"
+
+msgctxt "#30315"
+msgid "Login by Code"
+msgstr "Вход по коду"
