@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon id="plugin.video.filmix" version="1.0.0" name="Filmix" provider-name="vl.maksime">
+    <requires>
+        <import addon="xbmc.python" version="2.19.0"/>
+        <import addon="script.module.requests"/>
+        <import addon="script.module.simplemedia" version="1.0.4"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en_GB"></summary>
+        <summary lang="ru_RU"></summary>
+        <description lang="en_GB"></description>
+        <description lang="ru_RU"></description>
+        <disclaimer lang="en_GB"></disclaimer>
+        <disclaimer lang="ru_RU"></disclaimer>
+        <language>ru</language>
+        <platform>all</platform>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
+        <forum></forum>
+        <website>https://filmix.co/</website>
+        <email>vl.maksime@gmail.com</email>
+        <source>https://github.com/vlmaksime/plugin.video.filmix</source>
+        <news>v1.0.0 (2019-01-21)[CR]- Публичный релиз</news>
+        <assets>
+            <icon>icon.png</icon>
+            <fanart>fanart.jpg</fanart>
+        </assets>
+    </extension>
+</addon>
