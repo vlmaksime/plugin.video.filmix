@@ -2,7 +2,7 @@
 <addon id="plugin.video.filmix" version="1.0.0" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
-        <import addon="script.module.requests"/>
+        <import addon="script.module.requests" version="2.12.4"/>
         <import addon="script.module.simplemedia" version="1.0.4"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
