@@ -19,5 +19,6 @@
         <setting label="30307" type="bool" id="is_pro" visible="!eq(-2,)" enable="false" default="False"/>
         <setting label="30308" type="bool" id="is_pro_plus" visible="!eq(-3,)" enable="false"  default="False"/>
         <setting label="30309" type="text" id="pro_date" visible="!eq(0,)" enable="false" default=""/>
+        <setting type="text" id="X-FX-Token" visible="false" enable="false" default=""/>
     </category>
 </settings>

@@ -109,6 +109,38 @@ msgctxt "#30046"
 msgid "Incorrect login or password!"
 msgstr "Неправильный логин или пароль!"
 
+msgctxt "#30050"
+msgid "Add to Favorites"
+msgstr "Добавить в Избранное"
+
+msgctxt "#30051"
+msgid "Remove from Favorites"
+msgstr "Удалить из Избранного"
+
+msgctxt "#30052"
+msgid "Add to Watch Later"
+msgstr "Добавить в Смотреть позже"
+
+msgctxt "#30053"
+msgid "Remove from Watch Later"
+msgstr "Удалить из Смотреть позже"
+
+msgctxt "#30054"
+msgid "Successfully added to Favorites"
+msgstr "Успешно добавлено в Избранное"
+
+msgctxt "#30055"
+msgid "Successfully removed from Favorites"
+msgstr "Успешно удалено из избранного"
+
+msgctxt "#30056"
+msgid "Successfully added to Watch Later"
+msgstr "Успежно добавлено в Смотреть позже"
+
+msgctxt "#30057"
+msgid "Successfully removed from Watch Later"
+msgstr "Успешно удалено из Смотреть позже"
+
 msgctxt "#30200"
 msgid "General"
 msgstr "Общие"

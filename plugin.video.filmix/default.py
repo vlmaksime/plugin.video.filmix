@@ -58,6 +58,34 @@ def logout():
     dialog = xbmcgui.Dialog()
     dialog.ok(plugin.name, _('You have successfully logged out'))
 
+@plugin.route('/toogle_favorites')
+def toogle_favorites():
+    content_id = plugin.params.get('id')
+    value = plugin.params.get('value') == '1'
+
+    api.set_favorite(content_id, value)
+
+    if value:
+        xbmcgui.Dialog().notification(plugin.name, _('Successfully added to Favorites'), xbmcgui.NOTIFICATION_INFO)
+    else:
+        xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Favorites'), xbmcgui.NOTIFICATION_INFO)
+
+    xbmc.executebuiltin(' Container.Refresh()')
+
+@plugin.route('/toogle_watch_later')
+def toogle_watch_later():
+    content_id = plugin.params.get('id')
+    value = plugin.params.get('value') == '1'
+
+    api.set_watch_later(content_id, value)
+
+    if value:
+        xbmcgui.Dialog().notification(plugin.name, _('Successfully added to Watch Later'), xbmcgui.NOTIFICATION_INFO)
+    else:
+        xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Watch Later'), xbmcgui.NOTIFICATION_INFO)
+        
+        
+    xbmc.executebuiltin(' Container.Refresh()')
 
 @plugin.route('/')
 def root():
@@ -245,6 +273,7 @@ def _catalog_items(data, catalog):
                     'url': url,
                     'fanart':  plugin.fanart,
                     'thumb':  poster,
+                    'context_menu': _get_context_menu(item),
                     }
         
         yield listitem
@@ -811,6 +840,25 @@ def _make_rating(item, rating_source, field):
             'defaultt': False,
             }
  
+def _get_context_menu(item):
+    context_menu = []
+    
+    if plugin.get_setting('user_login'):
+        
+        url = plugin.url_for('toogle_favorites', id=item['id'], value=(0 if item['favorited'] else 1))
+        if item['favorited']:
+            context_menu.append((_('Remove from Favorites'),'RunPlugin({0})'.format(url)))
+        else:
+            context_menu.append((_('Add to Favorites'),'RunPlugin({0})'.format(url)))
+            
+        url = plugin.url_for('toogle_watch_later', id=item['id'], value=(0 if item['watch_later'] else 1))
+        if item['watch_later']:
+            context_menu.append((_('Remove from Watch Later'),'RunPlugin({0})'.format(url)))
+        else:
+            context_menu.append((_('Add to Watch Later'),'RunPlugin({0})'.format(url)))
+        
+    return context_menu
+
  
 def _use_atl_names():
     return plugin.params.get('atl', '').lower() == 'true' \

@@ -16,18 +16,6 @@ else:
 
 debug = False
 
-
-@python_2_unicode_compatible
-class APIException(Exception):
-
-    def __init__(self, msg, code=None):
-        self.msg = msg
-        self.code = code
-
-    def __str__(self):
-        return self.msg
-
-
 @python_2_unicode_compatible
 class http_client(object):
 
@@ -53,13 +41,8 @@ class http_client(object):
         
     def post(self, url, **kwargs):
 
-        try:
             r = self._s.post(url, **kwargs)
             r.raise_for_status()
-        except requests.ConnectionError:
-            raise APIException('Connection error')
-        except requests.HTTPError as e:
-            raise APIException(str(e))
 
         if debug:
             print('post')
@@ -72,13 +55,8 @@ class http_client(object):
 
     def get(self, url, **kwargs):
 
-        try:
             r = self._s.get(url, **kwargs)
             r.raise_for_status()
-        except requests.ConnectionError:
-            raise APIException('Connection error')
-        except requests.HTTPError as e:
-            raise APIException(str(e))
 
         if debug:
             print('get')
@@ -93,30 +71,50 @@ class http_client(object):
 @python_2_unicode_compatible
 class filmix(object):
 
-    APIException = APIException
+    @python_2_unicode_compatible
+    class APIException(Exception):
+    
+        def __init__(self, msg, code=None):
+            self.msg = msg
+            self.code = code
+    
+        def __str__(self):
+            return self.msg
 
     def __init__(self, headers=None, cookies=None):
         self._base_url = 'http://filmix.vip/'
 
         headers = headers or {}
-        headers.update({'User-Agent': None,
+
+        f_headers = {'User-Agent': None,
                         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                         'Accept-Encoding': 'gzip',
                         'Connection': 'keep-alive',
                         'X-FX-Token': '',
-                        })
+                     }
+        f_headers.update(headers)
 
-        self._client = http_client(headers, cookies)
+        self._client = http_client(f_headers, cookies)
 
     def _post(self, url, params=None, **kwargs):
         url = self._base_url + url
+        try:
         r = self._client.post(url, params=params, **kwargs)
+        except requests.ConnectionError:
+            raise self.APIException('Connection error')
+        except requests.HTTPError as e:
+            raise self.APIException(str(e))
         
         return r
         
     def _get(self, url, params=None, **kwargs):
         url = self._base_url + url
+        try:
         r = self._client.get(url, params=params, **kwargs)
+        except requests.ConnectionError:
+            raise self.APIException('Connection error')
+        except requests.HTTPError as e:
+            raise self.APIException(str(e))
         
         return r
 
@@ -239,50 +237,71 @@ class filmix(object):
         
     def get_search_catalog(self, keyword, page=1, **kwargs):
 
-        u_params = {'do': 'search',
+        params = {'do': 'search',
                     'story': keyword,
                     }
 
-        return self._get_items(u_params, **kwargs)
+        return self._get_items(params, **kwargs)
 
     def get_favorites_items(self, page=1, **kwargs):
-        u_params = {'do': 'favorites',
+        params = {'do': 'favorites',
                     }
 
-        return self._get_items(u_params, page, {}, **kwargs)
+        return self._get_items(params, page, {}, **kwargs)
 
     def get_watch_later_items(self, page=1, **kwargs):
-        u_params = {'do': 'watch_later',
+        params = {'do': 'watch_later',
                     }
 
-        return self._get_items(u_params, page, {}, **kwargs)
+        return self._get_items(params, page, {}, **kwargs)
 
     def get_history_items(self, page=1, **kwargs):
-        u_params = {'do': 'last_seen',
+        params = {'do': 'last_seen',
                     }
 
-        return self._get_items(u_params, page, {}, **kwargs)
+        return self._get_items(params, page, {}, **kwargs)
 
     def get_popular_items(self, page=1, **kwargs):
-        u_params = {'do': 'popular',
+        params = {'do': 'popular',
                     }
 
-        return self._get_items(u_params, page, {}, **kwargs)
+        return self._get_items(params, page, {}, **kwargs)
 
     def get_top_views_items(self, page=1, **kwargs):
-        u_params = {'do': 'top_views',
+        params = {'do': 'top_views',
                     }
 
-        return self._get_items(u_params, page, {}, **kwargs)
+        return self._get_items(params, page, {}, **kwargs)
          
     def get_filter(self, scope, type):
         url = 'engine/ajax/get_filter.php'
 
-        u_params = {'scope': scope,
+        params = {'scope': scope,
                     'type': type,
                     }
 
-        r = self._post(url, u_params)
+        r = self._post(url, params)
         j = self._extract_json(r)
 
         return j
+
+    def set_favorite(self, fav_id, value):
+        url = 'engine/ajax/favorites.php'
+
+        params = {'fav_id': fav_id,
+                  'action': 'plus' if value else 'minus',
+                  'skin': 'Filmix',
+                  'alert': '0',
+                  }
+
+        self._get(url, params)
+
+    def set_watch_later(self, post_id, value):
+        url = 'engine/ajax/watch_later.php'
+
+        data = {'post_id': post_id,
+                'action': 'add' if value else 'rm',
+                }
+
+        self._post(url, data=data)
+
