@@ -894,18 +894,21 @@ def _get_context_menu(item):
     context_menu = []
     
     if plugin.get_setting('user_login'):
-        
-        url = plugin.url_for('toogle_favorites', id=item['id'], value=(0 if item['favorited'] else 1))
-        if item['favorited']:
-            context_menu.append((_('Remove from Favorites'), 'RunPlugin({0})'.format(url)))
-        else:
-            context_menu.append((_('Add to Favorites'), 'RunPlugin({0})'.format(url)))
+        favorited = item.get('favorited')
+        if favorited is not None:
+            url = plugin.url_for('toogle_favorites', id=item['id'], value=(0 if favorited else 1))
+            if item['favorited']:
+                context_menu.append((_('Remove from Favorites'), 'RunPlugin({0})'.format(url)))
+            else:
+                context_menu.append((_('Add to Favorites'), 'RunPlugin({0})'.format(url)))
             
-        url = plugin.url_for('toogle_watch_later', id=item['id'], value=(0 if item['watch_later'] else 1))
-        if item['watch_later']:
-            context_menu.append((_('Remove from Watch Later'), 'RunPlugin({0})'.format(url)))
-        else:
-            context_menu.append((_('Add to Watch Later'), 'RunPlugin({0})'.format(url)))
+        watch_later = item.get('watch_later')
+        if watch_later is not None:
+            url = plugin.url_for('toogle_watch_later', id=item['id'], value=(0 if watch_later else 1))
+            if item['watch_later']:
+                context_menu.append((_('Remove from Watch Later'), 'RunPlugin({0})'.format(url)))
+            else:
+                context_menu.append((_('Add to Watch Later'), 'RunPlugin({0})'.format(url)))
         
     return context_menu
 

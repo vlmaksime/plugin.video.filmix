@@ -102,13 +102,13 @@ class PluginActionsTestCase(unittest.TestCase):
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/play'.format(addon_name), '9', '?e=18&s=8'])
     def test_09_play_video_serial_episodes():
-        print('# serial_episodes')
+        print('# play_video_serial_episodes')
         imp.load_source('__main__', default_script)
   
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/play'.format(addon_name), '10', '?e=18&s=8&t=LostFilm'])
     def test_10_play_video_serial_episodes_translation():
-        print('# serial_episodes_translation')
+        print('# play_video_serial_episodes_translation')
         imp.load_source('__main__', default_script)
   
     @staticmethod
@@ -177,10 +177,40 @@ class PluginActionsTestCase(unittest.TestCase):
     def test_21_search_keyword():
         print('# search_keyword')
         imp.load_source('__main__', default_script)
+
+    @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_favorites'.format(addon_name), '22', '?id=14624&value=1'])
+    def test_22_add_favorite():
+        print('# add_favorite')
+        imp.load_source('__main__', default_script)
+
+    @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_favorites'.format(addon_name), '23', '?id=14624&value=0'])
+    def test_23_remove_favorite():
+        print('# remove_favorite')
+        imp.load_source('__main__', default_script)
  
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/logout'.format(addon_name), '25', ''])
-    def test_25_logout():
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_watch_later'.format(addon_name), '24', '?id=14624&value=1'])
+    def test_24_add_watch_later():
+        print('# add_watch_later')
+        imp.load_source('__main__', default_script)
+ 
+    @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_watch_later'.format(addon_name), '25', '?id=14624&value=0'])
+    def test_25_remove_watch_later():
+        print('# remove_watch_later')
+        imp.load_source('__main__', default_script)
+ 
+    @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play'.format(addon_name), '26', ''])
+    def test_26_play_trailer():
+        print('# play_trailer')
+        imp.load_source('__main__', default_script)
+    
+    @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/logout'.format(addon_name), '30', ''])
+    def test_30_logout():
         print('# logout')
         imp.load_source('__main__', default_script)
 
