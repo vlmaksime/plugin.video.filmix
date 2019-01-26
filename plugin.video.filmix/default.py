@@ -58,6 +58,7 @@ def logout():
     dialog = xbmcgui.Dialog()
     dialog.ok(plugin.name, _('You have successfully logged out'))
 
+
 @plugin.route('/toogle_favorites')
 def toogle_favorites():
     content_id = plugin.params.get('id')
@@ -72,6 +73,7 @@ def toogle_favorites():
 
     xbmc.executebuiltin(' Container.Refresh()')
 
+
 @plugin.route('/toogle_watch_later')
 def toogle_watch_later():
     content_id = plugin.params.get('id')
@@ -84,8 +86,8 @@ def toogle_watch_later():
     else:
         xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Watch Later'), xbmcgui.NOTIFICATION_INFO)
         
-        
     xbmc.executebuiltin(' Container.Refresh()')
+
 
 @plugin.route('/')
 def root():
@@ -247,7 +249,7 @@ def _catalog_items(data, catalog):
         poster = item['poster']
         poster = poster.replace('thumbs/w220', 'big')
         
-        url = plugin.url_for('list_content', content_id='{0}-{1}'.format(item['id'], item['alt_name']), catalog=catalog)
+        url = plugin.url_for('list_content', content_name='{0}-{1}'.format(item['id'], item['alt_name']), catalog=catalog)
 
         if item['quality']:
             title = '{0} [{1}]'.format(item['title'], item['quality'])
@@ -292,12 +294,12 @@ def _catalog_items(data, catalog):
         yield item_info
 
 
-@plugin.route('/<catalog>/<content_id>')
-def list_content(catalog, content_id):
-    content_params = _get_content_params(content_id)
+@plugin.route('/<catalog>/<content_name>')
+def list_content(catalog, content_name):
+    content = _get_content_params(content_name)
     
     try:
-        content_info = api.get_movie_info(**content_params)
+        content_info = api.get_movie_info(content['id'], content['alt_name'])
     except api.APIException as e:
         plugin.notify_error(e.msg)
         plugin.create_directory([], succeeded=False)
@@ -330,7 +332,7 @@ def _list_movie_files(item):
 
     player_links = _get_player_links(item)
 
-    u_params = {'content_id': '{0}-{1}'.format(item['id'], item['alt_name']),
+    u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                 'catalog': _section_catalog(item['section'])
                 }
     
@@ -358,7 +360,7 @@ def _list_serial_seasons(item):
             listitem['info']['video']['season'] = int(season)
             listitem['info']['video']['sortseason'] = int(season)
             
-            u_params = {'content_id': '{0}-{1}'.format(item['id'], item['alt_name']),
+            u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                         'catalog': _section_catalog(item['section']),
                         's': season,
                         }
@@ -373,7 +375,7 @@ def _list_serial_seasons(item):
         listitem['info']['video']['season'] = 1
         listitem['info']['video']['sortseason'] = 1
         
-        u_params = {'content_id': '{0}-{1}'.format(item['id'], item['alt_name']),
+        u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                     'catalog': _section_catalog(item['section']),
                     }
 
@@ -386,12 +388,12 @@ def _list_serial_seasons(item):
                 yield listitem
  
     
-@plugin.route('/<catalog>/<content_id>/episodes')
-def list_season_episodes(catalog, content_id):
-    content_params = _get_content_params(content_id)
+@plugin.route('/<catalog>/<content_name>/episodes')
+def list_season_episodes(catalog, content_name):
+    content = _get_content_params(content_name)
     
     try:
-        serial_info = api.get_movie_info(**content_params)
+        serial_info = api.get_movie_info(content['id'], content['alt_name'])
     except api.APIException as e:
         plugin.notify_error(e.msg)
         plugin.create_directory([], succeeded=False)
@@ -422,7 +424,7 @@ def _season_episodes_items(item, season=None, translation=None):
     
     season_translation = _get_season_translation(item, season, translation)
 
-    u_params = {'content_id': '{0}-{1}'.format(item['id'], item['alt_name']),
+    u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                 'catalog': _section_catalog(item['section']),
                 't': translation,
                 }
@@ -443,13 +445,13 @@ def _season_episodes_items(item, season=None, translation=None):
         yield listitem
 
     
-@plugin.route('/<catalog>/<content_id>/play')
-def play_video(catalog, content_id):
+@plugin.route('/<catalog>/<content_name>/play')
+def play_video(catalog, content_name):
 
-    content_params = _get_content_params(content_id)
+    content = _get_content_params(content_name)
 
     try:
-        content_info = api.get_movie_info(**content_params)
+        content_info = api.get_movie_info(content['id'], content['alt_name'])
     except api.APIException as e:
         plugin.notify_error(e.msg)
         plugin.resolve_url({}, False)
@@ -484,7 +486,25 @@ def play_video(catalog, content_id):
         listitem['path'] = _get_movie_link(content_info, translation)
     else:
         listitem['path'] = _get_episode_link(content_info, season, episode, translation)
-            
+
+    plugin.resolve_url(listitem)
+
+    
+@plugin.route('/<catalog>/<content_name>/trailer')
+def play_trailer(catalog, content_name):
+
+    content = _get_content_params(content_name)
+
+    try:
+        content_info = api.get_movie_info(content['id'], content['alt_name'])
+    except api.APIException as e:
+        plugin.notify_error(e.msg)
+        plugin.resolve_url({}, False)
+        return
+
+    listitem = {}
+    listitem['path'] = _get_trailer_link(content_info)
+
     plugin.resolve_url(listitem)
 
 
@@ -545,11 +565,11 @@ def _catalog_section(catalog):
             return item['section']
 
 
-def _get_content_params(content_id):
-    sep = content_id.find('-')
+def _get_content_params(content_name):
+    sep = content_name.find('-')
     
-    result = {'newsid': content_id[:sep],
-              'alt_name': content_id[sep + 1:],
+    result = {'id': content_name[:sep],
+              'alt_name': content_name[sep + 1:],
               }
 
     return result
@@ -610,6 +630,29 @@ def _get_episode_link(item, season, episode, translation=None):
     return path
 
 
+def _get_trailer_link(item):
+    player_links = item['player_links']['trailer']
+    
+    url = player_links[0]['link']
+
+    url = api.decode_link(url)
+    
+    sub_a = url.find('[')
+    sub_b = url.find(']')
+    qualities = url[sub_a + 1:sub_b].split(',')
+
+    video_quality = plugin.get_setting('video_quality') + 1
+    quality_list = _available_qualities()
+    
+    path = None
+    for i, q in enumerate(quality_list):
+        if (path is None or video_quality >= i) \
+         and q in qualities:
+            path = url.replace(url[sub_a:sub_b + 1], q)
+
+    return path
+
+
 def _available_qualities():
     _user_data()
 
@@ -654,6 +697,12 @@ def _get_listitem(item):
         video_info.update({  # 'mediatype': 'episode',
                            'tvshowtitle': item['title'],
                            })
+
+    if item['player_links'].get('trailer') is not None:
+        trailer_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
+                          'catalog': _section_catalog(item['section']),
+                          }
+        video_info['trailer'] = plugin.url_for('play_trailer', **trailer_params)
 
     listitem = {'label': item['title'],
                 'info': {'video': video_info,
@@ -738,7 +787,7 @@ def search():
                   'total_items': catalog_info['count'],
                   'content': 'movies',
                   'category': ' / '.join([_('Search'), keyword]),
-    #                  'sort_methods': {'sortMethod': xbmcplugin.SORT_METHOD_NONE, 'label2Mask': '%Y / %O'},
+                  'sort_methods': xbmcplugin.SORT_METHOD_NONE,
                   'update_listing': (page > 1),
     
                   }
@@ -839,6 +888,7 @@ def _make_rating(item, rating_source, field):
             'votes': votes,
             'defaultt': False,
             }
+
  
 def _get_context_menu(item):
     context_menu = []
@@ -847,15 +897,15 @@ def _get_context_menu(item):
         
         url = plugin.url_for('toogle_favorites', id=item['id'], value=(0 if item['favorited'] else 1))
         if item['favorited']:
-            context_menu.append((_('Remove from Favorites'),'RunPlugin({0})'.format(url)))
+            context_menu.append((_('Remove from Favorites'), 'RunPlugin({0})'.format(url)))
         else:
-            context_menu.append((_('Add to Favorites'),'RunPlugin({0})'.format(url)))
+            context_menu.append((_('Add to Favorites'), 'RunPlugin({0})'.format(url)))
             
         url = plugin.url_for('toogle_watch_later', id=item['id'], value=(0 if item['watch_later'] else 1))
         if item['watch_later']:
-            context_menu.append((_('Remove from Watch Later'),'RunPlugin({0})'.format(url)))
+            context_menu.append((_('Remove from Watch Later'), 'RunPlugin({0})'.format(url)))
         else:
-            context_menu.append((_('Add to Watch Later'),'RunPlugin({0})'.format(url)))
+            context_menu.append((_('Add to Watch Later'), 'RunPlugin({0})'.format(url)))
         
     return context_menu
 

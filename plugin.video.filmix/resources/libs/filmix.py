@@ -16,6 +16,7 @@ else:
 
 debug = False
 
+
 @python_2_unicode_compatible
 class http_client(object):
 
@@ -41,8 +42,8 @@ class http_client(object):
         
     def post(self, url, **kwargs):
 
-            r = self._s.post(url, **kwargs)
-            r.raise_for_status()
+        r = self._s.post(url, **kwargs)
+        r.raise_for_status()
 
         if debug:
             print('post')
@@ -55,8 +56,8 @@ class http_client(object):
 
     def get(self, url, **kwargs):
 
-            r = self._s.get(url, **kwargs)
-            r.raise_for_status()
+        r = self._s.get(url, **kwargs)
+        r.raise_for_status()
 
         if debug:
             print('get')
@@ -87,10 +88,10 @@ class filmix(object):
         headers = headers or {}
 
         f_headers = {'User-Agent': None,
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                        'Accept-Encoding': 'gzip',
-                        'Connection': 'keep-alive',
-                        'X-FX-Token': '',
+                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                     'Accept-Encoding': 'gzip',
+                     'Connection': 'keep-alive',
+                     'X-FX-Token': '',
                      }
         f_headers.update(headers)
 
@@ -99,7 +100,7 @@ class filmix(object):
     def _post(self, url, params=None, **kwargs):
         url = self._base_url + url
         try:
-        r = self._client.post(url, params=params, **kwargs)
+            r = self._client.post(url, params=params, **kwargs)
         except requests.ConnectionError:
             raise self.APIException('Connection error')
         except requests.HTTPError as e:
@@ -110,7 +111,7 @@ class filmix(object):
     def _get(self, url, params=None, **kwargs):
         url = self._base_url + url
         try:
-        r = self._client.get(url, params=params, **kwargs)
+            r = self._client.get(url, params=params, **kwargs)
         except requests.ConnectionError:
             raise self.APIException('Connection error')
         except requests.HTTPError as e:
@@ -239,38 +240,38 @@ class filmix(object):
     def get_search_catalog(self, keyword, page=1, **kwargs):
 
         params = {'do': 'search',
-                    'story': keyword,
-                    }
+                  'story': keyword,
+                  }
 
         return self._get_items(params, **kwargs)
 
     def get_favorites_items(self, page=1, **kwargs):
         params = {'do': 'favorites',
-                    }
+                  }
 
         return self._get_items(params, page, {}, **kwargs)
 
     def get_watch_later_items(self, page=1, **kwargs):
         params = {'do': 'watch_later',
-                    }
+                 }
 
         return self._get_items(params, page, {}, **kwargs)
 
     def get_history_items(self, page=1, **kwargs):
         params = {'do': 'last_seen',
-                    }
+                  }
 
         return self._get_items(params, page, {}, **kwargs)
 
     def get_popular_items(self, page=1, **kwargs):
         params = {'do': 'popular',
-                    }
+                  }
 
         return self._get_items(params, page, {}, **kwargs)
 
     def get_top_views_items(self, page=1, **kwargs):
         params = {'do': 'top_views',
-                    }
+                  }
 
         return self._get_items(params, page, {}, **kwargs)
          
@@ -278,8 +279,8 @@ class filmix(object):
         url = 'engine/ajax/get_filter.php'
 
         params = {'scope': scope,
-                    'type': type,
-                    }
+                  'type': type,
+                  }
 
         r = self._post(url, params)
         j = self._extract_json(r)
@@ -305,4 +306,3 @@ class filmix(object):
                 }
 
         self._post(url, data=data)
-
