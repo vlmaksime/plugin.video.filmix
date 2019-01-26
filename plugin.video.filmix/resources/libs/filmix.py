@@ -37,7 +37,7 @@ class http_client(object):
         if isinstance(self._s.cookies, cookielib.LWPCookieJar) \
            and self._s.cookies.filename:
             self._s.cookies.save(ignore_expires=True, ignore_discard=True)
-        
+
     def post(self, url, **kwargs):
 
         r = self._s.post(url, **kwargs)
@@ -62,11 +62,11 @@ class filmix(object):
 
     @python_2_unicode_compatible
     class APIException(Exception):
-    
+
         def __init__(self, msg, code=None):
             self.msg = msg
             self.code = code
-    
+
         def __str__(self):
             return self.msg
 
@@ -93,9 +93,9 @@ class filmix(object):
             raise self.APIException('Connection error')
         except requests.HTTPError as e:
             raise self.APIException(str(e))
-        
+
         return r
-        
+
     def _get(self, url, params=None, **kwargs):
         url = self._base_url + url
         try:
@@ -104,12 +104,12 @@ class filmix(object):
             raise self.APIException('Connection error')
         except requests.HTTPError as e:
             raise self.APIException(str(e))
-        
+
         return r
 
     @staticmethod
     def decode_link(link):
-    
+
         tmp_a = 'y,5,U,4,e,i,6,d,7,N,J,g,t,G,2,V,l,B,x,f,s,Q,1,H,z,='.split(',')
         tmp_b = 'M,X,w,R,3,m,8,0,T,a,u,Z,p,D,b,o,k,Y,n,v,I,L,9,W,c,r'.split(',')
         a_length = len(tmp_a);
@@ -144,7 +144,7 @@ class filmix(object):
 
         result.update({'X-FX-Token': r.headers.get('X-FX-Token', ''),
                        })
-            
+
         return result
 
     def login(self, _login, _password):
@@ -157,9 +157,9 @@ class filmix(object):
         return self._get_profile(data)
 
     def user_data(self):
- 
+
         return self._get_profile()
-        
+
     def _get_items(self, u_params, page=1, page_params=None, **kwargs):
         url = 'android.php'
 
@@ -186,7 +186,7 @@ class filmix(object):
             pages = {'prev': None,
                      'next': None,
                      }
-            
+
         result = {'count': len(j),
                   'items': j,
                   'pages': pages,
@@ -207,11 +207,11 @@ class filmix(object):
                         'orderdir': orderdir,
                         'requested_url': 'filters/s{0}{1}{2}'.format(section, '-' if filter else '', filter)
                         }
-        
+
         page_params = {'orderby': orderby,
                        'orderdir': orderdir,
                        }
-        
+
         return self._get_items(u_params, page, page_params, **kwargs)
 
     def get_movie_info(self, newsid='', alt_name=''):
@@ -219,12 +219,12 @@ class filmix(object):
         u_params = {'newsid': newsid,
                     'seourl': alt_name,
                     }
-        
+
         r = self._get(url, u_params)
         j = self._extract_json(r)
 
         return j
-        
+
     def get_search_catalog(self, keyword, page=1, **kwargs):
 
         params = {'do': 'search',
@@ -262,7 +262,7 @@ class filmix(object):
                   }
 
         return self._get_items(params, page, {}, **kwargs)
-         
+
     def get_filter(self, scope, type):
         url = 'engine/ajax/get_filter.php'
 
