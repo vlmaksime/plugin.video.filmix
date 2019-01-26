@@ -162,6 +162,7 @@ class filmix(object):
         data = {'login_name': _login,
                 'login_password': _password,
                 'login': 'submit',
+                'login_not_save': 1,
                 }
 
         return self._get_profile(data)
