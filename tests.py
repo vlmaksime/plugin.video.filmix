@@ -29,7 +29,7 @@ with addon.get_storage('__history__.pcl') as storage:
     history.insert(0, {'keyword': 'Supernatural'})
     storage['history'] = history
 
-xbmc._set_log_level(-1)
+xbmc._set_log_level(0)
 
 default_script = os.path.join(addon_dir, 'default.py')
 
@@ -47,6 +47,18 @@ class PluginActionsTestCase(unittest.TestCase):
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/login'.format(addon_name), '0', ''])
     def test_00_login():
         print('# login')
+        xbmc.Keyboard.strings.append('')
+        xbmc.Keyboard.strings.append('')
+        imp.load_source('__main__', default_script)
+
+        xbmc.Keyboard.strings.append(os.getenv('FILMIX_LOGIN', ''))
+        xbmc.Keyboard.strings.append('')
+        imp.load_source('__main__', default_script)
+
+        xbmc.Keyboard.strings.append(os.getenv('FILMIX_LOGIN', ''))
+        xbmc.Keyboard.strings.append('0000000000')
+        imp.load_source('__main__', default_script)
+
         xbmc.Keyboard.strings.append(os.getenv('FILMIX_LOGIN', ''))
         xbmc.Keyboard.strings.append(os.getenv('FILMIX_PASSWORD', ''))
         imp.load_source('__main__', default_script)
@@ -58,7 +70,7 @@ class PluginActionsTestCase(unittest.TestCase):
         imp.load_source('__main__', default_script)
      
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies'.format(addon_name), '2', ''])
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies'.format(addon_name), '2', '?page=3'])
     def test_02_catalog():
         print('# catalog')
         imp.load_source('__main__', default_script)
@@ -70,7 +82,7 @@ class PluginActionsTestCase(unittest.TestCase):
         imp.load_source('__main__', default_script)
    
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play'.format(addon_name), '4', ''])
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play'.format(addon_name), '4', '?strm=1'])
     def test_04_play_video_movie():
         print('# play_video_movie')
         imp.load_source('__main__', default_script)

@@ -14,8 +14,6 @@ if PY2:
 else:
     import http.cookiejar as cookielib
 
-debug = False
-
 
 @python_2_unicode_compatible
 class http_client(object):
@@ -45,11 +43,6 @@ class http_client(object):
         r = self._s.post(url, **kwargs)
         r.raise_for_status()
 
-        if debug:
-            print('post')
-            print('url:', r.url)
-            print('content:', r.content)
-
         self._save_cookies()
 
         return r
@@ -58,11 +51,6 @@ class http_client(object):
 
         r = self._s.get(url, **kwargs)
         r.raise_for_status()
-
-        if debug:
-            print('get')
-            print('url:', r.url)
-            print('content:', r.content)
 
         self._save_cookies()
 
