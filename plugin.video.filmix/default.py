@@ -185,19 +185,23 @@ def list_catalog(catalog):
     per_page = plugin.get_setting('step', False)
 
     if catalog in ['watch_history', 'watch_later', 'favorites', 'popular', 'top_views']:
+        use_filters = False
         params = {'page': page,
                   'per_page': per_page}
     else:
+        use_filters = plugin.get_setting('use_filters')
         section = _catalog_section(catalog)
 
         orderby = plugin.params.get('orderby', 'date')
         orderdir = plugin.params.get('orderdir', 'desc')
+        filters = plugin.params.get('filters', '')
 
         params = {'page': page,
                   'section': section,
                   'orderby': orderby,
                   'orderdir': orderdir,
                   'per_page': per_page,
+                  'filters': filters,
                   }
 
     try:
@@ -488,8 +492,10 @@ def play_video(catalog, content_name):
 
     if content_info['section'] in [0, 14]:
         listitem['path'] = _get_movie_link(content_info, translation)
+        api.add_watched(content['id'], translation=translation)
     else:
         listitem['path'] = _get_episode_link(content_info, season, episode, translation)
+        api.add_watched(content['id'], season, episode, translation)
 
     plugin.resolve_url(listitem)
 
