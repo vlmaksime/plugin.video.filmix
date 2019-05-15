@@ -453,7 +453,8 @@ def _season_episodes_items(item, season=None, translation=None):
         yield listitem
 
 
-@plugin.route('/<catalog>/<content_name>/play')
+@plugin.route('/<catalog>/<content_name>/play', 'play_video_old')
+@plugin.route('/<catalog>/<content_name>/play/')
 def play_video(catalog, content_name):
 
     content = _get_content_params(content_name)
