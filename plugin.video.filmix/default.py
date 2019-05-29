@@ -231,7 +231,7 @@ def list_catalog(catalog):
     category_parts = [_category]
     if page > 1:
         category_parts.append('{0} {1}'.format(_('Page'), page))
-    result = {'items': _catalog_items(catalog_info, catalog),
+    result = {'items': _catalog_items(catalog_info, catalog, use_filters),
               'total_items': catalog_info['count'],
               'content': 'movies',
               'category': ' / '.join(category_parts),
@@ -242,8 +242,13 @@ def list_catalog(catalog):
     plugin.create_directory(**result)
 
 
-def _catalog_items(data, catalog):
+def _catalog_items(data, catalog, use_filters=False):
 
+    if use_filters:
+        used_filters = _get_filters()
+        for used_filter in used_filters:
+            yield _make_filter_item(catalog, used_filter['t'])
+        
     for item in data['items']:
 
         is_folder = True
@@ -296,6 +301,39 @@ def _catalog_items(data, catalog):
                      'url':   url}
         yield item_info
 
+@plugin.route('/select_filter')
+def select_filter():
+    catalog = plugin.params.get('catalog')
+    filter_id  = plugin.params.get('filter_id')
+
+    filter_title = _get_filter_title(filter_id)
+    values_list = _get_filter_values(filter_id)
+#    values_list =  sorted(values_list, key=values_list.get)
+
+    filter_values = _get_catalog_filters()    
+
+    keys = []
+    titles = []
+    preselected = []
+
+    for key, val in iteritems(values_list):
+        titles.append(val)
+        keys.append(key)
+        if key in filter_values:
+            preselected.append(keys.index(key))
+            filter_values.remove(key)
+
+    selected = xbmcgui.Dialog().multiselect(filter_title, titles, preselect=preselected)
+    if selected is not None:
+        for _index in selected:
+            filter_values.append(keys[_index])
+
+        params = {}
+        if filter_values:
+            params['filters'] = '-'.join(filter_values)
+
+        url = plugin.url_for('list_catalog', catalog=catalog, **params)
+        xbmc.executebuiltin('Container.Update("%s")' % url)
 
 @plugin.route('/<catalog>/<content_name>')
 def list_content(catalog, content_name):
@@ -803,7 +841,109 @@ def search():
 
                   }
         plugin.create_directory(**result)
+def _get_filter_prefix(filter_id):
+    filters = _get_filters()
+    for filter in filters:
+        if filter['t'] == filter_id:
+            return filter['p']
+    
+def _get_filter_values(filter_id):
+    
+    storage = plugin.get_mem_storage()
+    filters = storage.get('filters', {})
+    if filters.get(filter_id) is not None:
+        return filters[filter_id]
 
+    try:
+        result = api.get_filter('cat', filter_id)
+
+        prefix = _get_filter_prefix(filter_id)
+        filter_values = {}
+        start_index = 0 if filter_id in ['years'] else 1
+        for key, val in iteritems(result):
+            filter_values[prefix+key[start_index:]] = val
+
+        filters[filter_id] = filter_values    
+        storage['filters'] = filters
+    except api.APIException as e:
+        plugin.notify_error(e.msg)
+        filter_values = {}
+    
+    return filter_values
+
+def _get_filters():
+    filters = [{'p': 'c', 't': 'countries'},
+               {'p': 'g', 't': 'categories' },
+               {'p': 'y', 't': 'years'},
+               {'p': 'q', 't': 'rip'},
+               {'p': 't', 't': 'translation'},
+               ]
+    
+    return filters
+
+def _make_filter_item(catalog, filter_id):
+
+    url = plugin.url_for('select_filter', filter_id=filter_id, catalog=catalog, **plugin.params)
+    label = _make_filter_label('yellowgreen', filter_id)
+    list_item = {'label': label,
+                 'is_folder':   False,
+                 'is_playable': False,
+                 'url': url,
+                 'icon': _get_filter_icon(filter_id),
+                 'fanart': plugin.fanart}
+
+    return list_item
+
+def _get_filter_title(filter_name):
+    result = ''
+    if filter_name == 'categories': result = _('Genre')
+    elif filter_name =='years': result = _('Year')
+    elif filter_name =='countries': result = _('Country')
+    elif filter_name =='translation': result = _('Translation/Voice')
+    elif filter_name =='rip': result = _('Quality')
+#    elif filter_name =='sort': result = _('Sort')
+
+    return result
+        
+def _get_filter_icon(filter_name):
+    image = ''
+    if filter_name == 'categories': image = plugin.get_image('DefaultGenre.png')
+    elif filter_name =='years': image = plugin.get_image('DefaultYear.png')
+    elif filter_name =='countries': image = plugin.get_image('DefaultCountry.png')
+    elif filter_name =='translation': image = plugin.get_image('DefaultLanguage.png')
+#    elif filter_name =='sort': image = plugin.get_image('DefaultMovieTitle.png')
+
+    if not image:
+        image = plugin.icon
+
+    return image
+
+def _get_filter_value(filter_id):
+    
+    filter_values = _get_catalog_filters()
+    filter_items =  _get_filter_values(filter_id)
+    values = []
+
+    for filter_value in filter_values:
+        if filter_items.get(filter_value) is not None:
+            values.append(filter_items[filter_value])
+            
+    if values:
+        return ', '.join(values)
+    else:
+        return _('All')
+
+def _make_filter_label(color, filter_id):
+    title = _get_filter_title(filter_id)
+    values = _get_filter_value(filter_id)
+
+    return '[COLOR={0}][B]{1}:[/B] {2}[/COLOR]'.format(color, title, values)
+
+def _get_catalog_filters():
+    filter_string = plugin.params.get('filters', '')
+    filter_values = filter_string.split('-') if filter_string else []
+
+    return filter_values
 
 def _get_keyboard_text(line='', heading='', hidden=False):
     kbd = xbmc.Keyboard(line, heading, hidden)

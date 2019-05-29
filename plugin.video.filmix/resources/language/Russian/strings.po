@@ -85,6 +85,11 @@ msgstr "Популярное"
 msgctxt "#30020"
 msgid "Top Views"
 msgstr "Сейчас смотрят"
+
+msgctxt "#30021"
+msgid "All"
+msgstr "Все"
+
 msgctxt "#30041"
 msgid "Connection error"
 msgstr "Ошибка подключения"
@@ -202,6 +207,30 @@ msgctxt "#30309"
 msgid "PRO Date"
 msgstr "Срок подписки"
 
+msgctxt "#30341"
+msgid "Country"
+msgstr "Страна"
 
+msgctxt "#30342"
+msgid "Genre"
+msgstr "Жанр"
 
+msgctxt "#30343"
+msgid "Year"
+msgstr "Год выпуска"
 
+msgctxt "#30344"
+msgid "Quality"
+msgstr "Качество"
+
+msgctxt "#30345"
+msgid "Translation/Voice"
+msgstr "Перевод/Озвучка"
+
+msgctxt "#30346"
+msgid "Language"
+msgstr "Язык"
+
+msgctxt "#30347"
+msgid "Order"
+msgstr "Порядок"
