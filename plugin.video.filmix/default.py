@@ -270,7 +270,7 @@ def _catalog_items(data, catalog, use_filters=False):
                       'year': item['year'],
                       'cast': item['actors'],
                       'dateadded': '{0} {1}'.format(item['date_atom'][0:10], item['date_atom'][11:19]),
-                      'mediatype': 'movie' if item['section'] in [0, 14] else 'tvshow',
+                      'mediatype': 'movie' if _is_movie(item) else 'tvshow',
                       }
 
         listitem = {'label': video_info['title'],
@@ -346,7 +346,7 @@ def list_content(catalog, content_name):
         plugin.create_directory([], succeeded=False)
         return
 
-    if content_info['section'] in [0, 14]:
+    if _is_movie(content_info):
         result = {'items': _list_movie_files(content_info),
                   'content': 'movies',
                   'category': content_info['title'],
@@ -462,8 +462,10 @@ def _season_episodes_items(item, season=None, translation=None):
     listitem['is_folder'] = False
     listitem['is_playable'] = True
 
-    listitem['info']['video']['season'] = int(season) if season is not None else 1
-    listitem['info']['video']['sortseason'] = int(season) if season is not None else 1
+    int_season = max(1, int(season or '1'))
+
+    listitem['info']['video']['season'] = int_season
+    listitem['info']['video']['sortseason'] = int_season
     listitem['info']['video']['mediatype'] = 'episode'
 
     season_translation = _get_season_translation(item, season, translation)
@@ -519,17 +521,18 @@ def play_video(catalog, content_name):
         listitem['is_folder'] = False
         listitem['is_playable'] = True
 
-        if content_info['section'] in [0, 14]:
+        if _is_movie(content_info):
             listitem['info']['video']['mediatype'] = 'movie'
         else:
-            listitem['info']['video']['season'] = int(season) if season is not None else 1
+            int_season = max(1, int(season or '1'))
+            listitem['info']['video']['season'] = int_season
             listitem['info']['video']['episode'] = int(episode)
             listitem['info']['video']['mediatype'] = 'episode'
 
             listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
             listitem['info']['video']['title'] = listitem['label']
 
-    if content_info['section'] in [0, 14]:
+    if _is_movie(content_info):
         listitem['path'] = _get_movie_link(content_info, translation)
         api.add_watched(content['id'], translation=translation)
     else:
@@ -571,14 +574,16 @@ def _get_season_translation(item, season, translation):
     player_links = _get_player_links(item)
 
     if isinstance(player_links, dict):
-        season_translations = player_links.get(season)
+        link_season = season or '-1'
+        season_translations = player_links.get(link_season)
 
-        if translation is not None:
+        if season_translations is not None:
             season_translation = season_translations.get(translation)
         else:
             season_translation = None
 
-        if season_translation is None:
+        if season_translation is None \
+          and season_translations is not None:
             for key, translation_info in iteritems(season_translations):
                 season_translation = translation_info
                 break
@@ -625,7 +630,7 @@ def _get_content_params(content_name):
 
 
 def _get_player_links(item):
-    link_source = 'movie' if item['section']  in [0, 14] else 'playlist'
+    link_source = 'movie' if _is_movie(item) else 'playlist'
     return item['player_links'][link_source]
 
 
@@ -735,7 +740,7 @@ def _get_listitem(item):
                   'rating': rating,
                   }
 
-    if item['section'] in [0, 14]:
+    if _is_movie(item):
         video_info.update({'mediatype': 'movie',
                            'title': item['title'],
                            'originaltitle': item['original_title'] if item['original_title'] else item['title'],
@@ -1067,6 +1072,12 @@ def _get_context_menu(item):
 def _use_atl_names():
     return plugin.params.get('atl', '').lower() == 'true' \
              or plugin.get_setting('use_atl_names')
+
+def _is_movie(content_info):
+    if content_info.get('player_links') is not None:
+        return len(content_info['player_links']['playlist']) == 0
+    else:
+        return 
 
 
 if __name__ == '__main__':

@@ -220,6 +220,12 @@ class PluginActionsTestCase(unittest.TestCase):
         imp.load_source('__main__', default_script)
 
     @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/70388-transformery-energon-transformer-super-link-multserial-2004'.format(addon_name), '27', ''])
+    def test_27_serial_seasons_without_seasons():
+        print('# serial_seasons_without_seasons')
+        imp.load_source('__main__', default_script)
+
+    @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/logout'.format(addon_name), '30', ''])
     def test_30_logout():
         print('# logout')
