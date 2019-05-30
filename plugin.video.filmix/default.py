@@ -368,6 +368,8 @@ def _list_movie_files(item):
 
     del listitem['info']['video']['title']
 
+    use_atl_names = _use_atl_names()
+
     listitem['is_folder'] = False
     listitem['is_playable'] = True
 
@@ -377,10 +379,27 @@ def _list_movie_files(item):
                 'catalog': _section_catalog(item['section'])
                 }
 
+    if use_atl_names:
+        atl_name_parts = []
+        if item.get('original_title', ''):
+            movie_title = item['original_title']
+        else:
+            movie_title = item['title']
+        atl_name_parts.append(movie_title)
+            
+        atl_name_parts.append('(%d)' % (item['year']))
+            
+        title = ' '.join(atl_name_parts)
+    else:
+        title = item['title']
+
     for link in player_links:
         url = plugin.url_for('play_video', t=link['translation'], **u_params)
         listitem['url'] = url
-        listitem['label'] = '{0} ({1})'.format(item['title'], link['translation'])
+        if use_atl_names:
+            listitem['label'] = '{0} [{1}]'.format(title, link['translation'])
+        else:
+            listitem['label'] = '{0} ({1})'.format(title, link['translation'])
 
         yield listitem
 
@@ -395,6 +414,11 @@ def _list_serial_seasons(item):
 
     player_links = _get_player_links(item)
 
+    use_atl_names = _use_atl_names()
+    ext_params = {}
+    if use_atl_names:
+        ext_params['atl'] = use_atl_names
+
     if isinstance(player_links, dict):
         for season, season_translations in iteritems(player_links):
 
@@ -405,6 +429,7 @@ def _list_serial_seasons(item):
                         'catalog': _section_catalog(item['section']),
                         's': season,
                         }
+            u_params.update(ext_params)
 
             for translation_item in iteritems(season_translations):
                 translation = translation_item[0]
@@ -421,6 +446,7 @@ def _list_serial_seasons(item):
         u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                     'catalog': _section_catalog(item['section']),
                     }
+        u_params.update(ext_params)
 
         for season_translations in player_links:
             for translation_item in iteritems(season_translations):
@@ -446,10 +472,17 @@ def list_season_episodes(catalog, content_name):
     season = plugin.params.s
     translation = plugin.params.get('t')
 
+    use_atl_names = _use_atl_names()
+    if use_atl_names:
+        sort_methods = xbmcplugin.SORT_METHOD_TITLE
+    else:
+        sort_methods = xbmcplugin.SORT_METHOD_EPISODE
+        
+
     result = {'items': _season_episodes_items(serial_info, season, translation),
               'content': 'episodes',
               'category': ' / '.join([serial_info['title'], '{0} {1}'.format(_('Season'), season)]),
-              'sort_methods': xbmcplugin.SORT_METHOD_EPISODE,
+              'sort_methods': sort_methods,
               }
 
     plugin.create_directory(**result)
@@ -458,6 +491,8 @@ def list_season_episodes(catalog, content_name):
 def _season_episodes_items(item, season=None, translation=None):
 
     listitem = _get_listitem(item)
+
+    use_atl_names = _use_atl_names()
 
     listitem['is_folder'] = False
     listitem['is_playable'] = True
@@ -477,6 +512,9 @@ def _season_episodes_items(item, season=None, translation=None):
     if season is not None:
         u_params['s'] = season
 
+    if use_atl_names:
+        u_params['strm'] = 1
+
     for episode_item in iteritems(season_translation):
 
         episode = episode_item[0]
@@ -488,7 +526,21 @@ def _season_episodes_items(item, season=None, translation=None):
         listitem['url'] = url
         listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
 
-        listitem['info']['video']['title'] = listitem['label']
+        if use_atl_names:
+            atl_name_parts = []
+            if item.get('original_title', ''):
+                series_title = item['original_title']
+            else:
+                series_title = item['title']
+            atl_name_parts.append(series_title)
+                
+            atl_name_parts.append('.s%02de%02d' % (int_season, int(episode)))
+                
+            title = ''.join(atl_name_parts)
+        else:
+            title = listitem['label']
+
+        listitem['info']['video']['title'] = title
 
         yield listitem
 
@@ -1077,7 +1129,7 @@ def _is_movie(content_info):
     if content_info.get('player_links') is not None:
         return len(content_info['player_links']['playlist']) == 0
     else:
-        return 
+        return content_info['section'] in [0, 14]
 
 
 if __name__ == '__main__':

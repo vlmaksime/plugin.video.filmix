@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
     <category label="30200">
-	    <setting label="30201" type="bool" id="use_atl_names" visible="false" default="false" />
+	    <setting label="30201" type="bool" id="use_atl_names" visible="true" default="false" />
 	    <setting label="30202" type="labelenum" id="history_length" values="5|10|15|20|25" default="10" />
 	    <setting label="30203" type="labelenum" id="step" values="15|30|45|60" default="30" />
 	    <setting label="30204" type="bool" id="use_filters" default="true"/>
