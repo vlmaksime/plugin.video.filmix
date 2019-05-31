@@ -86,6 +86,10 @@ msgctxt "#30020"
 msgid "Top Views"
 msgstr ""
 
+msgctxt "#30021"
+msgid "All"
+msgstr ""
+
 msgctxt "#30041"
 msgid "Connection error"
 msgstr ""
@@ -159,7 +163,7 @@ msgid "Results per page"
 msgstr ""
 
 msgctxt "#30204"
-msgid "Safe Search"
+msgid "Use filters"
 msgstr ""
 
 msgctxt "#30210"
@@ -234,18 +238,30 @@ msgctxt "#30309"
 msgid "PRO Date"
 msgstr ""
 
-msgctxt "#30312"
-msgid "None"
+msgctxt "#30341"
+msgid "Country"
 msgstr ""
 
-msgctxt "#30313"
-msgid "Male"
+msgctxt "#30342"
+msgid "Genre"
 msgstr ""
 
-msgctxt "#30314"
-msgid "Female"
+msgctxt "#30343"
+msgid "Year"
 msgstr ""
 
-msgctxt "#30315"
-msgid "Login by Code"
+msgctxt "#30344"
+msgid "Quality"
+msgstr ""
+
+msgctxt "#30345"
+msgid "Translation/Voice"
+msgstr ""
+
+msgctxt "#30346"
+msgid "Language"
+msgstr ""
+
+msgctxt "#30347"
+msgid "Order"
 msgstr ""

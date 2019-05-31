@@ -185,19 +185,23 @@ def list_catalog(catalog):
     per_page = plugin.get_setting('step', False)
 
     if catalog in ['watch_history', 'watch_later', 'favorites', 'popular', 'top_views']:
+        use_filters = False
         params = {'page': page,
                   'per_page': per_page}
     else:
+        use_filters = plugin.get_setting('use_filters')
         section = _catalog_section(catalog)
 
         orderby = plugin.params.get('orderby', 'date')
         orderdir = plugin.params.get('orderdir', 'desc')
+        filters = plugin.params.get('filters', '')
 
         params = {'page': page,
                   'section': section,
                   'orderby': orderby,
                   'orderdir': orderdir,
                   'per_page': per_page,
+                  'filters': filters,
                   }
 
     try:
@@ -227,7 +231,7 @@ def list_catalog(catalog):
     category_parts = [_category]
     if page > 1:
         category_parts.append('{0} {1}'.format(_('Page'), page))
-    result = {'items': _catalog_items(catalog_info, catalog),
+    result = {'items': _catalog_items(catalog_info, catalog, use_filters),
               'total_items': catalog_info['count'],
               'content': 'movies',
               'category': ' / '.join(category_parts),
@@ -238,8 +242,13 @@ def list_catalog(catalog):
     plugin.create_directory(**result)
 
 
-def _catalog_items(data, catalog):
+def _catalog_items(data, catalog, use_filters=False):
 
+    if use_filters:
+        used_filters = _get_filters()
+        for used_filter in used_filters:
+            yield _make_filter_item(catalog, used_filter['t'])
+        
     for item in data['items']:
 
         is_folder = True
@@ -261,7 +270,7 @@ def _catalog_items(data, catalog):
                       'year': item['year'],
                       'cast': item['actors'],
                       'dateadded': '{0} {1}'.format(item['date_atom'][0:10], item['date_atom'][11:19]),
-                      'mediatype': 'movie' if item['section'] in [0, 14] else 'tvshow',
+                      'mediatype': 'movie' if _is_movie(item) else 'tvshow',
                       }
 
         listitem = {'label': video_info['title'],
@@ -293,6 +302,41 @@ def _catalog_items(data, catalog):
         yield item_info
 
 
+@plugin.route('/select_filter')
+def select_filter():
+    catalog = plugin.params.get('catalog')
+    filter_id = plugin.params.get('filter_id')
+
+    filter_title = _get_filter_title(filter_id)
+    values_list = _get_filter_values(filter_id)
+#    values_list =  sorted(values_list, key=values_list.get)
+
+    filter_values = _get_catalog_filters()    
+
+    keys = []
+    titles = []
+    preselected = []
+
+    for key, val in iteritems(values_list):
+        titles.append(val)
+        keys.append(key)
+        if key in filter_values:
+            preselected.append(keys.index(key))
+            filter_values.remove(key)
+
+    selected = xbmcgui.Dialog().multiselect(filter_title, titles, preselect=preselected)
+    if selected is not None:
+        for _index in selected:
+            filter_values.append(keys[_index])
+
+        params = {}
+        if filter_values:
+            params['filters'] = '-'.join(filter_values)
+
+        url = plugin.url_for('list_catalog', catalog=catalog, **params)
+        xbmc.executebuiltin('Container.Update("%s")' % url)
+
+
 @plugin.route('/<catalog>/<content_name>')
 def list_content(catalog, content_name):
     content = _get_content_params(content_name)
@@ -304,7 +348,7 @@ def list_content(catalog, content_name):
         plugin.create_directory([], succeeded=False)
         return
 
-    if content_info['section'] in [0, 14]:
+    if _is_movie(content_info):
         result = {'items': _list_movie_files(content_info),
                   'content': 'movies',
                   'category': content_info['title'],
@@ -326,6 +370,8 @@ def _list_movie_files(item):
 
     del listitem['info']['video']['title']
 
+    use_atl_names = _use_atl_names()
+
     listitem['is_folder'] = False
     listitem['is_playable'] = True
 
@@ -335,10 +381,27 @@ def _list_movie_files(item):
                 'catalog': _section_catalog(item['section'])
                 }
 
+    if use_atl_names:
+        atl_name_parts = []
+        if item.get('original_title', ''):
+            movie_title = item['original_title']
+        else:
+            movie_title = item['title']
+        atl_name_parts.append(movie_title)
+            
+        atl_name_parts.append('(%d)' % (item['year']))
+            
+        title = ' '.join(atl_name_parts)
+    else:
+        title = item['title']
+
     for link in player_links:
         url = plugin.url_for('play_video', t=link['translation'], **u_params)
         listitem['url'] = url
-        listitem['label'] = '{0} ({1})'.format(item['title'], link['translation'])
+        if use_atl_names:
+            listitem['label'] = '{0} [{1}]'.format(title, link['translation'])
+        else:
+            listitem['label'] = '{0} ({1})'.format(title, link['translation'])
 
         yield listitem
 
@@ -353,6 +416,11 @@ def _list_serial_seasons(item):
 
     player_links = _get_player_links(item)
 
+    use_atl_names = _use_atl_names()
+    ext_params = {}
+    if use_atl_names:
+        ext_params['atl'] = use_atl_names
+
     if isinstance(player_links, dict):
         for season, season_translations in iteritems(player_links):
 
@@ -363,6 +431,7 @@ def _list_serial_seasons(item):
                         'catalog': _section_catalog(item['section']),
                         's': season,
                         }
+            u_params.update(ext_params)
 
             for translation_item in iteritems(season_translations):
                 translation = translation_item[0]
@@ -379,6 +448,7 @@ def _list_serial_seasons(item):
         u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                     'catalog': _section_catalog(item['section']),
                     }
+        u_params.update(ext_params)
 
         for season_translations in player_links:
             for translation_item in iteritems(season_translations):
@@ -404,10 +474,16 @@ def list_season_episodes(catalog, content_name):
     season = plugin.params.s
     translation = plugin.params.get('t')
 
+    use_atl_names = _use_atl_names()
+    if use_atl_names:
+        sort_methods = xbmcplugin.SORT_METHOD_TITLE
+    else:
+        sort_methods = xbmcplugin.SORT_METHOD_EPISODE
+
     result = {'items': _season_episodes_items(serial_info, season, translation),
               'content': 'episodes',
               'category': ' / '.join([serial_info['title'], '{0} {1}'.format(_('Season'), season)]),
-              'sort_methods': xbmcplugin.SORT_METHOD_EPISODE,
+              'sort_methods': sort_methods,
               }
 
     plugin.create_directory(**result)
@@ -417,39 +493,64 @@ def _season_episodes_items(item, season=None, translation=None):
 
     listitem = _get_listitem(item)
 
+    use_atl_names = _use_atl_names()
+
     listitem['is_folder'] = False
     listitem['is_playable'] = True
 
-    listitem['info']['video']['season'] = int(season) if season is not None else 1
-    listitem['info']['video']['sortseason'] = int(season) if season is not None else 1
+    int_season = max(1, int(season or '1'))
+
+    listitem['info']['video']['season'] = int_season
+    listitem['info']['video']['sortseason'] = int_season
     listitem['info']['video']['mediatype'] = 'episode'
 
     season_translation = _get_season_translation(item, season, translation)
 
     u_params = {'content_name': '{0}-{1}'.format(item['id'], item['alt_name']),
                 'catalog': _section_catalog(item['section']),
-                't': translation,
                 }
+    if translation is not None:
+        u_params['t'] = translation
+
     if season is not None:
         u_params['s'] = season
 
-    for episode_item in iteritems(season_translation):
+    if use_atl_names:
+        u_params['strm'] = 1
 
-        episode = episode_item[0]
+    if season_translation is not None:
+        for episode_item in iteritems(season_translation):
+    
+            episode = episode_item[0]
+    
+            listitem['info']['video']['episode'] = int(episode)
+            listitem['info']['video']['sortepisode'] = int(episode)
+    
+            url = plugin.url_for('play_video', e=episode, **u_params)
+            listitem['url'] = url
+            listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
+    
+            if use_atl_names:
+                atl_name_parts = []
+                if item.get('original_title', ''):
+                    series_title = item['original_title']
+                else:
+                    series_title = item['title']
+                atl_name_parts.append(series_title)
+                    
+                atl_name_parts.append('.s%02de%02d' % (int_season, int(episode)))
+                    
+                title = ''.join(atl_name_parts)
+            else:
+                title = listitem['label']
+    
+            listitem['info']['video']['title'] = title
+    
+            yield listitem
 
-        listitem['info']['video']['episode'] = int(episode)
-        listitem['info']['video']['sortepisode'] = int(episode)
 
-        url = plugin.url_for('play_video', e=episode, **u_params)
-        listitem['url'] = url
-        listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
-
-        listitem['info']['video']['title'] = listitem['label']
-
-        yield listitem
-
-
-@plugin.route('/<catalog>/<content_name>/play')
+@plugin.route('/<catalog>/<content_name>/play', 'play_video_old')
+@plugin.route('/<catalog>/<content_name>/play/')
 def play_video(catalog, content_name):
 
     content = _get_content_params(content_name)
@@ -476,20 +577,23 @@ def play_video(catalog, content_name):
         listitem['is_folder'] = False
         listitem['is_playable'] = True
 
-        if content_info['section'] in [0, 14]:
+        if _is_movie(content_info):
             listitem['info']['video']['mediatype'] = 'movie'
         else:
-            listitem['info']['video']['season'] = int(season) if season is not None else 1
+            int_season = max(1, int(season or '1'))
+            listitem['info']['video']['season'] = int_season
             listitem['info']['video']['episode'] = int(episode)
             listitem['info']['video']['mediatype'] = 'episode'
 
             listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
             listitem['info']['video']['title'] = listitem['label']
 
-    if content_info['section'] in [0, 14]:
+    if _is_movie(content_info):
         listitem['path'] = _get_movie_link(content_info, translation)
+        api.add_watched(content['id'], translation=translation)
     else:
         listitem['path'] = _get_episode_link(content_info, season, episode, translation)
+        api.add_watched(content['id'], season, episode, translation)
 
     plugin.resolve_url(listitem)
 
@@ -526,14 +630,16 @@ def _get_season_translation(item, season, translation):
     player_links = _get_player_links(item)
 
     if isinstance(player_links, dict):
-        season_translations = player_links.get(season)
+        link_season = season or '-1'
+        season_translations = player_links.get(link_season)
 
-        if translation is not None:
+        if season_translations is not None:
             season_translation = season_translations.get(translation)
         else:
             season_translation = None
 
-        if season_translation is None:
+        if season_translation is None \
+          and season_translations is not None:
             for key, translation_info in iteritems(season_translations):
                 season_translation = translation_info
                 break
@@ -580,7 +686,7 @@ def _get_content_params(content_name):
 
 
 def _get_player_links(item):
-    link_source = 'movie' if item['section']  in [0, 14] else 'playlist'
+    link_source = 'movie' if _is_movie(item) else 'playlist'
     return item['player_links'][link_source]
 
 
@@ -617,6 +723,9 @@ def _get_movie_link(item, translation=None):
 def _get_episode_link(item, season, episode, translation=None):
     season_translation = _get_season_translation(item, season, translation)
 
+    if season_translation is None:
+        return None
+
     episode_info = season_translation[episode]
 
     url = api.decode_link(episode_info['link'])
@@ -635,7 +744,10 @@ def _get_episode_link(item, season, episode, translation=None):
 
 
 def _get_trailer_link(item):
-    player_links = item['player_links']['trailer']
+    player_links = item['player_links'].get('trailer')
+
+    if player_links is None:
+        return ''
 
     url = player_links[0]['link']
 
@@ -690,7 +802,7 @@ def _get_listitem(item):
                   'rating': rating,
                   }
 
-    if item['section'] in [0, 14]:
+    if _is_movie(item):
         video_info.update({'mediatype': 'movie',
                            'title': item['title'],
                            'originaltitle': item['original_title'] if item['original_title'] else item['title'],
@@ -796,6 +908,119 @@ def search():
 
                   }
         plugin.create_directory(**result)
+
+
+def _get_filter_prefix(filter_id):
+    filters = _get_filters()
+    for filter in filters:
+        if filter['t'] == filter_id:
+            return filter['p']
+
+    
+def _get_filter_values(filter_id):
+    
+    storage = plugin.get_mem_storage()
+    filters = storage.get('filters', {})
+    if filters.get(filter_id) is not None:
+        return filters[filter_id]
+
+    try:
+        result = api.get_filter('cat', filter_id)
+
+        prefix = _get_filter_prefix(filter_id)
+        filter_values = {}
+        start_index = 0 if filter_id in ['years'] else 1
+        for key, val in iteritems(result):
+            filter_values[prefix + key[start_index:]] = val
+
+        filters[filter_id] = filter_values    
+        storage['filters'] = filters
+    except api.APIException as e:
+        plugin.notify_error(e.msg)
+        filter_values = {}
+    
+    return filter_values
+
+
+def _get_filters():
+    filters = [{'p': 'c', 't': 'countries'},
+               {'p': 'g', 't': 'categories' },
+               {'p': 'y', 't': 'years'},
+               {'p': 'q', 't': 'rip'},
+               {'p': 't', 't': 'translation'},
+               ]
+    
+    return filters
+
+
+def _make_filter_item(catalog, filter_id):
+
+    url = plugin.url_for('select_filter', filter_id=filter_id, catalog=catalog, **plugin.params)
+    label = _make_filter_label('yellowgreen', filter_id)
+    list_item = {'label': label,
+                 'is_folder':   False,
+                 'is_playable': False,
+                 'url': url,
+                 'icon': _get_filter_icon(filter_id),
+                 'fanart': plugin.fanart}
+
+    return list_item
+
+
+def _get_filter_title(filter_name):
+    result = ''
+    if filter_name == 'categories': result = _('Genre')
+    elif filter_name == 'years': result = _('Year')
+    elif filter_name == 'countries': result = _('Country')
+    elif filter_name == 'translation': result = _('Translation/Voice')
+    elif filter_name == 'rip': result = _('Quality')
+#    elif filter_name =='sort': result = _('Sort')
+
+    return result
+
+        
+def _get_filter_icon(filter_name):
+    image = ''
+    if filter_name == 'categories': image = plugin.get_image('DefaultGenre.png')
+    elif filter_name == 'years': image = plugin.get_image('DefaultYear.png')
+    elif filter_name == 'countries': image = plugin.get_image('DefaultCountry.png')
+    elif filter_name == 'translation': image = plugin.get_image('DefaultLanguage.png')
+#    elif filter_name =='sort': image = plugin.get_image('DefaultMovieTitle.png')
+
+    if not image:
+        image = plugin.icon
+
+    return image
+
+
+def _get_filter_value(filter_id):
+    
+    filter_values = _get_catalog_filters()
+    filter_items = _get_filter_values(filter_id)
+    values = []
+
+    for filter_value in filter_values:
+        if filter_items.get(filter_value) is not None:
+            values.append(filter_items[filter_value])
+            
+    if values:
+        return ', '.join(values)
+    else:
+        return _('All')
+
+
+def _make_filter_label(color, filter_id):
+    title = _get_filter_title(filter_id)
+    values = _get_filter_value(filter_id)
+
+    return '[COLOR={0}][B]{1}:[/B] {2}[/COLOR]'.format(color, title, values)
+
+
+def _get_catalog_filters():
+    filter_string = plugin.params.get('filters', '')
+    filter_values = filter_string.split('-') if filter_string else []
+
+    return filter_values
 
 
 def _get_keyboard_text(line='', heading='', hidden=False):
@@ -920,6 +1145,14 @@ def _get_context_menu(item):
 def _use_atl_names():
     return plugin.params.get('atl', '').lower() == 'true' \
              or plugin.get_setting('use_atl_names')
+
+
+def _is_movie(content_info):
+    if content_info.get('player_links') is None:
+        return content_info['section'] in [0, 14]
+    else:
+        return content_info['section'] in [0, 14] \
+            and len(content_info['player_links']['playlist']) == 0
 
 
 if __name__ == '__main__':

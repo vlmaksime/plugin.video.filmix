@@ -121,7 +121,7 @@ class filmix(object):
         try:
             j = r.json()
         except ValueError as err:
-            raise APIException(err)
+            raise self.APIException(err)
 
         if isinstance(j, dict) \
           and j.get('error') is not None:
@@ -194,23 +194,29 @@ class filmix(object):
 
         return result
 
-    def get_catalog_items(self, orderby='', orderdir='', section=996, page=1, filter='', **kwargs):
+    def get_catalog_items(self, orderby='', orderdir='', section=996, page=1, filters='', **kwargs):
 
         if section == 996:
             u_params = {'orderby': orderby,
                         'orderdir': orderdir,
                         }
         else:
+            filter_items = filters.split('-') if filters else []
+            filter_items.append('s{0}'.format(section))
+            
             u_params = {'do': 'cat',
                         'category': '',
                         'orderby': orderby,
                         'orderdir': orderdir,
-                        'requested_url': 'filters/s{0}{1}{2}'.format(section, '-' if filter else '', filter)
+                        'requested_url': 'filters/{0}'.format('-'.join(filter_items))
                         }
 
         page_params = {'orderby': orderby,
                        'orderdir': orderdir,
                        }
+        
+        if filters:
+            page_params['filters'] = filters
 
         return self._get_items(u_params, page, page_params, **kwargs)
 
@@ -263,12 +269,13 @@ class filmix(object):
 
         return self._get_items(params, page, {}, **kwargs)
 
-    def get_filter(self, scope, type):
+    def get_filter(self, scope, filter_id=None):
         url = 'engine/ajax/get_filter.php'
 
         params = {'scope': scope,
-                  'type': type,
                   }
+        if filter_id is not None:
+            params['type'] = filter_id
 
         r = self._post(url, params)
         j = self._extract_json(r)
@@ -292,5 +299,23 @@ class filmix(object):
         data = {'post_id': post_id,
                 'action': 'add' if value else 'rm',
                 }
+
+        self._post(url, data=data)
+
+    def add_watched(self, post_id, season=None, episode=None, translation=None):
+        url = 'android.php'
+        
+        data = {'add_watched':'true',
+                'id': post_id,
+                }
+
+        if season is not None:
+            data['season'] = season
+            
+        if episode is not None:
+            data['episode'] = episode
+
+        if translation is not None:
+            data['translation'] = translation
 
         self._post(url, data=data)
