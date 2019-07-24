@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmix" version="1.2.0" name="Filmix" provider-name="vl.maksime">
+<addon id="plugin.video.filmix" version="1.2.1" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
         <import addon="script.module.requests" version="2.12.4"/>
@@ -9,12 +9,8 @@
         <provides>video</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary lang="en_GB"></summary>
         <summary lang="ru_RU">Смотреть онлайн фильмы и сериалы бесплатно</summary>
-        <description lang="en_GB"></description>
         <description lang="ru_RU">Дополнение для онлайн-кинотеатра Filmix! В нашей базе 60000 разных видео, каждый из которых доступен вашему просмотру бесплатно и в отличном качестве. Выбирайте по вкусу и по настроению.</description>
-        <disclaimer lang="en_GB"></disclaimer>
-        <disclaimer lang="ru_RU"></disclaimer>
         <language>ru</language>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
@@ -22,10 +18,11 @@
         <website>https://filmix.co/</website>
         <email>vl.maksime@gmail.com</email>
         <source>https://github.com/vlmaksime/plugin.video.filmix</source>
-        <news>v1.2.0 (2019-05-30)[CR]- Добавлен вывод фильтров в списке контента. Можно отключить в настройках[CR]- Реализовано формирование имен для совместимости с "Add To Lib"[CR]- Поправлено определение типа контента для некоторых сериалов[CR]- Исправлено отображение отметки о просмотре на Kodi 18[CR]- Исправлены выявленные ошибки[CR][CR]v1.1.0 (2019-01-26)[CR]- Поправлена авторизация на сервисе[CR]- Добавлено контекстное меню для добавления/удаления контента в разделы "Избранное" и "Посмотреть позже"[CR]- В описание контента добавлена ссылка на трейлер[CR][CR]v1.0.0 (2019-01-21)[CR]- Публичный релиз</news>
+        <news>v1.2.1 (2019-07-24)[CR]- Исправлено получение ссылок на источник[CR]- Исправлена проблема с авторизацией на устройствах ATV[CR]- Добавлена поддержка дополнения Widget Manager (пока не найдется решение лучше)[CR][CR]v1.2.0 (2019-05-30)[CR]- Добавлен вывод фильтров в списке контента. Можно отключить в настройках[CR]- Реализовано формирование имен для совместимости с "Add To Lib"[CR]- Поправлено определение типа контента для некоторых сериалов[CR]- Исправлено отображение отметки о просмотре на Kodi 18[CR]- Исправлены выявленные ошибки[CR][CR]v1.1.0 (2019-01-26)[CR]- Поправлена авторизация на сервисе[CR]- Добавлено контекстное меню для добавления/удаления контента в разделы "Избранное" и "Посмотреть позже"[CR]- В описание контента добавлена ссылка на трейлер[CR][CR]v1.0.0 (2019-01-21)[CR]- Публичный релиз</news>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>
+            <clearlogo>resources\media\clearlogo.png</clearlogo>
         </assets>
     </extension>
 </addon>

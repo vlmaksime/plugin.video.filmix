@@ -110,8 +110,8 @@ class filmix(object):
     @staticmethod
     def decode_link(link):
 
-        tmp_a = 'y,5,U,4,e,i,6,d,7,N,J,g,t,G,2,V,l,B,x,f,s,Q,1,H,z,='.split(',')
-        tmp_b = 'M,X,w,R,3,m,8,0,T,a,u,Z,p,D,b,o,k,Y,n,v,I,L,9,W,c,r'.split(',')
+        tmp_a = 'u,5,Y,I,E,4,7,D,6,G,j,n,2,g,T,b,L,v,S,F,X,h,1,q,=,Z'.split(',')
+        tmp_b = 'W,x,m,M,3,r,t,0,8,z,U,A,B,d,P,y,K,O,i,V,N,w,9,l,R,C'.split(',')
         a_length = len(tmp_a);
         for  i in range(0, a_length, 1):
             link = link.replace(tmp_b[i], '___').replace(tmp_a[i], tmp_b[i]).replace('___', tmp_a[i])

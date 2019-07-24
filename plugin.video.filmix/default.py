@@ -23,7 +23,9 @@ def login():
     _login = _get_keyboard_text('', _('Login'))
     if not _login:
         return
-
+    
+    xbmc.sleep(1000)
+    
     _password = _get_keyboard_text('', _('Password'), True)
     if not _password:
         return
@@ -228,10 +230,22 @@ def list_catalog(catalog):
         plugin.create_directory([], succeeded=False)
         return
 
+    wm_params = {'catalog': catalog,
+                 'wm_link': 1,
+                 }
+    wm_params.update(plugin.params)
+    if wm_params.get('page') is not None:
+        del wm_params['page']
+        
+    wm_properties = {'wm_link': plugin.url_for('list_catalog', **wm_params),
+                     'wm_addon': plugin.id,
+                     'wm_label': _category,
+                     }
+    
     category_parts = [_category]
     if page > 1:
         category_parts.append('{0} {1}'.format(_('Page'), page))
-    result = {'items': _catalog_items(catalog_info, catalog, use_filters),
+    result = {'items': _catalog_items(catalog_info, catalog, use_filters, wm_properties),
               'total_items': catalog_info['count'],
               'content': 'movies',
               'category': ' / '.join(category_parts),
@@ -242,14 +256,23 @@ def list_catalog(catalog):
     plugin.create_directory(**result)
 
 
-def _catalog_items(data, catalog, use_filters=False):
+def _catalog_items(data, catalog, use_filters=False, wm_properties=None):
 
-    if use_filters:
+    wm_link = (plugin.params.get('wm_link') == '1')
+    
+    if not wm_link \
+       and use_filters:
         used_filters = _get_filters()
         for used_filter in used_filters:
             yield _make_filter_item(catalog, used_filter['t'])
         
+    properties = {}
+    properties.update(wm_properties or {})
+    
     for item in data['items']:
+
+        if not isinstance(item, dict):
+            continue
 
         is_folder = True
         is_playable = False
@@ -284,22 +307,24 @@ def _catalog_items(data, catalog, use_filters=False):
                     'fanart':  plugin.fanart,
                     'thumb':  poster,
                     'context_menu': _get_context_menu(item),
+                    'properties': properties,
                     }
 
         yield listitem
 
-    pages = data.get('pages', {})
-    if pages.get('prev') is not None:
-        url = plugin.url_for('list_catalog', catalog=catalog, **pages['prev'])
-        item_info = {'label': _('Previous page...'),
-                     'url':   url}
-        yield item_info
-
-    if pages.get('next') is not None:
-        url = plugin.url_for('list_catalog', catalog=catalog, **pages['next'])
-        item_info = {'label': _('Next page...'),
-                     'url':   url}
-        yield item_info
+    if not wm_link:
+        pages = data.get('pages', {})
+        if pages.get('prev') is not None:
+            url = plugin.url_for('list_catalog', catalog=catalog, **pages['prev'])
+            item_info = {'label': _('Previous page...'),
+                         'url':   url}
+            yield item_info
+    
+        if pages.get('next') is not None:
+            url = plugin.url_for('list_catalog', catalog=catalog, **pages['next'])
+            item_info = {'label': _('Next page...'),
+                         'url':   url}
+            yield item_info
 
 
 @plugin.route('/select_filter')
