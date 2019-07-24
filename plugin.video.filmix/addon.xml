@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmix" version="1.2.0" name="Filmix" provider-name="vl.maksime">
+<addon id="plugin.video.filmix" version="1.2.1" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
         <import addon="script.module.requests" version="2.12.4"/>
@@ -26,6 +26,7 @@
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>
+            <clearlogo>resources\media\clearlogo.png</clearlogo>
         </assets>
     </extension>
 </addon>
