@@ -24,6 +24,8 @@ def login():
     if not _login:
         return
     
+    xbmc.sleep(1000)
+    
     _password = _get_keyboard_text('', _('Password'), True)
     if not _password:
         return
