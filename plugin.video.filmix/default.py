@@ -271,6 +271,9 @@ def _catalog_items(data, catalog, use_filters=False, wm_properties=None):
     
     for item in data['items']:
 
+        if not isinstance(item, dict):
+            continue
+
         is_folder = True
         is_playable = False
 
