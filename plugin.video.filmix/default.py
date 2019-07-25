@@ -618,7 +618,7 @@ def play_video(catalog, content_name):
         api.add_watched(content['id'], translation=translation)
     else:
         listitem['path'] = _get_episode_link(content_info, season, episode, translation)
-        api.add_watched(content['id'], season, episode, translation)
+        #api.add_watched(content['id'], season, episode, translation)
 
     plugin.resolve_url(listitem)
 
@@ -1072,13 +1072,23 @@ def _get_cookie_path():
     return os.path.join(plugin.profile_dir, 'filmix.cookies')
 
 
+def _get_cert_path():
+    return os.path.join(plugin.path, 'resources', 'cert')
+
+
 def _api():
     cookie_file = _get_cookie_path()
+    cert_path = _get_cert_path()
+    
+    cert = (os.path.join(cert_path, 'certificate.pem'), os.path.join(cert_path, 'plainkey.pem'))
 
-    headers = {'X-FX-Token': plugin.get_setting('X-FX-Token'),
-               }
+    filmix_token = plugin.get_setting('X-FX-Token')
 
-    api = filmix(headers, cookie_file)
+    headers = {}
+    if filmix_token:
+        headers['X-FX-Token'] = filmix_token     
+
+    api = filmix(headers, cookie_file, cert)
 
     return api
 
