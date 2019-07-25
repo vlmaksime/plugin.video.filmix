@@ -18,7 +18,7 @@ else:
 @python_2_unicode_compatible
 class http_client(object):
 
-    def __init__(self, headers=None, cookie_file=None):
+    def __init__(self, headers=None, cookie_file=None, cert=None):
         self._s = requests.Session()
 
         if cookie_file is not None:
@@ -26,6 +26,10 @@ class http_client(object):
             if os.path.exists(cookie_file):
                 self._s.cookies.load(ignore_discard=True, ignore_expires=True)
 
+        if cert is not None:
+            self._s.cert = cert
+            self._s.verify = False
+        
         self.update(headers)
 
     def update(self, headers=None):
@@ -70,8 +74,8 @@ class filmix(object):
         def __str__(self):
             return self.msg
 
-    def __init__(self, headers=None, cookies=None):
-        self._base_url = 'http://filmix.vip/'
+    def __init__(self, headers=None, cookies=None, cert=None):
+        self._base_url = 'https://filmix.vip:8044/'
 
         headers = headers or {}
 
@@ -83,7 +87,7 @@ class filmix(object):
                      }
         f_headers.update(headers)
 
-        self._client = http_client(f_headers, cookies)
+        self._client = http_client(f_headers, cookies, cert)
 
     def _post(self, url, params=None, **kwargs):
         url = self._base_url + url
