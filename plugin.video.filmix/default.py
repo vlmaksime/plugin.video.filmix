@@ -12,11 +12,34 @@ import xbmc
 import xbmcgui
 import xbmcplugin
 
-from resources.libs.filmix import filmix
+from resources.libs import FilmixClient, FilmixError
 
 plugin = simplemedia.RoutedPlugin()
 _ = plugin.initialize_gettext()
 
+
+class Filmix(FilmixClient):
+
+    def __init__(self):
+
+        super(Filmix, self).__init__()
+
+        headers = self._client.headers
+    
+        filmix_token = plugin.get_setting('X-FX-Token')
+        if filmix_token:
+            headers['X-FX-Token'] = filmix_token     
+
+        cookie_file = _get_cookie_path()
+
+        new_client = simplemedia.WebClient(headers, cookie_file)
+        new_client._secret_data.append('login_password')
+
+        new_client.cert = self._client.cert
+        new_client.verify = self._client.verify
+        new_client.adapters = self._client.adapters
+
+        self._client = new_client
 
 @plugin.route('/login')
 def login():
@@ -30,21 +53,18 @@ def login():
     if not _password:
         return
 
-    dialog = xbmcgui.Dialog()
-
     try:
         login_result = api.login(_login, _password)
-    except api.APIException as e:
-        dialog.ok(plugin.name, e.msg)
-        return
-
-    user_fields = _get_user_fields(login_result)
-    plugin.set_settings(user_fields)
-
-    if user_fields['user_login']:
-        dialog.ok(plugin.name, _('You have successfully logged in'))
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e, True)
     else:
-        dialog.ok(plugin.name, _('Incorrect login or password!'))
+        user_fields = _get_user_fields(login_result)
+        plugin.set_settings(user_fields)
+    
+        if user_fields['user_login']:
+            plugin.dialog_ok(_('You have successfully logged in'))
+        else:
+            plugin.dialog_ok(_('Incorrect login or password!'))
 
 
 @plugin.route('/logout')
@@ -225,35 +245,34 @@ def list_catalog(catalog):
         else:
             _category = _catalog_name(catalog)
             catalog_info = api.get_catalog_items(**params)
-    except api.APIException as e:
-        plugin.notify_error(e.msg)
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e)
         plugin.create_directory([], succeeded=False)
-        return
-
-    wm_params = {'catalog': catalog,
-                 'wm_link': 1,
-                 }
-    wm_params.update(plugin.params)
-    if wm_params.get('page') is not None:
-        del wm_params['page']
-        
-    wm_properties = {'wm_link': plugin.url_for('list_catalog', **wm_params),
-                     'wm_addon': plugin.id,
-                     'wm_label': _category,
+    else:
+        wm_params = {'catalog': catalog,
+                     'wm_link': 1,
                      }
+        wm_params.update(plugin.params)
+        if wm_params.get('page') is not None:
+            del wm_params['page']
+            
+        wm_properties = {'wm_link': plugin.url_for('list_catalog', **wm_params),
+                         'wm_addon': plugin.id,
+                         'wm_label': _category,
+                         }
+        
+        category_parts = [_category]
+        if page > 1:
+            category_parts.append('{0} {1}'.format(_('Page'), page))
+        result = {'items': _catalog_items(catalog_info, catalog, use_filters, wm_properties),
+                  'total_items': catalog_info['count'],
+                  'content': 'movies',
+                  'category': ' / '.join(category_parts),
+                  'sort_methods': {'sortMethod': xbmcplugin.SORT_METHOD_NONE, 'label2Mask': '%Y / %O'},
+                  'update_listing': (page > 1),
     
-    category_parts = [_category]
-    if page > 1:
-        category_parts.append('{0} {1}'.format(_('Page'), page))
-    result = {'items': _catalog_items(catalog_info, catalog, use_filters, wm_properties),
-              'total_items': catalog_info['count'],
-              'content': 'movies',
-              'category': ' / '.join(category_parts),
-              'sort_methods': {'sortMethod': xbmcplugin.SORT_METHOD_NONE, 'label2Mask': '%Y / %O'},
-              'update_listing': (page > 1),
-
-              }
-    plugin.create_directory(**result)
+                  }
+        plugin.create_directory(**result)
 
 
 def _catalog_items(data, catalog, use_filters=False, wm_properties=None):
@@ -368,25 +387,25 @@ def list_content(catalog, content_name):
 
     try:
         content_info = api.get_movie_info(content['id'], content['alt_name'])
-    except api.APIException as e:
-        plugin.notify_error(e.msg)
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e)
         plugin.create_directory([], succeeded=False)
-        return
-
-    if _is_movie(content_info):
-        result = {'items': _list_movie_files(content_info),
-                  'content': 'movies',
-                  'category': content_info['title'],
-                  'sort_methods': {'sortMethod': xbmcplugin.SORT_METHOD_NONE, 'label2Mask': '%Y / %O'},
-                  }
     else:
-        result = {'items': _list_serial_seasons(content_info),
-                  'content': 'seasons',
-                  'category': content_info['title'],
-                  'sort_methods': xbmcplugin.SORT_METHOD_LABEL,
-                  }
-
-    plugin.create_directory(**result)
+    
+        if _is_movie(content_info):
+            result = {'items': _list_movie_files(content_info),
+                      'content': 'movies',
+                      'category': content_info['title'],
+                      'sort_methods': {'sortMethod': xbmcplugin.SORT_METHOD_NONE, 'label2Mask': '%Y / %O'},
+                      }
+        else:
+            result = {'items': _list_serial_seasons(content_info),
+                      'content': 'seasons',
+                      'category': content_info['title'],
+                      'sort_methods': xbmcplugin.SORT_METHOD_LABEL,
+                      }
+    
+        plugin.create_directory(**result)
 
 
 def _list_movie_files(item):
@@ -491,27 +510,26 @@ def list_season_episodes(catalog, content_name):
 
     try:
         serial_info = api.get_movie_info(content['id'], content['alt_name'])
-    except api.APIException as e:
-        plugin.notify_error(e.msg)
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e)
         plugin.create_directory([], succeeded=False)
-        return
-
-    season = plugin.params.s
-    translation = plugin.params.get('t')
-
-    use_atl_names = _use_atl_names()
-    if use_atl_names:
-        sort_methods = xbmcplugin.SORT_METHOD_TITLE
     else:
-        sort_methods = xbmcplugin.SORT_METHOD_EPISODE
-
-    result = {'items': _season_episodes_items(serial_info, season, translation),
-              'content': 'episodes',
-              'category': ' / '.join([serial_info['title'], '{0} {1}'.format(_('Season'), season)]),
-              'sort_methods': sort_methods,
-              }
-
-    plugin.create_directory(**result)
+        season = plugin.params.s
+        translation = plugin.params.get('t')
+    
+        use_atl_names = _use_atl_names()
+        if use_atl_names:
+            sort_methods = xbmcplugin.SORT_METHOD_TITLE
+        else:
+            sort_methods = xbmcplugin.SORT_METHOD_EPISODE
+    
+        result = {'items': _season_episodes_items(serial_info, season, translation),
+                  'content': 'episodes',
+                  'category': ' / '.join([serial_info['title'], '{0} {1}'.format(_('Season'), season)]),
+                  'sort_methods': sort_methods,
+                  }
+    
+        plugin.create_directory(**result)
 
 
 def _season_episodes_items(item, season=None, translation=None):
@@ -582,45 +600,45 @@ def play_video(catalog, content_name):
 
     try:
         content_info = api.get_movie_info(content['id'], content['alt_name'])
-    except api.APIException as e:
-        plugin.notify_error(e.msg)
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e)
         plugin.resolve_url({}, False)
-        return
-
-    is_strm = plugin.params.get('strm') == '1' \
-               and plugin.kodi_major_version() >= '18'
-
-    translation = plugin.params.get('t')
-    season = plugin.params.get('s')
-    episode = plugin.params.get('e')
-
-    if is_strm:
-        listitem = {}
     else:
-        listitem = _get_listitem(content_info)
-
-        listitem['is_folder'] = False
-        listitem['is_playable'] = True
-
-        if _is_movie(content_info):
-            listitem['info']['video']['mediatype'] = 'movie'
+    
+        is_strm = plugin.params.get('strm') == '1' \
+                   and plugin.kodi_major_version() >= '18'
+    
+        translation = plugin.params.get('t')
+        season = plugin.params.get('s')
+        episode = plugin.params.get('e')
+    
+        if is_strm:
+            listitem = {}
         else:
-            int_season = max(1, int(season or '1'))
-            listitem['info']['video']['season'] = int_season
-            listitem['info']['video']['episode'] = int(episode)
-            listitem['info']['video']['mediatype'] = 'episode'
-
-            listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
-            listitem['info']['video']['title'] = listitem['label']
-
-    if _is_movie(content_info):
-        listitem['path'] = _get_movie_link(content_info, translation)
-        api.add_watched(content['id'], translation=translation)
-    else:
-        listitem['path'] = _get_episode_link(content_info, season, episode, translation)
-        #api.add_watched(content['id'], season, episode, translation)
-
-    plugin.resolve_url(listitem)
+            listitem = _get_listitem(content_info)
+    
+            listitem['is_folder'] = False
+            listitem['is_playable'] = True
+    
+            if _is_movie(content_info):
+                listitem['info']['video']['mediatype'] = 'movie'
+            else:
+                int_season = max(1, int(season or '1'))
+                listitem['info']['video']['season'] = int_season
+                listitem['info']['video']['episode'] = int(episode)
+                listitem['info']['video']['mediatype'] = 'episode'
+    
+                listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
+                listitem['info']['video']['title'] = listitem['label']
+    
+        if _is_movie(content_info):
+            listitem['path'] = _get_movie_link(content_info, translation)
+            api.add_watched(content['id'], translation=translation)
+        else:
+            listitem['path'] = _get_episode_link(content_info, season, episode, translation)
+            #api.add_watched(content['id'], season, episode, translation)
+    
+        plugin.resolve_url(listitem)
 
 
 @plugin.route('/<catalog>/<content_name>/trailer')
@@ -630,15 +648,15 @@ def play_trailer(catalog, content_name):
 
     try:
         content_info = api.get_movie_info(content['id'], content['alt_name'])
-    except api.APIException as e:
-        plugin.notify_error(e.msg)
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e)
         plugin.resolve_url({}, False)
-        return
-
-    listitem = {}
-    listitem['path'] = _get_trailer_link(content_info)
-
-    plugin.resolve_url(listitem)
+    else:
+    
+        listitem = {}
+        listitem['path'] = _get_trailer_link(content_info)
+    
+        plugin.resolve_url(listitem)
 
 
 def  _get_catalogs():
@@ -863,8 +881,9 @@ def search_history():
     with plugin.get_storage('__history__.pcl') as storage:
         history = storage.get('history', [])
 
-        if len(history) > plugin.get_setting('history_length'):
-            history[plugin.history_length - len(history):] = []
+        history_length = plugin.get_setting('history_length')
+        if len(history) > history_length:
+            history[history_length - len(history):] = []
             storage['history'] = history
 
     listing = []
@@ -919,20 +938,20 @@ def search():
     elif keyword:
         try:
             catalog_info = api.get_search_catalog(keyword, page)
-        except api.APIException as e:
-            plugin.notify_error(e.msg)
+        except (FilmixError, simplemedia.WebClientError) as e:
+            plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
-            return
-
-        result = {'items': _catalog_items(catalog_info, 'search'),
-                  'total_items': catalog_info['count'],
-                  'content': 'movies',
-                  'category': ' / '.join([_('Search'), keyword]),
-                  'sort_methods': xbmcplugin.SORT_METHOD_NONE,
-                  'update_listing': (page > 1),
-
-                  }
-        plugin.create_directory(**result)
+        else:
+    
+            result = {'items': _catalog_items(catalog_info, 'search'),
+                      'total_items': catalog_info['count'],
+                      'content': 'movies',
+                      'category': ' / '.join([_('Search'), keyword]),
+                      'sort_methods': xbmcplugin.SORT_METHOD_NONE,
+                      'update_listing': (page > 1),
+    
+                      }
+            plugin.create_directory(**result)
 
 
 def _get_filter_prefix(filter_id):
@@ -951,7 +970,10 @@ def _get_filter_values(filter_id):
 
     try:
         result = api.get_filter('cat', filter_id)
-
+    except (FilmixError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e)
+        filter_values = {}
+    else:
         prefix = _get_filter_prefix(filter_id)
         filter_values = {}
         start_index = 0 if filter_id in ['years'] else 1
@@ -960,11 +982,8 @@ def _get_filter_values(filter_id):
 
         filters[filter_id] = filter_values    
         storage['filters'] = filters
-    except api.APIException as e:
-        plugin.notify_error(e.msg)
-        filter_values = {}
-    
-    return filter_values
+    finally:
+        return filter_values
 
 
 def _get_filters():
@@ -1077,18 +1096,8 @@ def _get_cert_path():
 
 
 def _api():
-    cookie_file = _get_cookie_path()
-    cert_path = _get_cert_path()
-    
-    cert = (os.path.join(cert_path, 'certificate.pem'), os.path.join(cert_path, 'plainkey.pem'))
 
-    filmix_token = plugin.get_setting('X-FX-Token')
-
-    headers = {}
-    if filmix_token:
-        headers['X-FX-Token'] = filmix_token     
-
-    api = filmix(headers, cookie_file, cert)
+    api = Filmix()
 
     return api
 

@@ -3,113 +3,62 @@
 
 from __future__ import unicode_literals
 
-from future.utils import PY2, PY3, iteritems, python_2_unicode_compatible
+from future.utils import PY26, PY3, iteritems
 from builtins import range
 
 import os
-from base64 import b64decode
+import ssl
 import requests
-if PY2:
-    import cookielib
-else:
-    import http.cookiejar as cookielib
+from base64 import b64decode
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 
+class FilmixError(Exception):
 
-@python_2_unicode_compatible
-class http_client(object):
+    def __init__(self, message, code=None):
+        self.message = message
+        self.code = code
 
-    def __init__(self, headers=None, cookie_file=None, cert=None):
-        self._s = requests.Session()
+        super(FilmixError, self).__init__(self.message)
 
-        if cookie_file is not None:
-            self._s.cookies = cookielib.LWPCookieJar(cookie_file)
-            if os.path.exists(cookie_file):
-                self._s.cookies.load(ignore_discard=True, ignore_expires=True)
+class FilmixAdapter(HTTPAdapter):
+    
+    _filmix_ciphers = 'DEFAULT@SECLEVEL=0'
+    
+    def init_poolmanager(self, *args, **kwargs):
+        context = create_urllib3_context(ciphers=self._filmix_ciphers)
+        kwargs['ssl_context'] = context
+        return super(FilmixAdapter, self).init_poolmanager(*args, **kwargs)
 
-        if cert is not None:
-            self._s.cert = cert
-            self._s.verify = False
+    def proxy_manager_for(self, *args, **kwargs):
+        context = create_urllib3_context(ciphers=self._filmix_ciphers)
+        kwargs['ssl_context'] = context
+        return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
+
+class FilmixClient(object):
+
+    _base_url = 'https://filmix.vip:8044/'
+
+    def __init__(self):
+
+        headers = {'User-Agent': None,
+                   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                   }
+
+        self._client = requests.Session()
+        self._client.headers.update(headers)
+
+        cwd = os.path.dirname(os.path.abspath(__file__))
+
+        certificate = os.path.join(cwd, 'cert', 'certificate.pem')
+        plainkey = os.path.join(cwd, 'cert', 'plainkey.pem')
+
+        self._client.cert = (certificate, plainkey)
+        self._client.verify = certificate
         
-        self.update(headers)
-
-    def update(self, headers=None):
-
-        if headers is not None and headers:
-            self._s.headers.update(headers)
-
-    def _save_cookies(self):
-        if isinstance(self._s.cookies, cookielib.LWPCookieJar) \
-           and self._s.cookies.filename:
-            self._s.cookies.save(ignore_expires=True, ignore_discard=True)
-
-    def post(self, url, **kwargs):
-
-        r = self._s.post(url, **kwargs)
-        r.raise_for_status()
-
-        self._save_cookies()
-
-        return r
-
-    def get(self, url, **kwargs):
-
-        r = self._s.get(url, **kwargs)
-        r.raise_for_status()
-
-        self._save_cookies()
-
-        return r
-
-
-@python_2_unicode_compatible
-class filmix(object):
-
-    @python_2_unicode_compatible
-    class APIException(Exception):
-
-        def __init__(self, msg, code=None):
-            self.msg = msg
-            self.code = code
-
-        def __str__(self):
-            return self.msg
-
-    def __init__(self, headers=None, cookies=None, cert=None):
-        self._base_url = 'https://filmix.vip:8044/'
-
-        headers = headers or {}
-
-        f_headers = {'User-Agent': None,
-                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                     'Accept-Encoding': 'gzip',
-                     'Connection': 'keep-alive',
-                     'X-FX-Token': '',
-                     }
-        f_headers.update(headers)
-
-        self._client = http_client(f_headers, cookies, cert)
-
-    def _post(self, url, params=None, **kwargs):
-        url = self._base_url + url
-        try:
-            r = self._client.post(url, params=params, **kwargs)
-        except requests.ConnectionError:
-            raise self.APIException('Connection error')
-        except requests.HTTPError as e:
-            raise self.APIException(str(e))
-
-        return r
-
-    def _get(self, url, params=None, **kwargs):
-        url = self._base_url + url
-        try:
-            r = self._client.get(url, params=params, **kwargs)
-        except requests.ConnectionError:
-            raise self.APIException('Connection error')
-        except requests.HTTPError as e:
-            raise self.APIException(str(e))
-
-        return r
+        if not PY26 \
+          and ssl.OPENSSL_VERSION_INFO >= (1,1):
+            self._client.mount(self._base_url, FilmixAdapter())
 
     @staticmethod
     def decode_link(link):
@@ -122,23 +71,20 @@ class filmix(object):
         return b64decode(link).decode('utf8')
 
     def _extract_json(self, r):
-        try:
-            j = r.json()
-        except ValueError as err:
-            raise self.APIException(err)
+        j = r.json()
 
         if isinstance(j, dict) \
           and j.get('error') is not None:
             if j['error'].get('user_message') is not None:
-                raise self.APIException(j['error']['user_message'], j['error']['code'])
+                raise FilmixError(j['error']['user_message'], j['error']['code'])
             else:
-                raise self.APIException(j['error']['message'], j['error']['code'])
+                raise FilmixError(j['error']['message'], j['error']['code'])
         return j
 
     def _get_profile(self, data=None):
-        url = 'android.php?get_profile'
+        url = self._base_url + 'android.php?get_profile'
 
-        r = self._post(url, data=data)
+        r = self._client.post(url, data=data)
         j = self._extract_json(r)
 
         if isinstance(j, dict):
@@ -152,20 +98,21 @@ class filmix(object):
         return result
 
     def login(self, _login, _password):
+
         data = {'login_name': _login,
                 'login_password': _password,
                 'login': 'submit',
                 'login_not_save': 1,
                 }
 
-        return self._get_profile(data)
+        return self._get_profile(data=data)
 
     def user_data(self):
 
         return self._get_profile()
 
     def _get_items(self, u_params, page=1, page_params=None, **kwargs):
-        url = 'android.php'
+        url = self._base_url + 'android.php'
 
         params = kwargs or {}
 
@@ -177,7 +124,7 @@ class filmix(object):
         cookies = {'per_page_news': per_page,
                    }
 
-        r = self._get(url, u_params, cookies=cookies)
+        r = self._client.get(url, params=u_params, cookies=cookies)
         j = self._extract_json(r) or []
 
         if page_params is not None:
@@ -225,12 +172,12 @@ class filmix(object):
         return self._get_items(u_params, page, page_params, **kwargs)
 
     def get_movie_info(self, newsid='', alt_name=''):
-        url = 'android.php'
+        url = self._base_url + 'android.php'
         u_params = {'newsid': newsid,
                     'seourl': alt_name,
                     }
 
-        r = self._get(url, u_params)
+        r = self._client.get(url, params=u_params)
         j = self._extract_json(r)
 
         return j
@@ -274,20 +221,20 @@ class filmix(object):
         return self._get_items(params, page, {}, **kwargs)
 
     def get_filter(self, scope, filter_id=None):
-        url = 'engine/ajax/get_filter.php'
+        url = self._base_url + 'engine/ajax/get_filter.php'
 
         params = {'scope': scope,
                   }
         if filter_id is not None:
             params['type'] = filter_id
 
-        r = self._post(url, params)
+        r = self._client.post(url, params=params)
         j = self._extract_json(r)
 
         return j
 
     def set_favorite(self, fav_id, value):
-        url = 'engine/ajax/favorites.php'
+        url = self._base_url + 'engine/ajax/favorites.php'
 
         params = {'fav_id': fav_id,
                   'action': 'plus' if value else 'minus',
@@ -295,19 +242,19 @@ class filmix(object):
                   'alert': '0',
                   }
 
-        self._get(url, params)
+        self._client.get(url, params=params)
 
     def set_watch_later(self, post_id, value):
-        url = 'engine/ajax/watch_later.php'
+        url = self._base_url + 'engine/ajax/watch_later.php'
 
         data = {'post_id': post_id,
                 'action': 'add' if value else 'rm',
                 }
 
-        self._post(url, data=data)
+        self._client.post(url, data=data)
 
     def add_watched(self, post_id, season=None, episode=None, translation=None):
-        url = 'android.php'
+        url = self._base_url + 'android.php'
         
         data = {'add_watched':'true',
                 'id': post_id,
@@ -322,4 +269,4 @@ class filmix(object):
         if translation is not None:
             data['translation'] = translation
 
-        self._post(url, data=data)
+        self._client.post(url, data=data)
