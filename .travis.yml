@@ -9,11 +9,15 @@ python:
   - "2.7"
   - "3.6"
 before_install:
+  - export PYTHONIOENCODING=UTF-8
+  - wget -O /tmp/simplemedia.tar.gz https://github.com/vlmaksime/script.module.simplemedia/archive/master.tar.gz
+  - tar -C /tmp -xf /tmp/simplemedia.tar.gz
+  - ln -s /tmp/script.module.simplemedia-master/script.module.simplemedia/ script.module.simplemedia
+install:
+  - pip install codecov codacy-coverage mock future m3u8
   - pip install https://github.com/romanvm/script.module.simpleplugin/archive/develop.zip
   - pip install https://github.com/vlmaksime/script.module.simplemedia/archive/master.zip
   - pip install https://github.com/vlmaksime/Kodistubs/archive/develop.zip
-install:
-  - pip install codecov codacy-coverage mock future
 script:
   - coverage run tests.py
 after_success:
