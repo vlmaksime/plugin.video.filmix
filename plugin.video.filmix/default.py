@@ -814,8 +814,10 @@ def _available_qualities():
 
     if plugin.get_setting('is_pro_plus'):
         return ['360', '480', '720', '1080', '1440', '2160']
-    else:
+    elif plugin.get_setting('user_name'):
         return ['360', '480', '720']
+    else:
+        return ['360', '480']
 
 
 def _get_listitem(item):
