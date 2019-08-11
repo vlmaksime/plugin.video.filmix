@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from future.utils import PY26, PY3, iteritems
+from future.utils import PY26, PY3, iteritems, python_2_unicode_compatible
 from builtins import range
 
 import os
@@ -35,6 +35,7 @@ class FilmixAdapter(HTTPAdapter):
         kwargs['ssl_context'] = context
         return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
 
+@python_2_unicode_compatible
 class FilmixClient(object):
 
     _base_url = 'https://filmix.vip:8044/'
@@ -57,8 +58,17 @@ class FilmixClient(object):
         self._client.verify = certificate
         
         if not PY26 \
-          and ssl.OPENSSL_VERSION_INFO >= (1,1):
-            self._client.mount(self._base_url, FilmixAdapter())
+          and ssl.OPENSSL_VERSION_INFO >= (1,1,0):
+            try:
+                adapter = FilmixAdapter()
+            except ssl.SSLError as e:
+                print('OpenSSL info: {0}'.format(ssl.OPENSSL_VERSION))
+                print('Error: {0}'.format(e))
+            else:
+                self._client.mount(self._base_url, adapter)
+
+    def __str__(self):
+        return '<FilmixClient>'
 
     @staticmethod
     def decode_link(link):
