@@ -23,9 +23,9 @@ def login():
     _login = _get_keyboard_text('', _('Login'))
     if not _login:
         return
-    
+
     xbmc.sleep(1000)
-    
+
     _password = _get_keyboard_text('', _('Password'), True)
     if not _password:
         return
@@ -38,7 +38,7 @@ def login():
     else:
         user_fields = api.get_user_fields(login_result)
         plugin.set_settings(user_fields)
-    
+
         if user_fields['user_login']:
             plugin.dialog_ok(_('You have successfully logged in'))
         else:
@@ -75,7 +75,7 @@ def toogle_favorites():
             xbmcgui.Dialog().notification(plugin.name, _('Successfully added to Favorites'), xbmcgui.NOTIFICATION_INFO)
         else:
             xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Favorites'), xbmcgui.NOTIFICATION_INFO)
-    
+
         xbmc.executebuiltin(' Container.Refresh()')
 
 
@@ -94,7 +94,7 @@ def toogle_watch_later():
             xbmcgui.Dialog().notification(plugin.name, _('Successfully added to Watch Later'), xbmcgui.NOTIFICATION_INFO)
         else:
             xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Watch Later'), xbmcgui.NOTIFICATION_INFO)
-    
+
         xbmc.executebuiltin(' Container.Refresh()')
 
 
@@ -185,7 +185,8 @@ def _root_items():
     yield list_item
 
 
-@plugin.route('/<catalog>')
+@plugin.route('/<catalog>', 'list_catalog_old')
+@plugin.route('/<catalog>/')
 def list_catalog(catalog):
 
     page = plugin.params.get('page', '1')
@@ -243,12 +244,12 @@ def list_catalog(catalog):
         wm_params.update(plugin.params)
         if wm_params.get('page') is not None:
             del wm_params['page']
-            
+
         wm_properties = {'wm_link': plugin.url_for('list_catalog', **wm_params),
                          'wm_addon': plugin.id,
                          'wm_label': _category,
                          }
-        
+
         category_parts = [_category]
         if page > 1:
             category_parts.append('{0} {1}'.format(_('Page'), page))
@@ -258,7 +259,7 @@ def list_catalog(catalog):
                   'category': ' / '.join(category_parts),
                   'sort_methods': {'sortMethod': xbmcplugin.SORT_METHOD_NONE, 'label2Mask': '%Y / %O'},
                   'update_listing': (page > 1),
-    
+
                   }
         plugin.create_directory(**result)
 
@@ -266,16 +267,16 @@ def list_catalog(catalog):
 def _catalog_items(data, catalog, use_filters=False, wm_properties=None):
 
     wm_link = (plugin.params.get('wm_link') == '1')
-    
+
     if not wm_link \
        and use_filters:
         used_filters = _get_filters()
         for used_filter in used_filters:
             yield _make_filter_item(catalog, used_filter['t'])
-        
+
     properties = {}
     properties.update(wm_properties or {})
-    
+
     for item in data['items']:
 
         if not isinstance(item, dict):
@@ -326,7 +327,7 @@ def _catalog_items(data, catalog, use_filters=False, wm_properties=None):
             item_info = {'label': _('Previous page...'),
                          'url':   url}
             yield item_info
-    
+
         if pages.get('next') is not None:
             url = plugin.url_for('list_catalog', catalog=catalog, **pages['next'])
             item_info = {'label': _('Next page...'),
@@ -343,7 +344,7 @@ def select_filter():
     values_list = _get_filter_values(filter_id)
 #    values_list =  sorted(values_list, key=values_list.get)
 
-    filter_values = _get_catalog_filters()    
+    filter_values = _get_catalog_filters()
 
     keys = []
     titles = []
@@ -369,7 +370,8 @@ def select_filter():
         xbmc.executebuiltin('Container.Update("%s")' % url)
 
 
-@plugin.route('/<catalog>/<content_name>')
+@plugin.route('/<catalog>/<content_name>', 'list_content_old')
+@plugin.route('/<catalog>/<content_name>/')
 def list_content(catalog, content_name):
     content = _get_content_params(content_name)
 
@@ -380,7 +382,7 @@ def list_content(catalog, content_name):
         plugin.notify_error(e)
         plugin.create_directory([], succeeded=False)
     else:
-    
+
         if _is_movie(content_info):
             result = {'items': _list_movie_files(content_info),
                       'content': 'movies',
@@ -393,7 +395,7 @@ def list_content(catalog, content_name):
                       'category': content_info['title'],
                       'sort_methods': xbmcplugin.SORT_METHOD_LABEL,
                       }
-    
+
         plugin.create_directory(**result)
 
 
@@ -421,9 +423,9 @@ def _list_movie_files(item):
         else:
             movie_title = item['title']
         atl_name_parts.append(movie_title)
-            
+
         atl_name_parts.append('(%d)' % (item['year']))
-            
+
         title = ' '.join(atl_name_parts)
     else:
         title = item['title']
@@ -493,7 +495,8 @@ def _list_serial_seasons(item):
                 yield listitem
 
 
-@plugin.route('/<catalog>/<content_name>/episodes')
+@plugin.route('/<catalog>/<content_name>/episodes', 'list_season_episodes_old')
+@plugin.route('/<catalog>/<content_name>/episodes/')
 def list_season_episodes(catalog, content_name):
     content = _get_content_params(content_name)
 
@@ -506,19 +509,19 @@ def list_season_episodes(catalog, content_name):
     else:
         season = plugin.params.s
         translation = plugin.params.get('t')
-    
+
         use_atl_names = _use_atl_names()
         if use_atl_names:
             sort_methods = xbmcplugin.SORT_METHOD_TITLE
         else:
             sort_methods = xbmcplugin.SORT_METHOD_EPISODE
-    
+
         result = {'items': _season_episodes_items(serial_info, season, translation),
                   'content': 'episodes',
                   'category': ' / '.join([serial_info['title'], '{0} {1}'.format(_('Season'), season)]),
                   'sort_methods': sort_methods,
                   }
-    
+
         plugin.create_directory(**result)
 
 
@@ -553,16 +556,16 @@ def _season_episodes_items(item, season=None, translation=None):
 
     if season_translation is not None:
         for episode_item in iteritems(season_translation):
-    
+
             episode = episode_item[0]
-    
+
             listitem['info']['video']['episode'] = int(episode)
             listitem['info']['video']['sortepisode'] = int(episode)
-    
+
             url = plugin.url_for('play_video', e=episode, **u_params)
             listitem['url'] = url
             listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
-    
+
             if use_atl_names:
                 atl_name_parts = []
                 if item.get('original_title', ''):
@@ -570,15 +573,15 @@ def _season_episodes_items(item, season=None, translation=None):
                 else:
                     series_title = item['title']
                 atl_name_parts.append(series_title)
-                    
+
                 atl_name_parts.append('.s%02de%02d' % (int_season, int(episode)))
-                    
+
                 title = ''.join(atl_name_parts)
             else:
                 title = listitem['label']
-    
+
             listitem['info']['video']['title'] = title
-    
+
             yield listitem
 
 
@@ -595,22 +598,22 @@ def play_video(catalog, content_name):
         plugin.notify_error(e)
         plugin.resolve_url({}, False)
     else:
-    
+
         is_strm = plugin.params.get('strm') == '1' \
                    and plugin.kodi_major_version() >= '18'
-    
+
         translation = plugin.params.get('t')
         season = plugin.params.get('s')
         episode = plugin.params.get('e')
-    
+
         if is_strm:
             listitem = {}
         else:
             listitem = _get_listitem(content_info)
-    
+
             listitem['is_folder'] = False
             listitem['is_playable'] = True
-    
+
             if _is_movie(content_info):
                 listitem['info']['video']['mediatype'] = 'movie'
             else:
@@ -618,10 +621,10 @@ def play_video(catalog, content_name):
                 listitem['info']['video']['season'] = int_season
                 listitem['info']['video']['episode'] = int(episode)
                 listitem['info']['video']['mediatype'] = 'episode'
-    
+
                 listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
                 listitem['info']['video']['title'] = listitem['label']
-    
+
         if _is_movie(content_info):
             listitem['path'] = _get_movie_link(content_info, translation)
             try:
@@ -631,7 +634,7 @@ def play_video(catalog, content_name):
         else:
             listitem['path'] = _get_episode_link(content_info, season, episode, translation)
             # api.add_watched(content['id'], season, episode, translation)
-    
+
         plugin.resolve_url(listitem)
 
 
@@ -647,10 +650,10 @@ def play_trailer(catalog, content_name):
         plugin.notify_error(e)
         plugin.resolve_url({}, False)
     else:
-    
+
         listitem = {}
         listitem['path'] = _get_trailer_link(content_info)
-    
+
         plugin.resolve_url(listitem)
 
 
@@ -874,34 +877,28 @@ def _get_listitem(item):
     return listitem
 
 
-@plugin.route('/search/history')
+@plugin.route('/search/history/')
 def search_history():
 
-    with plugin.get_storage('__history__.pcl') as storage:
-        history = storage.get('history', [])
+    result = {'items': plugin.search_history_items(),
+              'content': '',
+              'category': ' / '.join([plugin.name, _('Search')]),
+              'sort_methods': xbmcplugin.SORT_METHOD_LABEL_IGNORE_FOLDERS,
+              }
 
-        history_length = plugin.get_setting('history_length')
-        if len(history) > history_length:
-            history[history_length - len(history):] = []
-            storage['history'] = history
+    plugin.create_directory(**result)
 
-    listing = []
-    listing.append({'label': _('New Search...'),
-                    'url': plugin.url_for('search'),
-                    'icon': plugin.get_image('DefaultAddonsSearch.png'),
-                    'is_folder': False,
-                    'is_playable': False,
-                    'fanart': plugin.fanart})
 
-    for item in history:
-        listing.append({'label': item['keyword'],
-                        'url': plugin.url_for('search', keyword=item['keyword']),
-                        'icon': plugin.icon,
-                        'is_folder': True,
-                        'is_playable': False,
-                        'fanart': plugin.fanart})
+@plugin.route('/search/remove/<int:index>')
+def search_remove(index):
 
-    plugin.create_directory(listing, content='files', category=_('Search'))
+    plugin.search_history_remove(index)
+
+
+@plugin.route('/search/clear')
+def search_clear():
+
+    plugin.search_history_clear()
 
 
 @plugin.route('/search')
@@ -942,14 +939,14 @@ def search():
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
-    
+
             result = {'items': _catalog_items(catalog_info, 'search'),
                       'total_items': catalog_info['count'],
                       'content': 'movies',
                       'category': ' / '.join([_('Search'), keyword]),
                       'sort_methods': xbmcplugin.SORT_METHOD_NONE,
                       'update_listing': (page > 1),
-    
+
                       }
             plugin.create_directory(**result)
 
@@ -960,9 +957,9 @@ def _get_filter_prefix(filter_id):
         if filter['t'] == filter_id:
             return filter['p']
 
-    
+
 def _get_filter_values(filter_id):
-    
+
     storage = plugin.get_mem_storage()
     filters = storage.get('filters', {})
     if filters.get(filter_id) is not None:
@@ -981,7 +978,7 @@ def _get_filter_values(filter_id):
         for key, val in iteritems(result):
             filter_values[prefix + key[start_index:]] = val
 
-        filters[filter_id] = filter_values    
+        filters[filter_id] = filter_values
         storage['filters'] = filters
 
     return filter_values
@@ -994,7 +991,7 @@ def _get_filters():
                {'p': 'q', 't': 'rip'},
                {'p': 't', 't': 'translation'},
                ]
-    
+
     return filters
 
 
@@ -1023,7 +1020,7 @@ def _get_filter_title(filter_name):
 
     return result
 
-        
+
 def _get_filter_icon(filter_name):
     image = ''
     if filter_name == 'categories': image = plugin.get_image('DefaultGenre.png')
@@ -1039,7 +1036,7 @@ def _get_filter_icon(filter_name):
 
 
 def _get_filter_value(filter_id):
-    
+
     filter_values = _get_catalog_filters()
     filter_items = _get_filter_values(filter_id)
     values = []
@@ -1047,7 +1044,7 @@ def _get_filter_value(filter_id):
     for filter_value in filter_values:
         if filter_items.get(filter_value) is not None:
             values.append(filter_items[filter_value])
-            
+
     if values:
         return ', '.join(values)
     else:

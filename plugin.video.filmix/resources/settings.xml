@@ -16,8 +16,8 @@
 	    <setting label="30302" type="action" option="close" visible="!eq(1,)" action="RunPlugin(plugin://$ID/logout)" />
         <setting label="30303" type="text" id="user_login" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30306" type="text" id="user_name" visible="!eq(0,)" enable="false" default=""/>
-        <setting label="30307" type="bool" id="is_pro" visible="!eq(-2,)" enable="false" default="False"/>
-        <setting label="30308" type="bool" id="is_pro_plus" visible="!eq(-3,)" enable="false"  default="False"/>
+        <setting label="30307" type="bool" id="is_pro" visible="!eq(-2,)" enable="false" default="false"/>
+        <setting label="30308" type="bool" id="is_pro_plus" visible="!eq(-3,)" enable="false"  default="false"/>
         <setting label="30309" type="text" id="pro_date" visible="!eq(0,)" enable="false" default=""/>
         <setting type="text" id="X-FX-Token" visible="false" enable="false" default=""/>
     </category>

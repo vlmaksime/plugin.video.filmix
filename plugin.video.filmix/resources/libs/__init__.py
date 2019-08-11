@@ -25,10 +25,10 @@ class Filmix(FilmixClient):
         super(Filmix, self).__init__()
 
         headers = self._client.headers
-    
+
         filmix_token = addon.get_setting('X-FX-Token')
         if filmix_token:
-            headers['X-FX-Token'] = filmix_token     
+            headers['X-FX-Token'] = filmix_token
 
         cookie_file = self.get_cookie_path()
 
@@ -40,7 +40,7 @@ class Filmix(FilmixClient):
         new_client.adapters.update(self._client.adapters)
 
         self._client = new_client
-        
+
         if addon.get_setting('user_name'):
             self.check_login()
 
@@ -60,7 +60,7 @@ class Filmix(FilmixClient):
     @staticmethod
     def get_user_fields(user_info=None):
         user_info = user_info or {}
-    
+
         fields = {'user_login': user_info.get('login') or '',
                   'user_name': user_info.get('display_name') or '',
                   'is_pro': user_info.get('is_pro') or False,
