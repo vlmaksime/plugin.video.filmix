@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from future.utils import PY26, PY3, iteritems
+from future.utils import PY26, PY3, iteritems, python_2_unicode_compatible
 from builtins import range
 
 import os
@@ -22,9 +22,9 @@ class FilmixError(Exception):
         super(FilmixError, self).__init__(self.message)
 
 class FilmixAdapter(HTTPAdapter):
-    
+
     _filmix_ciphers = 'DEFAULT@SECLEVEL=0'
-    
+
     def init_poolmanager(self, *args, **kwargs):
         context = create_urllib3_context(ciphers=self._filmix_ciphers)
         kwargs['ssl_context'] = context
@@ -35,6 +35,7 @@ class FilmixAdapter(HTTPAdapter):
         kwargs['ssl_context'] = context
         return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
 
+@python_2_unicode_compatible
 class FilmixClient(object):
 
     _base_url = 'https://filmix.vip:8044/'
@@ -55,10 +56,19 @@ class FilmixClient(object):
 
         self._client.cert = (certificate, plainkey)
         self._client.verify = certificate
-        
+
         if not PY26 \
-          and ssl.OPENSSL_VERSION_INFO >= (1,1):
-            self._client.mount(self._base_url, FilmixAdapter())
+          and ssl.OPENSSL_VERSION_INFO >= (1,1,0):
+            try:
+                adapter = FilmixAdapter()
+            except ssl.SSLError as e:
+                print('OpenSSL info: {0}'.format(ssl.OPENSSL_VERSION))
+                print('Error: {0}'.format(e))
+            else:
+                self._client.mount(self._base_url, adapter)
+
+    def __str__(self):
+        return '<FilmixClient>'
 
     @staticmethod
     def decode_link(link):
@@ -154,7 +164,7 @@ class FilmixClient(object):
         else:
             filter_items = filters.split('-') if filters else []
             filter_items.append('s{0}'.format(section))
-            
+
             u_params = {'do': 'cat',
                         'category': '',
                         'orderby': orderby,
@@ -165,7 +175,7 @@ class FilmixClient(object):
         page_params = {'orderby': orderby,
                        'orderdir': orderdir,
                        }
-        
+
         if filters:
             page_params['filters'] = filters
 
@@ -255,14 +265,14 @@ class FilmixClient(object):
 
     def add_watched(self, post_id, season=None, episode=None, translation=None):
         url = self._base_url + 'android.php'
-        
+
         data = {'add_watched':'true',
                 'id': post_id,
                 }
 
         if season is not None:
             data['season'] = season
-            
+
         if episode is not None:
             data['episode'] = episode
 
