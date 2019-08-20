@@ -37,7 +37,7 @@ class Filmix(FilmixClient):
 
         new_client.cert = self._client.cert
         new_client.verify = self._client.verify
-        new_client.adapters.update(self._client.adapters)
+        new_client.adapters = self._client.adapters
 
         self._client = new_client
 
