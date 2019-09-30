@@ -34,6 +34,7 @@ xbmcaddon.init_addon(addon_dir, addon_config_dir, True)
 run_script = lambda : imp.load_source('__main__', os.path.join(addon_dir, 'default.py'))
 
 # Import our module being tested
+sys.path.append(os.path.join(cwd, 'script.module.filmix.cert', 'libs'))
 sys.path.append(addon_dir)
 
 def setUpModule():

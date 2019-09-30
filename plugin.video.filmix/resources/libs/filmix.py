@@ -12,6 +12,7 @@ import requests
 from base64 import b64decode
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
+import filmixcert
 
 class FilmixError(Exception):
 
@@ -51,8 +52,8 @@ class FilmixClient(object):
 
         cwd = os.path.dirname(os.path.abspath(__file__))
 
-        certificate = os.path.join(cwd, 'cert', 'certificate.pem')
-        plainkey = os.path.join(cwd, 'cert', 'plainkey.pem')
+        certificate = filmixcert.certificate()
+        plainkey = filmixcert.plainkey()
 
         self._client.cert = (certificate, plainkey)
         self._client.verify = certificate
