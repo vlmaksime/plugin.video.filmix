@@ -559,34 +559,19 @@ def _season_episodes_items(item, season=None, translation=None):
         u_params['strm'] = 1
 
     if season_translation is not None:
-        for episode_item in iteritems(season_translation):
-
-            episode = episode_item[0]
-
-            listitem['info']['video']['episode'] = int(episode)
-            listitem['info']['video']['sortepisode'] = int(episode)
-
-            url = plugin.url_for('play_video', e=episode, **u_params)
-            listitem['url'] = url
-            listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
-
-            if use_atl_names:
-                atl_name_parts = []
-                if item.get('original_title', ''):
-                    series_title = item['original_title']
-                else:
-                    series_title = item['title']
-                atl_name_parts.append(series_title)
-
-                atl_name_parts.append('.s%02de%02d' % (int_season, int(episode)))
-
-                title = ''.join(atl_name_parts)
-            else:
-                title = listitem['label']
-
-            listitem['info']['video']['title'] = title
-
-            yield listitem
+        if isinstance(season_translation, list):
+            for episode, episode_info in enumerate(season_translation):
+    
+                _add_episode_info(listitem, episode + 1, int_season, item, use_atl_names, u_params)
+    
+                yield listitem
+        else:
+            for episode_item in iteritems(season_translation):
+    
+                episode = episode_item[0]
+                _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_params)
+    
+                yield listitem
 
 
 @plugin.route('/<catalog>/<content_name>/play', 'play_video_old')
@@ -772,7 +757,10 @@ def _get_episode_link(item, season, episode, translation=None):
     if season_translation is None:
         return None
 
-    episode_info = season_translation[episode]
+    if isinstance(season_translation, list):
+        episode_info = season_translation[int(episode)-1]
+    else:
+        episode_info = season_translation[episode]
 
     api = Filmix()
     url = api.decode_link(episode_info['link'])
@@ -1168,6 +1156,31 @@ def _is_movie(content_info):
         return content_info['section'] in [0, 14] \
             and len(content_info['player_links']['playlist']) == 0
 
+def _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_params):
+
+    listitem['info']['video']['episode'] = int(episode)
+    listitem['info']['video']['sortepisode'] = int(episode)
+
+    url = plugin.url_for('play_video', e=episode, **u_params)
+    listitem['url'] = url
+    listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
+
+    if use_atl_names:
+        atl_name_parts = []
+        if item.get('original_title', ''):
+            series_title = item['original_title']
+        else:
+            series_title = item['title']
+        atl_name_parts.append(series_title)
+
+        atl_name_parts.append('.s%02de%02d' % (int_season, int(episode)))
+
+        title = ''.join(atl_name_parts)
+    else:
+        title = listitem['label']
+
+    listitem['info']['video']['title'] = title
+    
 
 if __name__ == '__main__':
     plugin.run()
