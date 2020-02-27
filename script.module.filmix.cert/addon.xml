@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="script.module.filmix.cert" version="0.9.3" name="Filmix certificates" provider-name="vl.maksime">
+<addon id="script.module.filmix.cert" version="0.9.4" name="Filmix certificates" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
     </requires>
