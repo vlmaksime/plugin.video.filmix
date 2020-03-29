@@ -37,7 +37,11 @@ def login():
         plugin.notify_error(e, True)
     else:
         user_fields = api.get_user_fields(login_result)
+        if user_fields['user_login']:
+            user_fields['user_password'] = _password
+
         plugin.set_settings(user_fields)
+
 
         if user_fields['user_login']:
             plugin.dialog_ok(_('You have successfully logged in'))
