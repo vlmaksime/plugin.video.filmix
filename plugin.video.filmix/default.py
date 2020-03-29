@@ -1163,7 +1163,6 @@ def _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_para
 
     url = plugin.url_for('play_video', e=episode, **u_params)
     listitem['url'] = url
-    listitem['label'] = '{0} {1}'.format(_('Episode'), episode)
 
     if use_atl_names:
         atl_name_parts = []
@@ -1177,8 +1176,9 @@ def _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_para
 
         title = ''.join(atl_name_parts)
     else:
-        title = listitem['label']
+        title = '{0} {1}'.format(_('Episode'), episode)
 
+    listitem['label'] = title
     listitem['info']['video']['title'] = title
     
 
