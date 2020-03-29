@@ -14,8 +14,8 @@ before_install:
   - tar -C /tmp -xf /tmp/simplemedia.tar.gz
   - ln -s /tmp/script.module.simplemedia-master/script.module.simplemedia/ script.module.simplemedia
 install:
-  - pip install codecov codacy-coverage mock future m3u8
-  - pip install https://github.com/romanvm/script.module.simpleplugin/archive/develop.zip
+  - pip install codecov codacy-coverage mock future
+  - pip install https://github.com/romanvm/script.module.simpleplugin/archive/master.zip
   - pip install https://github.com/vlmaksime/script.module.simplemedia/archive/master.zip
   - pip install https://github.com/vlmaksime/Kodistubs/archive/develop.zip
 script:
