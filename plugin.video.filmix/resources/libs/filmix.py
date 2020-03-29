@@ -82,7 +82,10 @@ class FilmixClient(object):
         return b64decode(link).decode('utf8')
 
     def _extract_json(self, r):
-        j = r.json()
+        try:
+            j = r.json()
+        except ValueError as e:
+            raise FilmixError(e)
 
         if isinstance(j, dict) \
           and j.get('error') is not None:

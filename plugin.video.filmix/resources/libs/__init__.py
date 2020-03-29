@@ -41,7 +41,7 @@ class Filmix(FilmixClient):
 
         self._client = new_client
 
-        if addon.get_setting('user_name'):
+        if addon.get_setting('user_login'):
             self.check_login()
 
     def check_login(self):
@@ -51,6 +51,20 @@ class Filmix(FilmixClient):
             addon.notify_error(e)
         else:
             user_fields = self.get_user_fields(user_data)
+            if not user_fields['user_login']:
+                _login = addon.get_setting('user_login')
+                _password = addon.get_setting('user_password')
+
+                if _login and _password:
+                    try:
+                        login_result = self.login(_login, _password)
+                    except (FilmixError, simplemedia.WebClientError) as e:
+                        plugin.notify_error(e, True)
+                    else:
+                        user_fields = self.get_user_fields(login_result)
+                        if not user_fields['user_login']:
+                            user_fields['user_password'] = ''
+
             addon.set_settings(user_fields)
 
     @staticmethod
