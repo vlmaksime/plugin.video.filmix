@@ -42,7 +42,6 @@ def login():
 
         plugin.set_settings(user_fields)
 
-
         if user_fields['user_login']:
             plugin.dialog_ok(_('You have successfully logged in'))
         else:
@@ -387,7 +386,7 @@ def list_content(catalog, content_name):
         openmeta_search(content_name)
     else:
         content = _get_content_params(content_name)
-    
+
         try:
             api = Filmix()
             content_info = api.get_movie_info(content['id'], content['alt_name'])
@@ -395,7 +394,7 @@ def list_content(catalog, content_name):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
-    
+
             if _is_movie(content_info):
                 result = {'items': _list_movie_files(content_info),
                           'content': 'movies',
@@ -408,7 +407,7 @@ def list_content(catalog, content_name):
                           'category': content_info['title'],
                           'sort_methods': xbmcplugin.SORT_METHOD_LABEL,
                           }
-    
+
             plugin.create_directory(**result)
 
 
@@ -570,16 +569,16 @@ def _season_episodes_items(item, season=None, translation=None):
     if season_translation is not None:
         if isinstance(season_translation, list):
             for episode, episode_info in enumerate(season_translation):
-    
+
                 _add_episode_info(listitem, episode + 1, int_season, item, use_atl_names, u_params)
-    
+
                 yield listitem
         else:
             for episode_item in iteritems(season_translation):
-    
+
                 episode = episode_item[0]
                 _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_params)
-    
+
                 yield listitem
 
 
@@ -767,7 +766,7 @@ def _get_episode_link(item, season, episode, translation=None):
         return None
 
     if isinstance(season_translation, list):
-        episode_info = season_translation[int(episode)-1]
+        episode_info = season_translation[int(episode) - 1]
     else:
         episode_info = season_translation[episode]
 
@@ -1166,6 +1165,7 @@ def _is_movie(content_info):
         return int(content_info['section']) in [0, 14] \
             and len(content_info['player_links']['playlist']) == 0
 
+
 def _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_params):
 
     listitem['info']['video']['episode'] = int(episode)
@@ -1190,7 +1190,8 @@ def _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_para
 
     listitem['label'] = title
     listitem['info']['video']['title'] = title
-    
+
+
 @plugin.route('/openmeta/<content_type>/')
 def openmeta_search(content_type):
     title = plugin.params.get('title')
@@ -1198,7 +1199,7 @@ def openmeta_search(content_type):
     season = plugin.params.get('season')
     episode = plugin.params.get('episode')
 
-    part_match = True#(plugin.params.get('part_match') == 'true')
+    part_match = True  # (plugin.params.get('part_match') == 'true')
 
     try:
         api = Filmix()
@@ -1207,15 +1208,15 @@ def openmeta_search(content_type):
         plugin.notify_error(e)
         plugin.create_directory([], succeeded=False)
     else:
-        
+
         title_upper = title.upper()
         if year is not None:
             year_string = '({0})'.format(year)
             if title_upper.endswith(year_string):
                 title_upper = title_upper[0:-len(year_string)].strip()
-            
+
         for item in catalog_info['items']:
-    
+
             if not isinstance(item, dict):
                 continue
 
@@ -1228,7 +1229,7 @@ def openmeta_search(content_type):
                 continue
 
             mediatype = 'movie' if _is_movie(item) else 'tvshow'
-            
+
             if mediatype == 'movie' \
               and content_type == 'movies':
 
@@ -1242,7 +1243,7 @@ def openmeta_search(content_type):
                     result = {'items': _list_movie_files(content_info),
                               'content': 'movies',
                               }
-                
+
             elif mediatype == 'tvshow' \
               and content_type == 'tvshows':
 
@@ -1264,7 +1265,8 @@ def openmeta_search(content_type):
 
             plugin.create_directory(**result)
             break
- 
+
+
 def _openmeta_episodes_items(item, season_str, episode_str):
 
     listitem = _get_listitem(item)
@@ -1294,9 +1296,8 @@ def _openmeta_episodes_items(item, season_str, episode_str):
     for season_translation_item in _openmeta_season_translation(item, season_str):
         translation = season_translation_item[0]
         u_params['t'] = translation
-        
-        season_translation = season_translation_item[1]
 
+        season_translation = season_translation_item[1]
 
         if isinstance(season_translation, list):
             for episode, episode_info in enumerate(season_translation):
@@ -1305,18 +1306,19 @@ def _openmeta_episodes_items(item, season_str, episode_str):
                     _add_episode_info(listitem, episode + 1, int_season, item, use_atl_names, u_params)
 
                     listitem['info']['label'] = '{0} {1} - {2} [{3}]'.format(_('Season'), season_str, listitem['info']['label'], translation)
-        
+
                     yield listitem
         else:
             for episode_item in iteritems(season_translation):
-    
+
                 episode = episode_item[0]
                 if episode == episode_str:
                     _add_episode_info(listitem, episode, int_season, item, use_atl_names, u_params)
 
                     listitem['label'] = '{0} {1} - {2} [{3}]'.format(_('Season'), season_str, listitem['label'], translation)
-        
+
                     yield listitem
+
 
 def _openmeta_season_translation(item, season):
     player_links = _get_player_links(item)
@@ -1332,6 +1334,7 @@ def _openmeta_season_translation(item, season):
             for key, translation_info in iteritems(season_translations):
                 yield (key, translation_info)
 
+
 def _openmeta_compare_title(title, item_title, part_match):
     if not item_title:
         return False
@@ -1342,6 +1345,7 @@ def _openmeta_compare_title(title, item_title, part_match):
         return (item_title.startswith(title) or title.startswith(item_title))
     else:
         return item_title == title
+
 
 if __name__ == '__main__':
     plugin.run()
