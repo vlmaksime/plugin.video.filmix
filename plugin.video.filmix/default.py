@@ -790,7 +790,8 @@ def _get_episode_link(item, season, episode, translation=None):
 def _get_trailer_link(item):
     player_links = item['player_links'].get('trailer')
 
-    if player_links is None:
+    if player_links is None \
+      or len(player_links) == 0:
         return ''
 
     url = player_links[0]['link']
