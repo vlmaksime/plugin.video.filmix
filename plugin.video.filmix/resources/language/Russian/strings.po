@@ -158,6 +158,14 @@ msgctxt "#30361"
 msgid "Login by Code"
 msgstr "Вход по коду"
 
+msgctxt "#30362"
+msgid "Select video server"
+msgstr "Выберите видеосервер"
+
+msgctxt "#30363"
+msgid "Video server successfully changed"
+msgstr "Видеосервер успешно изменен"
+
 msgctxt "#30200"
 msgid "General"
 msgstr "Общие"
@@ -249,6 +257,14 @@ msgstr "PRO+"
 msgctxt "#30309"
 msgid "PRO Date"
 msgstr "Срок подписки"
+
+msgctxt "#30310"
+msgid "Video server"
+msgstr "Видеосервер"
+
+msgctxt "#30311"
+msgid "Change video server"
+msgstr "Изменить видеосервер"
 
 msgctxt "#30312"
 msgid "Update profile"

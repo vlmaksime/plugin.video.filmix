@@ -21,5 +21,8 @@
         <setting label="30308" type="bool" id="is_pro_plus" visible="!eq(-3,)" enable="false"  default="false"/>
         <setting label="30309" type="text" id="pro_date" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30312" type="action" option="close" visible="!eq(-5,)" action="RunPlugin(plugin://$ID/check_device)"/>
+	    <setting type="sep" visible="!eq(-6,)"/>
+        <setting label="30310" type="text" id="videoserver" visible="!eq(-7,)" enable="false" default=""/>
+        <setting label="30311" type="action" option="close" visible="eq(-5,true)|eq(-6,true)" action="RunPlugin(plugin://$ID/select_videoserver)"/>
     </category>
 </settings>

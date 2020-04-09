@@ -74,6 +74,43 @@ def login():
             plugin.dialog_ok(_('Login failure! Please, try later'))
 
 
+@plugin.route('/select_videoserver')
+def select_videoserver():
+
+    api = Filmix()
+    try:
+        user_data = api.user_data()
+    except (FilmixError, simplemedia.WebClientError) as e:
+        addon.notify_error(e)
+    else:
+
+        keys = []
+        titles = []
+        for key, val in iteritems(user_data['available_servers']):
+            titles.append(val)
+            keys.append(key)
+    
+        videoserver = user_data['videoserver'] or 'AUTO'
+
+        if plugin.kodi_major_version() >= '17':            
+            preselect = keys.index(videoserver)
+            selected = xbmcgui.Dialog().select(_('Select video server'), titles, preselect=preselect)
+        else:
+            selected = xbmcgui.Dialog().select(_('Select video server'), titles)
+    
+        if selected is not None \
+          and keys[selected] != videoserver:
+            try:
+                result = api.set_videoserver(keys[selected])
+            except (FilmixError, simplemedia.WebClientError) as e:
+                plugin.notify_error(e)
+            else:
+                if result['status'] == 'ok' \
+                  and videoserver != result['server']:
+                    plugin.set_setting('videoserver', user_data['available_servers'].get(result['server']))
+                    xbmcgui.Dialog().notification(plugin.name, _('Video server successfully changed'), xbmcgui.NOTIFICATION_INFO)
+
+
 @plugin.route('/check_device')
 def check_device():
 

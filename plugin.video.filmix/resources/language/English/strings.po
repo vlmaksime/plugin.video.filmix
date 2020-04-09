@@ -157,6 +157,15 @@ msgstr ""
 msgctxt "#30361"
 msgid "Login by Code"
 msgstr ""
+
+msgctxt "#30362"
+msgid "Select video server"
+msgstr ""
+
+msgctxt "#30363"
+msgid "Video server successfully changed"
+msgstr ""
+
 msgctxt "#30200"
 msgid "General"
 msgstr ""
@@ -247,6 +256,14 @@ msgstr ""
 
 msgctxt "#30309"
 msgid "PRO Date"
+msgstr ""
+
+msgctxt "#30310"
+msgid "Video server"
+msgstr ""
+
+msgctxt "#30311"
+msgid "Change video server"
 msgstr ""
 
 msgctxt "#30312"

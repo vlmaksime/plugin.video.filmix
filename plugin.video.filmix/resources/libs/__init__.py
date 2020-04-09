@@ -60,11 +60,19 @@ class Filmix(FilmixClient):
     def get_user_fields(user_info=None):
         user_info = user_info or {}
 
+        videoserver = user_info.get('videoserver') or 'AUTO'
+        if user_info.get('available_servers') is not None:
+            videoserver_label = user_info['available_servers'].get(videoserver)
+        else:
+            videoserver_label = ''
+        videoserver = videoserver_label or videoserver
+
         fields = {'user_login': user_info.get('login') or '',
                   'user_name': user_info.get('display_name') or '',
                   'is_pro': user_info.get('is_pro') or False,
                   'is_pro_plus': user_info.get('is_pro_plus') or False,
                   'pro_date': user_info.get('pro_date') or '',
+                  'videoserver': videoserver,
                   }
         return fields
 
