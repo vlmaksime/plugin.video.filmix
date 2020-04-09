@@ -62,29 +62,6 @@ class PluginActionsTestCase(unittest.TestCase):
         print("Running test: {0}".format(self.id().split('.')[-1]))
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/login'.format(addon_name), '0', ''])
-    def test_00_login():
-
-        login = os.getenv('FILMIX_LOGIN', None)
-        password = os.getenv('FILMIX_PASSWORD', None)
-
-        if login is None:
-            login = 'login'
-            print('Login not defined')
-
-        if password is None:
-            password = 'password'
-            print('Password not defined')
-
-        xbmc.Keyboard.strings.append(login)
-        xbmc.Keyboard.strings.append('0000000000')
-        run_script()
-
-        xbmc.Keyboard.strings.append(login)
-        xbmc.Keyboard.strings.append(password)
-        run_script()
-
-    @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/'.format(addon_name), '1', ''])
     def test_01_root():
 
@@ -268,12 +245,6 @@ class PluginActionsTestCase(unittest.TestCase):
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/tvshows/'.format(addon_name), '31', '?season=1&year=2005&episode=1&title=%D0%A1%D0%B2%D0%B5%D1%80%D1%85%D1%8A%D0%B5%D1%81%D1%82%D0%B5%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5'])
     def test_31_openmeta_tvshows():
-
-        run_script()
-
-    @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/logout'.format(addon_name), '99', ''])
-    def test_99_logout():
 
         run_script()
 

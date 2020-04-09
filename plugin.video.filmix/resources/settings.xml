@@ -12,14 +12,14 @@
 	    <setting type="text" id="us_command" visible="false" default="action=search&amp;keyword=" />
     </category>
     <category label="30300">
-	    <setting label="30301" type="action" option="close" visible="eq(2,)" action="RunPlugin(plugin://$ID/login)" />
-	    <setting label="30302" type="action" option="close" visible="!eq(1,)" action="RunPlugin(plugin://$ID/logout)" />
+        <setting type="text" id="user_dev_id" visible="false" enable="false" default=""/>
+        <setting type="text" id="user_dev_token" visible="false" enable="false" default=""/>
+	    <setting label="30301" type="action" option="close" visible="eq(1,)" action="RunPlugin(plugin://$ID/login)" />
         <setting label="30303" type="text" id="user_login" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30306" type="text" id="user_name" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30307" type="bool" id="is_pro" visible="!eq(-2,)" enable="false" default="false"/>
         <setting label="30308" type="bool" id="is_pro_plus" visible="!eq(-3,)" enable="false"  default="false"/>
         <setting label="30309" type="text" id="pro_date" visible="!eq(0,)" enable="false" default=""/>
-        <setting type="text" id="X-FX-Token" visible="false" enable="false" default=""/>
-        <setting type="text" id="user_password" visible="false" enable="false" default=""/>
+        <setting label="30312" type="action" option="close" visible="!eq(-5,)" action="RunPlugin(plugin://$ID/check_device)"/>
     </category>
 </settings>

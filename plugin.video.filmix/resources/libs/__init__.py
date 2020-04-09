@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 import os
+import xbmc
+import platform
 import simplemedia
 
 from .filmix import *
@@ -12,27 +14,13 @@ addon = simplemedia.Addon()
 
 class Filmix(FilmixClient):
 
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(Filmix, cls).__new__(cls, *args, **kwargs)
-            addon.log_debug('Created {0}'.format(cls._instance))
-        return cls._instance
-
     def __init__(self):
 
         super(Filmix, self).__init__()
 
         headers = self._client.headers
 
-        filmix_token = addon.get_setting('X-FX-Token')
-        if filmix_token:
-            headers['X-FX-Token'] = filmix_token
-
-        cookie_file = self.get_cookie_path()
-
-        new_client = simplemedia.WebClient(headers, cookie_file)
+        new_client = simplemedia.WebClient(headers)
         new_client._secret_data.append('login_password')
 
         new_client.cert = self._client.cert
@@ -41,35 +29,32 @@ class Filmix(FilmixClient):
 
         self._client = new_client
 
-        if addon.get_setting('user_login'):
-            self.check_login()
+        os_name = platform.system()
+        if os_name == 'Linux':
+            if xbmc.getCondVisibility('system.platform.android'):
+                os_name = 'Android'
+        else:
+            os_name = '{0} {1}'.format(os_name, platform.release())
 
-    def check_login(self):
+        self._user_dev_name = 'Kodi {0} ({1})'.format(addon.kodi_version(), os_name)
+        self._user_dev_id = addon.get_setting('user_dev_id')
+        self._user_dev_token = addon.get_setting('user_dev_token')
+
+        if not self._user_dev_id:
+            self._user_dev_id = self.create_dev_id()
+            addon.set_setting('user_dev_id', self._user_dev_id)
+
+    def update_dev_token(self, dev_token):
+        self._user_dev_token = dev_token
+
+    def check_device(self):
         try:
             user_data = self.user_data()
         except (FilmixError, simplemedia.WebClientError) as e:
             addon.notify_error(e)
         else:
             user_fields = self.get_user_fields(user_data)
-            if not user_fields['user_login']:
-                _login = addon.get_setting('user_login')
-                _password = addon.get_setting('user_password')
-
-                if _login and _password:
-                    try:
-                        login_result = self.login(_login, _password)
-                    except (FilmixError, simplemedia.WebClientError) as e:
-                        plugin.notify_error(e, True)
-                    else:
-                        user_fields = self.get_user_fields(login_result)
-                        if not user_fields['user_login']:
-                            user_fields['user_password'] = ''
-
             addon.set_settings(user_fields)
-
-    @staticmethod
-    def get_cookie_path():
-        return os.path.join(addon.profile_dir, 'filmix.cookies')
 
     @staticmethod
     def get_user_fields(user_info=None):
@@ -80,7 +65,6 @@ class Filmix(FilmixClient):
                   'is_pro': user_info.get('is_pro') or False,
                   'is_pro_plus': user_info.get('is_pro_plus') or False,
                   'pro_date': user_info.get('pro_date') or '',
-                  'X-FX-Token': user_info.get('X-FX-Token') or '',
                   }
         return fields
 

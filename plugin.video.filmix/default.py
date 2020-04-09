@@ -20,48 +20,64 @@ _ = plugin.initialize_gettext()
 
 @plugin.route('/login')
 def login():
-    _login = _get_keyboard_text('', _('Login'))
-    if not _login:
-        return
-
-    xbmc.sleep(1000)
-
-    _password = _get_keyboard_text('', _('Password'), True)
-    if not _password:
-        return
-
+    dialog = xbmcgui.Dialog()
+    
     try:
         api = Filmix()
-        login_result = api.login(_login, _password)
+        token_result = api.token_request()
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e, True)
     else:
-        user_fields = api.get_user_fields(login_result)
-        if user_fields['user_login']:
-            user_fields['user_password'] = _password
-
+        api.update_dev_token(token_result['code'])
+        plugin.set_setting('user_dev_token', token_result['code'])
+        
+        code = token_result['user_code']
+    
+        progress = xbmcgui.DialogProgress()
+        progress.create(_('Login by Code'),
+                        _('Connection code: [B]{0}[/B]').format(code),
+                        _('Enter this code on the page [B]filmix.co/consoles[/B]'),
+                        _('or at website in the section [B]\'Profile\' - \'Consoles\'[/B]'))
+        
+        wait_sec = 120
+        step_sec = 2
+        pass_sec = 0
+        check_sec = 20
+        
+        user_fields = api.get_user_fields()
+        while pass_sec < wait_sec:
+            if (progress.iscanceled()):
+                return
+    
+            xbmc.sleep( step_sec * 1000 )
+            pass_sec += step_sec
+    
+            progress.update(int(100 * pass_sec / wait_sec))
+            
+            if (pass_sec % check_sec) == 0:
+                try:
+                    user_data = api.user_data()
+                except (FilmixError, simplemedia.WebClientError) as e:
+                    addon.notify_error(e)
+                else:
+                    user_fields = api.get_user_fields(user_data)
+                    if user_fields['user_login']:
+                        break
+    
+        progress.close()
+        
         plugin.set_settings(user_fields)
 
         if user_fields['user_login']:
             plugin.dialog_ok(_('You have successfully logged in'))
         else:
-            plugin.dialog_ok(_('Incorrect login or password!'))
+            plugin.dialog_ok(_('Login failure! Please, try later'))
 
 
-@plugin.route('/logout')
-def logout():
+@plugin.route('/check_device')
+def check_device():
 
-    cookie_file = Filmix.get_cookie_path()
-    if os.path.exists(cookie_file):
-        os.remove(cookie_file)
-
-    api = Filmix()
-    user_fields = api.get_user_fields()
-    plugin.set_settings(user_fields)
-
-    dialog = xbmcgui.Dialog()
-    dialog.ok(plugin.name, _('You have successfully logged out'))
-
+    Filmix().check_device()
 
 @plugin.route('/toogle_favorites')
 def toogle_favorites():
@@ -818,7 +834,7 @@ def _available_qualities():
 
     if plugin.get_setting('is_pro_plus'):
         return ['360', '480', '720', '1080', '1440', '2160']
-    elif plugin.get_setting('user_name'):
+    elif plugin.get_setting('user_login'):
         return ['360', '480', '720']
     else:
         return ['360', '480']

@@ -8,6 +8,8 @@ from builtins import range
 
 import os
 import ssl
+import math
+import random
 import requests
 from base64 import b64decode
 from requests.adapters import HTTPAdapter
@@ -39,7 +41,7 @@ class FilmixAdapter(HTTPAdapter):
 @python_2_unicode_compatible
 class FilmixClient(object):
 
-    _base_url = 'https://filmix.vip:8044/'
+    _base_url = 'https://app.filmix.vip:8044/'
 
     def __init__(self):
 
@@ -50,13 +52,11 @@ class FilmixClient(object):
         self._client = requests.Session()
         self._client.headers.update(headers)
 
-        cwd = os.path.dirname(os.path.abspath(__file__))
-
         certificate = filmixcert.certificate()
         plainkey = filmixcert.plainkey()
 
         self._client.cert = (certificate, plainkey)
-        self._client.verify = certificate
+        self._client.verify = False #certificate
 
         if not PY26 \
           and ssl.OPENSSL_VERSION_INFO >= (1,1,0):
@@ -68,8 +68,32 @@ class FilmixClient(object):
             else:
                 self._client.mount(self._base_url, adapter)
 
+        self._user_dev_id = None
+        self._user_dev_name = None
+        self._user_dev_token = None
+        self._user_dev_vendor = None
+
     def __str__(self):
         return '<FilmixClient>'
+
+    def _add_device_info(self, params):
+        params = params or {}
+        params['user_dev_id'] = self._user_dev_id
+        params['user_dev_name'] = self._user_dev_name
+        params['user_dev_token'] = self._user_dev_token
+        params['user_dev_vendor'] = self._user_dev_vendor
+        
+        return params
+
+    def _get(self, url, params=None, *args, **kwargs):
+        params = self._add_device_info(params)
+        
+        return self._client.get(url, params=params, *args, **kwargs)
+
+    def _post(self, url, data=None, *args, **kwargs):
+        data = self._add_device_info(data)
+        
+        return self._client.post(url, data=data, *args, **kwargs)
 
     @staticmethod
     def decode_link(link):
@@ -111,19 +135,48 @@ class FilmixClient(object):
 
         return result
 
-    def login(self, _login, _password):
 
-        data = {'login_name': _login,
-                'login_password': _password,
-                'login': 'submit',
-                'login_not_save': 1,
+    @staticmethod
+    def create_dev_id():
+
+        result = ''
+        charsets = '0123456789abcdef'
+        while(len(result) < 16):
+            index = int(math.floor(random.random() * 15))
+            result = result + charsets[index]
+        return result
+
+    def token_request(self):
+        url = self._base_url + 'adgvn/token_request'
+
+        r = self._get(url)
+        j = self._extract_json(r)
+
+        return j
+        
+    def set_videoserver(self, vs_schg):
+        url = self._base_url + 'android.php'
+
+        data = {'vs_schg': vs_schg,
                 }
 
-        return self._get_profile(data=data)
+        r = self._post(url, data=data)
+        j = self._extract_json(r)
+
+        return j
 
     def user_data(self):
+        url = self._base_url + 'android.php?user_profile'
 
-        return self._get_profile()
+        r = self._get(url)
+        j = self._extract_json(r)
+
+        if isinstance(j, dict):
+            result = j['user_data']
+        else:
+            result = {}
+        
+        return result
 
     def _get_items(self, u_params, page=1, page_params=None, **kwargs):
         url = self._base_url + 'android.php'
@@ -138,7 +191,7 @@ class FilmixClient(object):
         cookies = {'per_page_news': per_page,
                    }
 
-        r = self._client.get(url, params=u_params, cookies=cookies)
+        r = self._get(url, params=u_params, cookies=cookies)
         j = self._extract_json(r) or []
 
         if page_params is not None:
@@ -191,7 +244,7 @@ class FilmixClient(object):
                     'seourl': alt_name,
                     }
 
-        r = self._client.get(url, params=u_params)
+        r = self._get(url, params=u_params)
         j = self._extract_json(r)
 
         return j
@@ -237,12 +290,12 @@ class FilmixClient(object):
     def get_filter(self, scope, filter_id=None):
         url = self._base_url + 'engine/ajax/get_filter.php'
 
-        params = {'scope': scope,
+        data = {'scope': scope,
                   }
         if filter_id is not None:
-            params['type'] = filter_id
+            data['type'] = filter_id
 
-        r = self._client.post(url, params=params)
+        r = self._post(url, data=data)
         j = self._extract_json(r)
 
         return j
@@ -256,7 +309,7 @@ class FilmixClient(object):
                   'alert': '0',
                   }
 
-        self._client.get(url, params=params)
+        self._get(url, params=params)
 
     def set_watch_later(self, post_id, value):
         url = self._base_url + 'engine/ajax/watch_later.php'
@@ -265,7 +318,7 @@ class FilmixClient(object):
                 'action': 'add' if value else 'rm',
                 }
 
-        self._client.post(url, data=data)
+        self._post(url, data=data)
 
     def add_watched(self, post_id, season=None, episode=None, translation=None):
         url = self._base_url + 'android.php'
@@ -283,4 +336,4 @@ class FilmixClient(object):
         if translation is not None:
             data['translation'] = translation
 
-        self._client.post(url, data=data)
+        self._post(url, data=data)
