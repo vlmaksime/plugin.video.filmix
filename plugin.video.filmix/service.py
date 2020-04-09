@@ -30,6 +30,21 @@ class FilmixMonitor(xbmc.Monitor):
     def __str__(self):
         return '<FilmixMonitor>'
         
+    def onNotification(self, sender, method, data):
+        super(FilmixMonitor, self).onNotification(sender, method, data)
+
+        addon = Addon()
+        addon.log_debug('{0}.onNotification({1}, {2}, {3})'.format(self, sender, method, py2_decode(data)))
+
+        if sender == addon.id:
+            if method == 'Other.OnPlay':
+                if data != 'nill':
+                    data = json.loads(data)
+                    try:
+                        Filmix().add_watched(**data)
+                    except (FilmixError, simplemedia.WebClientError) as e:
+                        pass
+
     def onSettingsChanged(self):
         super(FilmixMonitor, self).onSettingsChanged()
 

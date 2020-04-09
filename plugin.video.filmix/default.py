@@ -677,13 +677,15 @@ def play_video(catalog, content_name):
 
         if _is_movie(content_info):
             listitem['path'] = _get_movie_link(content_info, translation)
-            try:
-                api.add_watched(content['id'], translation=translation)
-            except (FilmixError, simplemedia.WebClientError) as e:
-                pass
         else:
             listitem['path'] = _get_episode_link(content_info, season, episode, translation)
-            # api.add_watched(content['id'], season, episode, translation)
+
+        data = {'post_id': content['id'],
+                'translation': translation,
+                'season': season,
+                'episode': episode,
+                }
+        plugin.send_notification('OnPlay', data)
 
         plugin.resolve_url(listitem)
 
