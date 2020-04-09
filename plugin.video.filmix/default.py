@@ -377,7 +377,7 @@ def select_filter():
             preselected.append(keys.index(key))
             filter_values.remove(key)
 
-    if plugin.kodi_major_version >= '17':
+    if plugin.kodi_major_version() >= '17':
         selected = xbmcgui.Dialog().multiselect(filter_title, titles, preselect=preselected)
     else:
         selected = xbmcgui.Dialog().multiselect(filter_title, titles)
