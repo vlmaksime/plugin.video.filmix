@@ -939,7 +939,7 @@ def search_history():
     result = {'items': plugin.search_history_items(),
               'content': '',
               'category': ' / '.join([plugin.name, _('Search')]),
-              'sort_methods': xbmcplugin.SORT_METHOD_LABEL_IGNORE_FOLDERS,
+              'sort_methods': xbmcplugin.SORT_METHOD_NONE,
               }
 
     plugin.create_directory(**result)
