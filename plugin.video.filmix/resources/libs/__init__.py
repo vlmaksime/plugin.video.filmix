@@ -29,14 +29,7 @@ class Filmix(FilmixClient):
 
         self._client = new_client
 
-        os_name = platform.system()
-        if os_name == 'Linux':
-            if xbmc.getCondVisibility('system.platform.android'):
-                os_name = 'Android'
-        else:
-            os_name = '{0} {1}'.format(os_name, platform.release())
-
-        self._user_dev_name = 'Kodi {0} ({1})'.format(addon.kodi_version(), os_name)
+        self._user_dev_name = addon.get_setting('user_dev_name')
         self._user_dev_id = addon.get_setting('user_dev_id')
         self._user_dev_token = addon.get_setting('user_dev_token')
 
@@ -56,8 +49,7 @@ class Filmix(FilmixClient):
             user_fields = self.get_user_fields(user_data)
             addon.set_settings(user_fields)
 
-    @staticmethod
-    def get_user_fields(user_info=None):
+    def get_user_fields(self, user_info=None):
         user_info = user_info or {}
 
         videoserver = user_info.get('videoserver') or 'AUTO'
@@ -74,5 +66,18 @@ class Filmix(FilmixClient):
                   'pro_date': user_info.get('pro_date') or '',
                   'videoserver': videoserver,
                   }
+
+        # user_dev_name
+        if True:
+            os_name = platform.system()
+            if os_name == 'Linux':
+                if xbmc.getCondVisibility('system.platform.android'):
+                    os_name = 'Android'
+            else:
+                os_name = '{0} {1}'.format(os_name, platform.release())
+    
+            user_dev_name = 'Kodi {0} ({1})_{2}'.format(addon.kodi_version(), os_name, self._user_dev_id[-5:])
+            fields['user_dev_name'] = user_dev_name
+
         return fields
 

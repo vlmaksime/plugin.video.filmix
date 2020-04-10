@@ -14,7 +14,8 @@
     <category label="30300">
         <setting type="text" id="user_dev_id" visible="false" enable="false" default=""/>
         <setting type="text" id="user_dev_token" visible="false" enable="false" default=""/>
-	    <setting label="30301" type="action" option="close" visible="eq(1,)" action="RunPlugin(plugin://$ID/login)" />
+	    <setting label="30301" type="action" option="close" visible="eq(2,)" action="RunPlugin(plugin://$ID/login)" />
+        <setting label="30302" type="text" id="user_dev_name" visible="!eq(1,)" enable="false" default=""/>
         <setting label="30303" type="text" id="user_login" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30306" type="text" id="user_name" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30307" type="bool" id="is_pro" visible="!eq(-2,)" enable="false" default="false"/>

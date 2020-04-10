@@ -231,7 +231,7 @@ msgid "Login"
 msgstr ""
 
 msgctxt "#30302"
-msgid "Logout"
+msgid "Device name"
 msgstr ""
 
 msgctxt "#30303"
