@@ -16,6 +16,9 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 import filmixcert
 
+__all__ = ['FilmixClient', 'FilmixError']
+
+
 class FilmixError(Exception):
 
     def __init__(self, message, code=None):
@@ -23,6 +26,7 @@ class FilmixError(Exception):
         self.code = code
 
         super(FilmixError, self).__init__(self.message)
+
 
 class FilmixAdapter(HTTPAdapter):
 
@@ -37,6 +41,7 @@ class FilmixAdapter(HTTPAdapter):
         context = create_urllib3_context(ciphers=self._filmix_ciphers)
         kwargs['ssl_context'] = context
         return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
+
 
 @python_2_unicode_compatible
 class FilmixClient(object):
@@ -56,10 +61,10 @@ class FilmixClient(object):
         plainkey = filmixcert.plainkey()
 
         self._client.cert = (certificate, plainkey)
-        self._client.verify = False #certificate
+        self._client.verify = False  # certificate
 
         if not PY26 \
-          and ssl.OPENSSL_VERSION_INFO >= (1,1,0):
+          and ssl.OPENSSL_VERSION_INFO >= (1, 1, 0):
             try:
                 adapter = FilmixAdapter()
             except ssl.SSLError as e:
@@ -134,7 +139,6 @@ class FilmixClient(object):
                        })
 
         return result
-
 
     @staticmethod
     def create_dev_id():

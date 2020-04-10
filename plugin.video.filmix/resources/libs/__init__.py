@@ -7,7 +7,7 @@ import xbmc
 import platform
 import simplemedia
 
-from .filmix import *
+from .filmix import FilmixClient, FilmixError
 
 addon = simplemedia.Addon()
 
@@ -21,7 +21,6 @@ class Filmix(FilmixClient):
         headers = self._client.headers
 
         new_client = simplemedia.WebClient(headers)
-        new_client._secret_data.append('login_password')
 
         new_client.cert = self._client.cert
         new_client.verify = self._client.verify

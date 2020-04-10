@@ -49,7 +49,7 @@ def login():
             if (progress.iscanceled()):
                 return
     
-            xbmc.sleep( step_sec * 1000 )
+            xbmc.sleep(step_sec * 1000)
             pass_sec += step_sec
     
             progress.update(int(100 * pass_sec / wait_sec))
@@ -116,6 +116,7 @@ def check_device():
 
     Filmix().check_device()
 
+
 @plugin.route('/toogle_favorites')
 def toogle_favorites():
     content_id = plugin.params.get('id')
@@ -157,10 +158,6 @@ def toogle_watch_later():
 @plugin.route('/')
 def root():
 
-    if plugin.params.action is not None:
-        if plugin.params.action == 'search':
-            search()
-    else:
         plugin.create_directory(_root_items())
 
 

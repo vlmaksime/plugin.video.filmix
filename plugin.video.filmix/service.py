@@ -10,6 +10,7 @@ import xbmc
 import json
 import simplemedia
 
+
 @python_2_unicode_compatible
 class FilmixMonitor(xbmc.Monitor):
 
@@ -76,6 +77,7 @@ class FilmixMonitor(xbmc.Monitor):
             return False
         else:
             return True
+
 
 if __name__ == '__main__':
 
