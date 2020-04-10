@@ -158,7 +158,7 @@ def toogle_watch_later():
 @plugin.route('/')
 def root():
 
-        plugin.create_directory(_root_items())
+    plugin.create_directory(_root_items(), content='', category=plugin.name)
 
 
 def _root_items():
@@ -168,18 +168,19 @@ def _root_items():
         url = plugin.url_for('list_catalog', catalog=catalog_info['catalog'])
         listitem = {'label': catalog_info['label'],
                     'url': url,
-                    'icon': plugin.icon,
+                    'icon': catalog_info['icon'],
                     'fanart': plugin.fanart,
                     'content_lookup': False,
                     }
         yield listitem
 
+    movie_icon = plugin.get_image('DefaultMovies.png')
+
     # Popular
     url = plugin.url_for('list_catalog', catalog='popular')
     list_item = {'label': _('Popular'),
                  'url': url,
-                 # 'icon': plugin.get_image('DefaultFavourites.png'),
-                 'icon': plugin.icon,
+                 'icon': movie_icon,
                  'fanart': plugin.fanart,
                  'content_lookup': False,
                  }
@@ -189,8 +190,7 @@ def _root_items():
     url = plugin.url_for('list_catalog', catalog='top_views')
     list_item = {'label': _('Top Views'),
                  'url': url,
-                 # 'icon': plugin.get_image('DefaultFavourites.png'),
-                 'icon': plugin.icon,
+                 'icon': movie_icon,
                  'fanart': plugin.fanart,
                  'content_lookup': False,
                  }
@@ -211,7 +211,7 @@ def _root_items():
         url = plugin.url_for('list_catalog', catalog='watch_later')
         list_item = {'label': _('Watch Later'),
                      'url': url,
-                     'icon': plugin.icon,
+                     'icon': plugin.get_image('DefaultFavourites.png'),
                      'fanart': plugin.fanart,
                      'content_lookup': False,
                      }
@@ -221,8 +221,7 @@ def _root_items():
         url = plugin.url_for('list_catalog', catalog='watch_history')
         list_item = {'label': _('Watch History'),
                      'url': url,
-                     # 'icon': plugin.get_image('DefaultFavourites.png'),
-                     'icon': plugin.icon,
+                     'icon': movie_icon,
                      'fanart': plugin.fanart,
                      'content_lookup': False,
                      }
@@ -707,10 +706,14 @@ def play_trailer(catalog, content_name):
 
 
 def  _get_catalogs():
-    catalogs = [{'catalog': 'movies', 'label': _('Movies'), 'section': 0},
-                {'catalog': 'serials', 'label': _('TV Series'), 'section': 7},
-                {'catalog': 'multfilms', 'label': _('Cartoons'), 'section': 14},
-                {'catalog': 'multserials', 'label': _('Cartoon Series'), 'section': 93},
+
+    movie_icon = plugin.get_image('DefaultMovies.png')
+    tvshow_icon = plugin.get_image('DefaultTVShows.png')
+
+    catalogs = [{'catalog': 'movies', 'label': _('Movies'), 'section': 0, 'icon': movie_icon},
+                {'catalog': 'serials', 'label': _('TV Series'), 'section': 7, 'icon': tvshow_icon},
+                {'catalog': 'multfilms', 'label': _('Cartoons'), 'section': 14, 'icon': movie_icon},
+                {'catalog': 'multserials', 'label': _('Cartoon Series'), 'section': 93, 'icon': tvshow_icon},
                 ]
 
     return catalogs
