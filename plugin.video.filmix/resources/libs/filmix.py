@@ -301,7 +301,7 @@ class FilmixClient(object):
         return j
 
     def set_favorite(self, fav_id, value):
-        url = self._base_url + 'engine/ajax/favorites.php'
+        url = self._base_url + 'android.php?favorite'
 
         params = {'fav_id': fav_id,
                   'action': 'plus' if value else 'minus',
@@ -312,10 +312,11 @@ class FilmixClient(object):
         self._get(url, params=params)
 
     def set_watch_later(self, post_id, value):
-        url = self._base_url + 'engine/ajax/watch_later.php'
+        url = self._base_url + 'android.php'
 
         data = {'post_id': post_id,
                 'action': 'add' if value else 'rm',
+                'deferred': True,
                 }
 
         self._post(url, data=data)
