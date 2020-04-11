@@ -62,6 +62,34 @@ class PluginActionsTestCase(unittest.TestCase):
         print("Running test: {0}".format(self.id().split('.')[-1]))
 
     @staticmethod
+    def test_00_login():
+
+        with mock.patch('simpleplugin.sys') as mock_sys:
+            mock_sys.argv = ['plugin://{0}/login'.format(addon_name), '0', '']
+
+            run_script()
+
+        with mock.patch('simpleplugin.sys') as mock_sys:
+            mock_sys.argv = ['plugin://{0}/check_device'.format(addon_name), '0', '']
+
+            addon = xbmcaddon.Addon()
+            
+            user_dev_id = os.getenv('user_dev_id', None)
+            if user_dev_id is not None:
+                addon.setSetting('user_dev_id', user_dev_id)
+            else:
+                print('user_dev_id not defined')
+    
+            user_dev_token = os.getenv('user_dev_token', None)
+            if user_dev_token is not None:
+                addon.setSetting('user_dev_token', user_dev_token)
+            else:
+                print('user_dev_token not defined')
+
+            run_script()
+
+
+    @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/'.format(addon_name), '1', ''])
     def test_01_root():
 
@@ -245,6 +273,12 @@ class PluginActionsTestCase(unittest.TestCase):
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/tvshows/'.format(addon_name), '31', '?season=1&year=2005&episode=1&title=%D0%A1%D0%B2%D0%B5%D1%80%D1%85%D1%8A%D0%B5%D1%81%D1%82%D0%B5%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5'])
     def test_31_openmeta_tvshows():
+
+        run_script()
+
+    @staticmethod
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/select_videoserver'.format(addon_name), '32', ''])
+    def test_32_select_videoserver():
 
         run_script()
 

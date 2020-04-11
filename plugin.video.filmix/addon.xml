@@ -3,15 +3,17 @@
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
         <import addon="script.module.simplemedia" version="1.2.2"/>
-        <import addon="script.module.filmix.cert" version="0.9.1"/>
+        <import addon="script.module.filmix.cert" version="0.9.4"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video</provides>
     </extension>
     <extension point="xbmc.service" library="service.py" />
     <extension point="xbmc.addon.metadata">
-        <summary lang="ru_RU">Смотреть онлайн фильмы и сериалы бесплатно</summary>
-        <description lang="ru_RU">Дополнение для онлайн-кинотеатра Filmix! В нашей базе 60000 разных видео, каждый из которых доступен вашему просмотру бесплатно и в отличном качестве. Выбирайте по вкусу и по настроению.</description>
+        <summary lang="en"></summary>
+        <summary lang="ru">Смотреть онлайн фильмы и сериалы бесплатно</summary>
+        <description lang="en"></description>
+        <description lang="ru">Дополнение для онлайн-кинотеатра Filmix! В нашей базе 60000 разных видео, каждый из которых доступен вашему просмотру бесплатно и в отличном качестве. Выбирайте по вкусу и по настроению.</description>
         <language>ru</language>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
