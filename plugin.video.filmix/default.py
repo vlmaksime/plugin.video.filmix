@@ -20,8 +20,7 @@ _ = plugin.initialize_gettext()
 
 @plugin.route('/login')
 def login():
-    dialog = xbmcgui.Dialog()
-    
+
     try:
         api = Filmix()
         token_result = api.token_request()
@@ -30,30 +29,30 @@ def login():
     else:
         api.update_dev_token(token_result['code'])
         plugin.set_setting('user_dev_token', token_result['code'])
-        
+
         code = token_result['user_code']
-    
+
         progress = xbmcgui.DialogProgress()
         progress.create(_('Login by Code'),
                         _('Connection code: [B]{0}[/B]').format(code),
                         _('Enter this code on the page [B]filmix.co/consoles[/B]'),
                         _('or at website in the section [B]\'Profile\' - \'Consoles\'[/B]'))
-        
+
         wait_sec = 120
         step_sec = 2
         pass_sec = 0
         check_sec = 20
-        
+
         user_fields = api.get_user_fields()
         while pass_sec < wait_sec:
             if (progress.iscanceled()):
                 return
-    
+
             xbmc.sleep(step_sec * 1000)
             pass_sec += step_sec
-    
+
             progress.update(int(100 * pass_sec / wait_sec))
-            
+
             if (pass_sec % check_sec) == 0:
                 try:
                     user_data = api.user_data()
@@ -63,9 +62,9 @@ def login():
                     user_fields = api.get_user_fields(user_data)
                     if user_fields['user_login']:
                         break
-    
+
         progress.close()
-        
+
         plugin.set_settings(user_fields)
 
         if user_fields['user_login']:
@@ -88,16 +87,16 @@ def select_videoserver():
         for key, val in iteritems(user_data.get('available_servers')):
             titles.append(val)
             keys.append(key)
-    
+
         videoserver = user_data.get('videoserver') or 'AUTO'
 
         if titles:
-            if plugin.kodi_major_version() >= '17':            
+            if plugin.kodi_major_version() >= '17':
                 preselect = keys.index(videoserver)
                 selected = xbmcgui.Dialog().select(_('Select video server'), titles, preselect=preselect)
             else:
                 selected = xbmcgui.Dialog().select(_('Select video server'), titles)
-        
+
             if selected is not None \
               and keys[selected] != videoserver:
                 try:
@@ -1009,9 +1008,9 @@ def search():
 
 def _get_filter_prefix(filter_id):
     filters = _get_filters()
-    for filter in filters:
-        if filter['t'] == filter_id:
-            return filter['p']
+    for _filter in filters:
+        if _filter['t'] == filter_id:
+            return _filter['p']
 
 
 def _get_filter_values(filter_id):

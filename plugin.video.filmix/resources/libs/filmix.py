@@ -87,17 +87,17 @@ class FilmixClient(object):
         params['user_dev_name'] = self._user_dev_name
         params['user_dev_token'] = self._user_dev_token
         params['user_dev_vendor'] = self._user_dev_vendor
-        
+
         return params
 
     def _get(self, url, params=None, *args, **kwargs):
         params = self._add_device_info(params)
-        
+
         return self._client.get(url, params=params, *args, **kwargs)
 
     def _post(self, url, data=None, *args, **kwargs):
         data = self._add_device_info(data)
-        
+
         return self._client.post(url, data=data, *args, **kwargs)
 
     @staticmethod
@@ -124,22 +124,6 @@ class FilmixClient(object):
                 raise FilmixError(j['error']['message'], j['error']['code'])
         return j
 
-    def _get_profile(self, data=None):
-        url = self._base_url + 'android.php?get_profile'
-
-        r = self._client.post(url, data=data)
-        j = self._extract_json(r)
-
-        if isinstance(j, dict):
-            result = j['user_data']
-        else:
-            result = {}
-
-        result.update({'X-FX-Token': r.headers.get('X-FX-Token', ''),
-                       })
-
-        return result
-
     @staticmethod
     def create_dev_id():
 
@@ -157,7 +141,7 @@ class FilmixClient(object):
         j = self._extract_json(r)
 
         return j
-        
+
     def set_videoserver(self, vs_schg):
         url = self._base_url + 'android.php'
 
@@ -179,7 +163,7 @@ class FilmixClient(object):
             result = j['user_data']
         else:
             result = {}
-        
+
         return result
 
     def _get_items(self, u_params, page=1, page_params=None, **kwargs):

@@ -37,6 +37,7 @@ run_script = lambda : imp.load_source('__main__', os.path.join(addon_dir, 'defau
 sys.path.append(os.path.join(cwd, 'script.module.filmix.cert', 'libs'))
 sys.path.append(addon_dir)
 
+
 def setUpModule():
 
     if not PY26:
@@ -48,6 +49,7 @@ def setUpModule():
         history = ['Нюхач', 'Я Легенда', 'Supernatural', 'Смешарики', 'Deadpool', 'Маша и медведь',
                    'Домики', 'Мстители', 'Stranger Things', 'Breaking Bad']
         storage['history'] = history
+
 
 def tearDownModule():
 
@@ -87,7 +89,6 @@ class PluginActionsTestCase(unittest.TestCase):
                 print('user_dev_token not defined')
 
             run_script()
-
 
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/'.format(addon_name), '1', ''])

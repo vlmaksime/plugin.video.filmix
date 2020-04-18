@@ -30,7 +30,7 @@ class FilmixMonitor(xbmc.Monitor):
 
     def __str__(self):
         return '<FilmixMonitor>'
-        
+
     def onNotification(self, sender, method, data):
         super(FilmixMonitor, self).onNotification(sender, method, data)
 
@@ -44,7 +44,7 @@ class FilmixMonitor(xbmc.Monitor):
                     try:
                         Filmix().add_watched(**data)
                     except (FilmixError, simplemedia.WebClientError) as e:
-                        pass
+                        self.log_error('{0}'.format(e))
 
     def onSettingsChanged(self):
         super(FilmixMonitor, self).onSettingsChanged()
@@ -66,7 +66,7 @@ class FilmixMonitor(xbmc.Monitor):
                     'user_dev_token': addon.get_setting('user_dev_token'),
                     }
         return settings
-        
+
     def check_device(self):
         addon = Addon()
         addon.log_debug('{0}.check_device()'.format(self))

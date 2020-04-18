@@ -74,7 +74,7 @@ class Filmix(FilmixClient):
                     os_name = 'Android'
             else:
                 os_name = '{0} {1}'.format(os_name, platform.release())
-    
+
             user_dev_name = 'Kodi {0} ({1})_{2}'.format(addon.kodi_version(), os_name, self._user_dev_id[-5:])
             fields['user_dev_name'] = user_dev_name
 
