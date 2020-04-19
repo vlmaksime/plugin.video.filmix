@@ -401,12 +401,12 @@ def select_filter():
     titles = []
     preselected = []
 
-    for key, val in iteritems(values_list):
-        titles.append(val)
-        keys.append(key)
-        if key in filter_values:
-            preselected.append(keys.index(key))
-            filter_values.remove(key)
+    for filter_item in values_list:
+        titles.append(filter_item['val'])
+        keys.append(filter_item['id'])
+        if filter_item['id'] in filter_values:
+            preselected.append(keys.index(filter_item['id']))
+            filter_values.remove(filter_item['id'])
 
     if plugin.kodi_major_version() >= '17':
         selected = xbmcgui.Dialog().multiselect(filter_title, titles, preselect=preselected)
@@ -1024,13 +1024,17 @@ def _get_filter_values(filter_id):
         result = api.get_filter('cat', filter_id)
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e)
-        filter_values = {}
+        filter_values = []
     else:
         prefix = _get_filter_prefix(filter_id)
-        filter_values = {}
+        filter_values = []
         start_index = 0 if filter_id in ['years'] else 1
         for key, val in iteritems(result):
-            filter_values[prefix + key[start_index:]] = val
+            filter_values.append({'id': prefix + key[start_index:],
+                                  'val': val,
+                                  })
+
+        filter_values.sort(key=_sort_by_val)
 
         filters[filter_id] = filter_values
         storage['filters'] = filters
@@ -1095,9 +1099,9 @@ def _get_filter_value(filter_id):
     filter_items = _get_filter_values(filter_id)
     values = []
 
-    for filter_value in filter_values:
-        if filter_items.get(filter_value) is not None:
-            values.append(filter_items[filter_value])
+    for filter_item in filter_items:
+        if filter_item['id'] in filter_values:
+            values.append(filter_item['val'])
 
     if values:
         return ', '.join(values)
@@ -1399,6 +1403,8 @@ def _openmeta_compare_title(title, item_title, part_match):
     else:
         return item_title == title
 
+def _sort_by_val(item):
+    return item.get('val', '')
 
 if __name__ == '__main__':
     plugin.run()
