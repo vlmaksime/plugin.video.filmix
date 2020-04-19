@@ -8,6 +8,9 @@ python:
   - "2.6"
   - "2.7"
   - "3.6"
+env:
+  global:
+    - ADDON_ID=plugin.video.filmix
 before_install:
   - export PYTHONIOENCODING=UTF-8
   - wget -O /tmp/simplemedia.tar.gz https://github.com/vlmaksime/script.module.simplemedia/archive/master.tar.gz
@@ -24,3 +27,18 @@ after_success:
   - codecov
   - coverage xml
   - python-codacy-coverage -r coverage.xml
+before_deploy:
+  - pip install -q git+https://github.com/romanvm/kodi-addon-submitter.git
+  - submit-addon -s -z $ADDON_ID
+  - export RELEASE_ZIP=$(ls *.zip)
+deploy:
+  # Publish an installable ZIP to GitHub Releases
+  - provider: releases
+    api_key: $GH_TOKEN
+    file_glob: true
+    file: $RELEASE_ZIP
+    skip_cleanup: true
+    on:
+      tags: true
+notifications:
+  email: false
