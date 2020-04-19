@@ -32,13 +32,12 @@ def login():
 
         code = token_result['user_code']
 
-        progress = xbmcgui.DialogProgress()
-        progress.create(_('Login by Code'),
-                        _('Connection code: [B]{0}[/B]').format(code),
-                        _('Enter this code on the page [B]filmix.co/consoles[/B]'),
-                        _('or at website in the section [B]\'Profile\' - \'Consoles\'[/B]'))
+        progress = plugin.dialog_progress_create(_('Login by Code'),
+                                                 _('Connection code: [B]{0}[/B]').format(code),
+                                                 _('Enter this code on the page [B]filmix.co/consoles[/B]'),
+                                                 _('or at website in the section [B]\'Profile\' - \'Consoles\'[/B]'))
 
-        wait_sec = 120
+        wait_sec = 300
         step_sec = 2
         pass_sec = 0
         check_sec = 20
@@ -51,7 +50,7 @@ def login():
             xbmc.sleep(step_sec * 1000)
             pass_sec += step_sec
 
-            progress.update(int(100 * pass_sec / wait_sec))
+            plugin.dialog_progress_update(progress, int(100 * pass_sec / wait_sec))
 
             if (pass_sec % check_sec) == 0:
                 try:
