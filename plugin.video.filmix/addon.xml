@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmix" version="1.2.9" name="Filmix" provider-name="vl.maksime">
+<addon id="plugin.video.filmix" version="1.2.10" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
-        <import addon="script.module.simplemedia" version="1.2.2"/>
-        <import addon="script.module.filmix.cert" version="0.9.1"/>
+        <import addon="script.module.simplemedia" version="1.2.6"/>
+        <import addon="script.module.filmix.cert" version="0.9.4"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video</provides>
     </extension>
+    <extension point="xbmc.service" library="service.py" />
     <extension point="xbmc.addon.metadata">
-        <summary lang="ru_RU">Смотреть онлайн фильмы и сериалы бесплатно</summary>
-        <description lang="ru_RU">Дополнение для онлайн-кинотеатра Filmix! В нашей базе 60000 разных видео, каждый из которых доступен вашему просмотру бесплатно и в отличном качестве. Выбирайте по вкусу и по настроению.</description>
+        <summary lang="en"></summary>
+        <summary lang="ru">Смотреть онлайн фильмы и сериалы бесплатно</summary>
+        <description lang="en"></description>
+        <description lang="ru">Дополнение для онлайн-кинотеатра Filmix! В нашей базе 60000 разных видео, каждый из которых доступен вашему просмотру бесплатно и в отличном качестве. Выбирайте по вкусу и по настроению.</description>
         <language>ru</language>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
@@ -18,7 +21,7 @@
         <website>https://filmix.co/</website>
         <email>vl.maksime@gmail.com</email>
         <source>https://github.com/vlmaksime/plugin.video.filmix</source>
-        <news>v1.2.9 (2020-03-29)[CR]- Исправлено формировние имен Add To Lib при обновлении[CR]- Изменен алгоритм авторизации по логину[CR]- Добавлена интеграция с Openmeta</news>
+        <news>v1.2.10 (2020-04-19)[CR]- Добавлена возможность входа по коду[CR]- Удален вход по логину и паролю[CR]- Добавлена возможность выбора сервера из настроек дополнения[CR]- Реализовано добавление сериалов в историю просмотра[CR]- Восстановена работа добавения и удаления в разделы "Смотреть позже" и "Избранное"[CR]- Для United Search установил ссылку поиска в новом формате. Требуется сброс основных настроек</news>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>

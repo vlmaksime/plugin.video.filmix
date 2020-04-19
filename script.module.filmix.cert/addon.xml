@@ -5,6 +5,10 @@
     </requires>
     <extension point="xbmc.python.module" library="libs" />
     <extension point="xbmc.addon.metadata">
+        <summary lang="en"></summary>
+        <summary lang="ru"></summary>
+        <description lang="en"></description>
+        <description lang="ru"></description>
         <platform>all</platform>
         <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
         <forum>http://xbmc.ru/forum/showthread.php?t=16408</forum>

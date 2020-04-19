@@ -106,12 +106,8 @@ msgctxt "#30044"
 msgid "You have successfully logged in"
 msgstr ""
 
-msgctxt "#30045"
-msgid "You have successfully logged out"
-msgstr ""
-
 msgctxt "#30046"
-msgid "Incorrect login or password!"
+msgid "Login failure! Please, try later"
 msgstr ""
 
 msgctxt "#30050"
@@ -144,6 +140,30 @@ msgstr ""
 
 msgctxt "#30057"
 msgid "Successfully removed from Watch Later"
+msgstr ""
+
+msgctxt "#30058"
+msgid "Enter this code on the page [B]filmix.co/consoles[/B]"
+msgstr ""
+
+msgctxt "#30059"
+msgid "or at website in the section [B]'Profile' - 'Consoles'[/B]"
+msgstr ""
+
+msgctxt "#30060"
+msgid "Connection code: [B]{0}[/B]"
+msgstr ""
+
+msgctxt "#30361"
+msgid "Login by Code"
+msgstr ""
+
+msgctxt "#30362"
+msgid "Select video server"
+msgstr ""
+
+msgctxt "#30363"
+msgid "Video server successfully changed"
 msgstr ""
 
 msgctxt "#30200"
@@ -211,7 +231,7 @@ msgid "Login"
 msgstr ""
 
 msgctxt "#30302"
-msgid "Logout"
+msgid "Device name"
 msgstr ""
 
 msgctxt "#30303"
@@ -236,6 +256,18 @@ msgstr ""
 
 msgctxt "#30309"
 msgid "PRO Date"
+msgstr ""
+
+msgctxt "#30310"
+msgid "Video server"
+msgstr ""
+
+msgctxt "#30311"
+msgid "Change video server"
+msgstr ""
+
+msgctxt "#30312"
+msgid "Update profile"
 msgstr ""
 
 msgctxt "#30341"

@@ -20,47 +20,99 @@ _ = plugin.initialize_gettext()
 
 @plugin.route('/login')
 def login():
-    _login = _get_keyboard_text('', _('Login'))
-    if not _login:
-        return
-
-    xbmc.sleep(1000)
-
-    _password = _get_keyboard_text('', _('Password'), True)
-    if not _password:
-        return
 
     try:
         api = Filmix()
-        login_result = api.login(_login, _password)
+        token_result = api.token_request()
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e, True)
     else:
-        user_fields = api.get_user_fields(login_result)
-        if user_fields['user_login']:
-            user_fields['user_password'] = _password
+        api.update_dev_token(token_result['code'])
+        plugin.set_setting('user_dev_token', token_result['code'])
+
+        code = token_result['user_code']
+
+        progress = plugin.dialog_progress_create(_('Login by Code'),
+                                                 _('Connection code: [B]{0}[/B]').format(code),
+                                                 _('Enter this code on the page [B]filmix.co/consoles[/B]'),
+                                                 _('or at website in the section [B]\'Profile\' - \'Consoles\'[/B]'))
+
+        wait_sec = 300
+        step_sec = 2
+        pass_sec = 0
+        check_sec = 20
+
+        user_fields = api.get_user_fields()
+        while pass_sec < wait_sec:
+            if (progress.iscanceled()):
+                return
+
+            xbmc.sleep(step_sec * 1000)
+            pass_sec += step_sec
+
+            plugin.dialog_progress_update(progress, int(100 * pass_sec / wait_sec))
+
+            if (pass_sec % check_sec) == 0:
+                try:
+                    user_data = api.user_data()
+                except (FilmixError, simplemedia.WebClientError) as e:
+                    addon.notify_error(e)
+                else:
+                    user_fields = api.get_user_fields(user_data)
+                    if user_fields['user_login']:
+                        break
+
+        progress.close()
 
         plugin.set_settings(user_fields)
 
         if user_fields['user_login']:
             plugin.dialog_ok(_('You have successfully logged in'))
         else:
-            plugin.dialog_ok(_('Incorrect login or password!'))
+            plugin.dialog_ok(_('Login failure! Please, try later'))
 
 
-@plugin.route('/logout')
-def logout():
-
-    cookie_file = Filmix.get_cookie_path()
-    if os.path.exists(cookie_file):
-        os.remove(cookie_file)
+@plugin.route('/select_videoserver')
+def select_videoserver():
 
     api = Filmix()
-    user_fields = api.get_user_fields()
-    plugin.set_settings(user_fields)
+    try:
+        user_data = api.user_data()
+    except (FilmixError, simplemedia.WebClientError) as e:
+        addon.notify_error(e)
+    else:
+        keys = []
+        titles = []
+        for key, val in iteritems(user_data.get('available_servers')):
+            titles.append(val)
+            keys.append(key)
 
-    dialog = xbmcgui.Dialog()
-    dialog.ok(plugin.name, _('You have successfully logged out'))
+        videoserver = user_data.get('videoserver') or 'AUTO'
+
+        if titles:
+            if plugin.kodi_major_version() >= '17':
+                preselect = keys.index(videoserver)
+                selected = xbmcgui.Dialog().select(_('Select video server'), titles, preselect=preselect)
+            else:
+                selected = xbmcgui.Dialog().select(_('Select video server'), titles)
+
+            if selected is not None \
+              and keys[selected] != videoserver:
+                try:
+                    result = api.set_videoserver(keys[selected])
+                except (FilmixError, simplemedia.WebClientError) as e:
+                    plugin.notify_error(e)
+                else:
+                    if result['status'] == 'ok' \
+                      and videoserver != result['server']:
+                        plugin.set_setting('videoserver', user_data['available_servers'].get(result['server']))
+                        xbmcgui.Dialog().notification(plugin.name, _('Video server successfully changed'), xbmcgui.NOTIFICATION_INFO)
+
+
+@plugin.route('/check_device')
+def check_device():
+
+    Filmix().check_device()
 
 
 @plugin.route('/toogle_favorites')
@@ -104,11 +156,7 @@ def toogle_watch_later():
 @plugin.route('/')
 def root():
 
-    if plugin.params.action is not None:
-        if plugin.params.action == 'search':
-            search()
-    else:
-        plugin.create_directory(_root_items())
+    plugin.create_directory(_root_items(), content='', category=plugin.name)
 
 
 def _root_items():
@@ -118,18 +166,19 @@ def _root_items():
         url = plugin.url_for('list_catalog', catalog=catalog_info['catalog'])
         listitem = {'label': catalog_info['label'],
                     'url': url,
-                    'icon': plugin.icon,
+                    'icon': catalog_info['icon'],
                     'fanart': plugin.fanart,
                     'content_lookup': False,
                     }
         yield listitem
 
+    movie_icon = plugin.get_image('DefaultMovies.png')
+
     # Popular
     url = plugin.url_for('list_catalog', catalog='popular')
     list_item = {'label': _('Popular'),
                  'url': url,
-                 # 'icon': plugin.get_image('DefaultFavourites.png'),
-                 'icon': plugin.icon,
+                 'icon': movie_icon,
                  'fanart': plugin.fanart,
                  'content_lookup': False,
                  }
@@ -139,8 +188,7 @@ def _root_items():
     url = plugin.url_for('list_catalog', catalog='top_views')
     list_item = {'label': _('Top Views'),
                  'url': url,
-                 # 'icon': plugin.get_image('DefaultFavourites.png'),
-                 'icon': plugin.icon,
+                 'icon': movie_icon,
                  'fanart': plugin.fanart,
                  'content_lookup': False,
                  }
@@ -161,7 +209,7 @@ def _root_items():
         url = plugin.url_for('list_catalog', catalog='watch_later')
         list_item = {'label': _('Watch Later'),
                      'url': url,
-                     'icon': plugin.icon,
+                     'icon': plugin.get_image('DefaultFavourites.png'),
                      'fanart': plugin.fanart,
                      'content_lookup': False,
                      }
@@ -171,8 +219,7 @@ def _root_items():
         url = plugin.url_for('list_catalog', catalog='watch_history')
         list_item = {'label': _('Watch History'),
                      'url': url,
-                     # 'icon': plugin.get_image('DefaultFavourites.png'),
-                     'icon': plugin.icon,
+                     'icon': movie_icon,
                      'fanart': plugin.fanart,
                      'content_lookup': False,
                      }
@@ -354,14 +401,14 @@ def select_filter():
     titles = []
     preselected = []
 
-    for key, val in iteritems(values_list):
-        titles.append(val)
-        keys.append(key)
-        if key in filter_values:
-            preselected.append(keys.index(key))
-            filter_values.remove(key)
+    for filter_item in values_list:
+        titles.append(filter_item['val'])
+        keys.append(filter_item['id'])
+        if filter_item['id'] in filter_values:
+            preselected.append(keys.index(filter_item['id']))
+            filter_values.remove(filter_item['id'])
 
-    if plugin.kodi_major_version >= '17':
+    if plugin.kodi_major_version() >= '17':
         selected = xbmcgui.Dialog().multiselect(filter_title, titles, preselect=preselected)
     else:
         selected = xbmcgui.Dialog().multiselect(filter_title, titles)
@@ -624,13 +671,15 @@ def play_video(catalog, content_name):
 
         if _is_movie(content_info):
             listitem['path'] = _get_movie_link(content_info, translation)
-            try:
-                api.add_watched(content['id'], translation=translation)
-            except (FilmixError, simplemedia.WebClientError) as e:
-                pass
         else:
             listitem['path'] = _get_episode_link(content_info, season, episode, translation)
-            # api.add_watched(content['id'], season, episode, translation)
+
+        data = {'post_id': content['id'],
+                'translation': translation,
+                'season': season,
+                'episode': episode,
+                }
+        plugin.send_notification('OnPlay', data)
 
         plugin.resolve_url(listitem)
 
@@ -655,10 +704,14 @@ def play_trailer(catalog, content_name):
 
 
 def  _get_catalogs():
-    catalogs = [{'catalog': 'movies', 'label': _('Movies'), 'section': 0},
-                {'catalog': 'serials', 'label': _('TV Series'), 'section': 7},
-                {'catalog': 'multfilms', 'label': _('Cartoons'), 'section': 14},
-                {'catalog': 'multserials', 'label': _('Cartoon Series'), 'section': 93},
+
+    movie_icon = plugin.get_image('DefaultMovies.png')
+    tvshow_icon = plugin.get_image('DefaultTVShows.png')
+
+    catalogs = [{'catalog': 'movies', 'label': _('Movies'), 'section': 0, 'icon': movie_icon},
+                {'catalog': 'serials', 'label': _('TV Series'), 'section': 7, 'icon': tvshow_icon},
+                {'catalog': 'multfilms', 'label': _('Cartoons'), 'section': 14, 'icon': movie_icon},
+                {'catalog': 'multserials', 'label': _('Cartoon Series'), 'section': 93, 'icon': tvshow_icon},
                 ]
 
     return catalogs
@@ -818,7 +871,7 @@ def _available_qualities():
 
     if plugin.get_setting('is_pro_plus'):
         return ['360', '480', '720', '1080', '1440', '2160']
-    elif plugin.get_setting('user_name'):
+    elif plugin.get_setting('user_login'):
         return ['360', '480', '720']
     else:
         return ['360', '480']
@@ -884,7 +937,7 @@ def search_history():
     result = {'items': plugin.search_history_items(),
               'content': '',
               'category': ' / '.join([plugin.name, _('Search')]),
-              'sort_methods': xbmcplugin.SORT_METHOD_LABEL_IGNORE_FOLDERS,
+              'sort_methods': xbmcplugin.SORT_METHOD_NONE,
               }
 
     plugin.create_directory(**result)
@@ -954,9 +1007,9 @@ def search():
 
 def _get_filter_prefix(filter_id):
     filters = _get_filters()
-    for filter in filters:
-        if filter['t'] == filter_id:
-            return filter['p']
+    for _filter in filters:
+        if _filter['t'] == filter_id:
+            return _filter['p']
 
 
 def _get_filter_values(filter_id):
@@ -971,13 +1024,17 @@ def _get_filter_values(filter_id):
         result = api.get_filter('cat', filter_id)
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e)
-        filter_values = {}
+        filter_values = []
     else:
         prefix = _get_filter_prefix(filter_id)
-        filter_values = {}
+        filter_values = []
         start_index = 0 if filter_id in ['years'] else 1
         for key, val in iteritems(result):
-            filter_values[prefix + key[start_index:]] = val
+            filter_values.append({'id': prefix + key[start_index:],
+                                  'val': val,
+                                  })
+
+        filter_values.sort(key=_sort_by_val)
 
         filters[filter_id] = filter_values
         storage['filters'] = filters
@@ -1042,9 +1099,9 @@ def _get_filter_value(filter_id):
     filter_items = _get_filter_values(filter_id)
     values = []
 
-    for filter_value in filter_values:
-        if filter_items.get(filter_value) is not None:
-            values.append(filter_items[filter_value])
+    for filter_item in filter_items:
+        if filter_item['id'] in filter_values:
+            values.append(filter_item['val'])
 
     if values:
         return ', '.join(values)
@@ -1346,6 +1403,8 @@ def _openmeta_compare_title(title, item_title, part_match):
     else:
         return item_title == title
 
+def _sort_by_val(item):
+    return item.get('val', '')
 
 if __name__ == '__main__':
     plugin.run()

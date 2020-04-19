@@ -37,6 +37,7 @@ run_script = lambda : imp.load_source('__main__', os.path.join(addon_dir, 'defau
 sys.path.append(os.path.join(cwd, 'script.module.filmix.cert', 'libs'))
 sys.path.append(addon_dir)
 
+
 def setUpModule():
 
     if not PY26:
@@ -48,6 +49,7 @@ def setUpModule():
         history = ['Нюхач', 'Я Легенда', 'Supernatural', 'Смешарики', 'Deadpool', 'Маша и медведь',
                    'Домики', 'Мстители', 'Stranger Things', 'Breaking Bad']
         storage['history'] = history
+
 
 def tearDownModule():
 
@@ -62,27 +64,31 @@ class PluginActionsTestCase(unittest.TestCase):
         print("Running test: {0}".format(self.id().split('.')[-1]))
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/login'.format(addon_name), '0', ''])
     def test_00_login():
 
-        login = os.getenv('FILMIX_LOGIN', None)
-        password = os.getenv('FILMIX_PASSWORD', None)
+        with mock.patch('simpleplugin.sys') as mock_sys:
+            mock_sys.argv = ['plugin://{0}/login'.format(addon_name), '0', '']
 
-        if login is None:
-            login = 'login'
-            print('Login not defined')
+            run_script()
 
-        if password is None:
-            password = 'password'
-            print('Password not defined')
+        with mock.patch('simpleplugin.sys') as mock_sys:
+            mock_sys.argv = ['plugin://{0}/check_device'.format(addon_name), '0', '']
 
-        xbmc.Keyboard.strings.append(login)
-        xbmc.Keyboard.strings.append('0000000000')
-        run_script()
+            addon = xbmcaddon.Addon()
+            
+            user_dev_id = os.getenv('user_dev_id', None)
+            if user_dev_id is not None:
+                addon.setSetting('user_dev_id', user_dev_id)
+            else:
+                print('user_dev_id not defined')
+    
+            user_dev_token = os.getenv('user_dev_token', None)
+            if user_dev_token is not None:
+                addon.setSetting('user_dev_token', user_dev_token)
+            else:
+                print('user_dev_token not defined')
 
-        xbmc.Keyboard.strings.append(login)
-        xbmc.Keyboard.strings.append(password)
-        run_script()
+            run_script()
 
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/'.format(addon_name), '1', ''])
@@ -272,8 +278,8 @@ class PluginActionsTestCase(unittest.TestCase):
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/logout'.format(addon_name), '99', ''])
-    def test_99_logout():
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/select_videoserver'.format(addon_name), '32', ''])
+    def test_32_select_videoserver():
 
         run_script()
 
