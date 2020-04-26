@@ -64,6 +64,7 @@ class FilmixClient(object):
         self._client.verify = False  # certificate
 
         if not PY26 \
+          and ssl.OPENSSL_VERSION.split(' ')[0].upper() == 'OPENSSL' \
           and ssl.OPENSSL_VERSION_INFO >= (1, 1, 0):
             try:
                 adapter = FilmixAdapter()
