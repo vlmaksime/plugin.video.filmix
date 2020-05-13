@@ -32,10 +32,13 @@ def login():
 
         code = token_result['user_code']
 
+        main_link = 'filmix.co/consoles'
+        mirror_link = 'filmix.co/consoles'
+
         progress = plugin.dialog_progress_create(_('Login by Code'),
                                                  _('Connection code: [B]{0}[/B]').format(code),
-                                                 _('Enter this code on the page [B]filmix.co/consoles[/B]'),
-                                                 _('or at website in the section [B]\'Profile\' - \'Consoles\'[/B]'))
+                                                 _('Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)').format(main_link, mirror_link),
+                                                 _('or in the site menu [B]\'Profile\' -> \'Consoles\'[/B]'))
 
         wait_sec = 300
         step_sec = 2

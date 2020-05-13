@@ -143,11 +143,11 @@ msgid "Successfully removed from Watch Later"
 msgstr ""
 
 msgctxt "#30058"
-msgid "Enter this code on the page [B]filmix.co/consoles[/B]"
+msgid "Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)"
 msgstr ""
 
 msgctxt "#30059"
-msgid "or at website in the section [B]'Profile' - 'Consoles'[/B]"
+msgid "or in the site menu [B]'Profile' -> 'Consoles'[/B]"
 msgstr ""
 
 msgctxt "#30060"

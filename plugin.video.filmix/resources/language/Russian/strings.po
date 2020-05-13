@@ -143,12 +143,12 @@ msgid "Successfully removed from Watch Later"
 msgstr "Успешно удалено из Смотреть позже"
 
 msgctxt "#30058"
-msgid "Enter this code on the page [B]filmix.co/consoles[/B]"
-msgstr "Введите этот код на странице [B]filmix.co/consoles[/B]"
+msgid "Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)"
+msgstr "Введите код на страничке [B]{0}[/B] ([B]{1}[/B] для жителей РФ)"
 
 msgctxt "#30059"
-msgid "or at website in the section [B]'Profile' - 'Consoles'[/B]"
-msgstr "или на сайте в разделе [B]'Профиль' - 'Приставки'[/B]"
+msgid "or in the site menu [B]'Profile' -> 'Consoles'[/B]"
+msgstr "или в меню сайта [B]'Профиль' -> 'Приставки'[/B]"
 
 msgctxt "#30060"
 msgid "Connection code: [B]{0}[/B]"
