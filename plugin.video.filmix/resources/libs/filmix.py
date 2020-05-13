@@ -3,18 +3,17 @@
 
 from __future__ import unicode_literals
 
-from future.utils import PY26, PY3, iteritems
-from builtins import range
-
-import os
-import ssl
 import math
 import random
-import requests
+import ssl
 from base64 import b64decode
+from builtins import range
+
+import filmixcert
+import requests
+from future.utils import PY26
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.ssl_ import create_urllib3_context
-import filmixcert
 
 __all__ = ['FilmixClient', 'FilmixError']
 
@@ -29,7 +28,6 @@ class FilmixError(Exception):
 
 
 class FilmixAdapter(HTTPAdapter):
-
     _filmix_ciphers = 'DEFAULT@SECLEVEL=0'
 
     def init_poolmanager(self, *args, **kwargs):
@@ -44,7 +42,6 @@ class FilmixAdapter(HTTPAdapter):
 
 
 class FilmixClient(object):
-
     _base_url = 'https://app.filmix.vip:8044/'
 
     def __init__(self):
@@ -63,8 +60,8 @@ class FilmixClient(object):
         self._client.verify = False  # certificate
 
         if not PY26 \
-          and ssl.OPENSSL_VERSION.split(' ')[0].upper() == 'OPENSSL' \
-          and ssl.OPENSSL_VERSION_INFO >= (1, 1, 0):
+                and ssl.OPENSSL_VERSION.split(' ')[0].upper() == 'OPENSSL' \
+                and ssl.OPENSSL_VERSION_INFO >= (1, 1, 0):
             try:
                 adapter = FilmixAdapter()
             except ssl.SSLError as e:
@@ -105,19 +102,20 @@ class FilmixClient(object):
 
         tmp_a = 'u,5,Y,I,E,4,7,D,6,G,j,n,2,g,T,b,L,v,S,F,X,h,1,q,=,Z'.split(',')
         tmp_b = 'W,x,m,M,3,r,t,0,8,z,U,A,B,d,P,y,K,O,i,V,N,w,9,l,R,C'.split(',')
-        a_length = len(tmp_a);
-        for  i in range(0, a_length, 1):
+        a_length = len(tmp_a)
+        for i in range(0, a_length, 1):
             link = link.replace(tmp_b[i], '___').replace(tmp_a[i], tmp_b[i]).replace('___', tmp_a[i])
         return b64decode(link).decode('utf8')
 
-    def _extract_json(self, r):
+    @staticmethod
+    def _extract_json(r):
         try:
             j = r.json()
         except ValueError as e:
             raise FilmixError(e)
 
         if isinstance(j, dict) \
-          and j.get('error') is not None:
+                and j.get('error') is not None:
             if j['error'].get('user_message') is not None:
                 raise FilmixError(j['error']['user_message'], j['error']['code'])
             else:
@@ -129,7 +127,7 @@ class FilmixClient(object):
 
         result = ''
         charsets = '0123456789abcdef'
-        while(len(result) < 16):
+        while len(result) < 16:
             index = int(math.floor(random.random() * 15))
             result = result + charsets[index]
         return result
@@ -186,8 +184,10 @@ class FilmixClient(object):
             pages = {'prev': {'page': page - 1} if page > 1 else None,
                      'next': {'page': page + 1} if int(per_page) == len(j) else None,
                      }
-            if pages['prev'] is not None: pages['prev'].update(page_params)
-            if pages['next'] is not None: pages['next'].update(page_params)
+            if pages['prev'] is not None:
+                pages['prev'].update(page_params)
+            if pages['next'] is not None:
+                pages['next'].update(page_params)
         else:
             pages = {'prev': None,
                      'next': None,
@@ -253,7 +253,7 @@ class FilmixClient(object):
 
     def get_watch_later_items(self, page=1, **kwargs):
         params = {'do': 'watch_later',
-                 }
+                  }
 
         return self._get_items(params, page, {}, **kwargs)
 
@@ -279,7 +279,7 @@ class FilmixClient(object):
         url = self._base_url + 'engine/ajax/get_filter.php'
 
         data = {'scope': scope,
-                  }
+                }
         if filter_id is not None:
             data['type'] = filter_id
 
@@ -312,7 +312,7 @@ class FilmixClient(object):
     def add_watched(self, post_id, season=None, episode=None, translation=None):
         url = self._base_url + 'android.php'
 
-        data = {'add_watched':'true',
+        data = {'add_watched': 'true',
                 'id': post_id,
                 }
 

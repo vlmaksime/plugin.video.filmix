@@ -2,13 +2,14 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
 from __future__ import unicode_literals
+
+import json
+
+import simplemedia
+import xbmc
 from future.utils import python_2_unicode_compatible, iteritems, PY26
 from resources.libs import Filmix, FilmixError
 from simplemedia import py2_decode, Addon
-
-import xbmc
-import json
-import simplemedia
 
 
 @python_2_unicode_compatible
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     while not monitor.abortRequested():
 
         if dev_check_sec <= 0 \
-          and monitor.check_device():
+                and monitor.check_device():
             dev_check_sec = 1800
 
         if monitor.waitForAbort(sleep_sec):

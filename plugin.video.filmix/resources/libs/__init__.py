@@ -2,14 +2,17 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
 from __future__ import unicode_literals
-import os
-import xbmc
+
 import platform
+
 import simplemedia
+import xbmc
 
 from .filmix import FilmixClient, FilmixError
 
 addon = simplemedia.Addon()
+
+__all__ = ['Filmix', 'FilmixError']
 
 
 class Filmix(FilmixClient):
