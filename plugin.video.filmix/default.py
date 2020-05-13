@@ -59,7 +59,7 @@ def login():
                 try:
                     user_data = api.user_data()
                 except (FilmixError, simplemedia.WebClientError) as e:
-                    addon.notify_error(e)
+                    plugin.notify_error(e)
                 else:
                     user_fields = api.get_user_fields(user_data)
                     if user_fields['user_login']:

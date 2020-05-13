@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from future.utils import PY26, PY3, iteritems, python_2_unicode_compatible
+from future.utils import PY26, PY3, iteritems
 from builtins import range
 
 import os
@@ -43,7 +43,6 @@ class FilmixAdapter(HTTPAdapter):
         return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
 
 
-@python_2_unicode_compatible
 class FilmixClient(object):
 
     _base_url = 'https://app.filmix.vip:8044/'
@@ -79,8 +78,8 @@ class FilmixClient(object):
         self._user_dev_token = None
         self._user_dev_vendor = None
 
-    def __str__(self):
-        return '<FilmixClient>'
+    def __del__(self):
+        self._client.close()
 
     def _add_device_info(self, params):
         params = params or {}

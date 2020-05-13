@@ -21,7 +21,7 @@ class FilmixMonitor(xbmc.Monitor):
         addon.log_debug('Started {0}'.format(self))
         if not PY26:
             import ssl
-            addon.log_debug('OpenSSL version: {0}'.format(ssl.OPENSSL_VERSION))
+            addon.log_debug('SSL library: {0}'.format(ssl.OPENSSL_VERSION))
 
         self._settings = self._get_settings()
 
@@ -44,7 +44,7 @@ class FilmixMonitor(xbmc.Monitor):
                     try:
                         Filmix().add_watched(**data)
                     except (FilmixError, simplemedia.WebClientError) as e:
-                        self.log_error('{0}'.format(e))
+                        addon.log_error('{0}'.format(e))
 
     def onSettingsChanged(self):
         super(FilmixMonitor, self).onSettingsChanged()
