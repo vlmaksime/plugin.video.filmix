@@ -110,6 +110,10 @@ msgctxt "#30046"
 msgid "Login failure! Please, try later"
 msgstr ""
 
+msgctxt "#30047"
+msgid "Server sent an empty response"
+msgstr ""
+
 msgctxt "#30050"
 msgid "Add to Favorites"
 msgstr ""

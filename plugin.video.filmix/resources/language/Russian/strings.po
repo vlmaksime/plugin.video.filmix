@@ -110,6 +110,10 @@ msgctxt "#30046"
 msgid "Login failure! Please, try later"
 msgstr "Ошибка входа! Пожалуйста, попробуйте позднее."
 
+msgctxt "#30047"
+msgid "Server sent an empty response"
+msgstr "Сервер отправил пустой ответ"
+
 msgctxt "#30050"
 msgid "Add to Favorites"
 msgstr "Добавить в Избранное"

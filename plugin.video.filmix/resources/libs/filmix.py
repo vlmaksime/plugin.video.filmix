@@ -109,6 +109,10 @@ class FilmixClient(object):
 
     @staticmethod
     def _extract_json(r):
+
+        if not r.text:
+            raise FilmixError('Server sent an empty response')
+
         try:
             j = r.json()
         except ValueError as e:
