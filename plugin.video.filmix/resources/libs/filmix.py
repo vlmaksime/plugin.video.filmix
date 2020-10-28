@@ -42,7 +42,7 @@ class FilmixAdapter(HTTPAdapter):
 
 
 class FilmixClient(object):
-    _base_url = 'https://app.filmix.vip:8044/'
+    _base_url = 'https://filmix.vip:8044/'
 
     def __init__(self):
 
@@ -57,7 +57,7 @@ class FilmixClient(object):
         plainkey = filmixcert.plainkey()
 
         self._client.cert = (certificate, plainkey)
-        self._client.verify = False  # certificate
+        self._client.verify = certificate
 
         if not PY26 \
                 and ssl.OPENSSL_VERSION.split(' ')[0].upper() == 'OPENSSL' \
