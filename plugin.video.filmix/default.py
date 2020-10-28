@@ -786,7 +786,7 @@ def _get_movie_link(item, translation=None):
     sub_b = url.find(']')
     qualities = url[sub_a + 1:sub_b].split(',')
 
-    video_quality = plugin.get_setting('video_quality') + 1
+    video_quality = plugin.get_setting('video_quality')
     quality_list = _available_qualities()
 
     path = None
@@ -813,7 +813,7 @@ def _get_episode_link(item, season, episode, translation=None):
     url = api.decode_link(episode_info['link'])
     qualities = episode_info['qualities']
 
-    video_quality = plugin.get_setting('video_quality') + 1
+    video_quality = plugin.get_setting('video_quality')
     quality_list = _available_qualities()
 
     path = None
@@ -841,7 +841,7 @@ def _get_trailer_link(item):
     sub_b = url.find(']')
     qualities = url[sub_a + 1:sub_b].split(',')
 
-    video_quality = plugin.get_setting('video_quality') + 1
+    video_quality = plugin.get_setting('video_quality')
     quality_list = _available_qualities()
 
     path = None

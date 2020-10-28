@@ -195,22 +195,26 @@ msgid "Video Quality"
 msgstr ""
 
 msgctxt "#30211"
-msgid "480p (SD)"
+msgid "360p (LD)"
 msgstr ""
 
 msgctxt "#30212"
-msgid "720p (HD)"
+msgid "480p (SD)"
 msgstr ""
 
 msgctxt "#30213"
-msgid "1080p (FHD)"
+msgid "720p (HD)"
 msgstr ""
 
 msgctxt "#30214"
-msgid "1440p (2K)"
+msgid "1080p (FHD)"
 msgstr ""
 
 msgctxt "#30215"
+msgid "1440p (2K)"
+msgstr ""
+
+msgctxt "#30216"
 msgid "2160p (4K UHD)"
 msgstr ""
 
