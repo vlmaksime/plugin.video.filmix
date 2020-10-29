@@ -29,14 +29,15 @@ class FilmixError(Exception):
 
 class FilmixAdapter(HTTPAdapter):
     _filmix_ciphers = 'DEFAULT@SECLEVEL=0'
+    _filmix_ssl_version = ssl.PROTOCOL_TLSv1
 
     def init_poolmanager(self, *args, **kwargs):
-        context = create_urllib3_context(ciphers=self._filmix_ciphers)
+        context = create_urllib3_context(ciphers=self._filmix_ciphers, ssl_version=self._filmix_ssl_version)
         kwargs['ssl_context'] = context
         return super(FilmixAdapter, self).init_poolmanager(*args, **kwargs)
 
     def proxy_manager_for(self, *args, **kwargs):
-        context = create_urllib3_context(ciphers=self._filmix_ciphers)
+        context = create_urllib3_context(ciphers=self._filmix_ciphers, ssl_version=self._filmix_ssl_version)
         kwargs['ssl_context'] = context
         return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
 
