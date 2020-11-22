@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="script.module.filmix.cert" version="0.9.4" name="Filmix certificates" provider-name="vl.maksime">
+<addon id="script.module.filmix.cert" version="0.9.5" name="Filmix certificates" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
     </requires>
     <extension point="xbmc.python.module" library="libs" />
     <extension point="xbmc.addon.metadata">
-        <summary lang="en"></summary>
-        <summary lang="ru"></summary>
-        <description lang="en"></description>
-        <description lang="ru"></description>
+        <summary lang="en">Filmix Certificate</summary>
+        <summary lang="ru">Сертификат Filmix</summary>
+        <description lang="en">Certificate required for the Filmix add-on</description>
+        <description lang="ru">Сертификат, необходимы для дополнения Filmix</description>
         <platform>all</platform>
-        <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
+        <license>GPL-3.0-only</license>
         <forum>http://xbmc.ru/forum/showthread.php?t=16408</forum>
         <email>vl.maksime@gmail.com</email>
         <source>https://github.com/vlmaksime/plugin.video.filmix</source>

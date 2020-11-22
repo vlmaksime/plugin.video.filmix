@@ -110,6 +110,10 @@ msgctxt "#30046"
 msgid "Login failure! Please, try later"
 msgstr ""
 
+msgctxt "#30047"
+msgid "Server sent an empty response"
+msgstr ""
+
 msgctxt "#30050"
 msgid "Add to Favorites"
 msgstr ""
@@ -143,11 +147,11 @@ msgid "Successfully removed from Watch Later"
 msgstr ""
 
 msgctxt "#30058"
-msgid "Enter this code on the page [B]filmix.co/consoles[/B]"
+msgid "Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)"
 msgstr ""
 
 msgctxt "#30059"
-msgid "or at website in the section [B]'Profile' - 'Consoles'[/B]"
+msgid "or in the site menu [B]'Profile' -> 'Consoles'[/B]"
 msgstr ""
 
 msgctxt "#30060"
@@ -191,22 +195,26 @@ msgid "Video Quality"
 msgstr ""
 
 msgctxt "#30211"
-msgid "480p (SD)"
+msgid "360p (LD)"
 msgstr ""
 
 msgctxt "#30212"
-msgid "720p (HD)"
+msgid "480p (SD)"
 msgstr ""
 
 msgctxt "#30213"
-msgid "1080p (FHD)"
+msgid "720p (HD)"
 msgstr ""
 
 msgctxt "#30214"
-msgid "1440p (2K)"
+msgid "1080p (FHD)"
 msgstr ""
 
 msgctxt "#30215"
+msgid "1440p (2K)"
+msgstr ""
+
+msgctxt "#30216"
 msgid "2160p (4K UHD)"
 msgstr ""
 

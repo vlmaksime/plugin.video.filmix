@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmix" version="1.2.10" name="Filmix" provider-name="vl.maksime">
+<addon id="plugin.video.filmix" version="1.2.11" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
         <import addon="script.module.simplemedia" version="1.2.6"/>
@@ -16,12 +16,12 @@
         <description lang="ru">Дополнение для онлайн-кинотеатра Filmix! В нашей базе 60000 разных видео, каждый из которых доступен вашему просмотру бесплатно и в отличном качестве. Выбирайте по вкусу и по настроению.</description>
         <language>ru</language>
         <platform>all</platform>
-        <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
+        <license>GPL-3.0-only</license>
         <forum>http://xbmc.ru/forum/showthread.php?t=16408</forum>
         <website>https://filmix.co/</website>
         <email>vl.maksime@gmail.com</email>
         <source>https://github.com/vlmaksime/plugin.video.filmix</source>
-        <news>v1.2.10 (2020-04-19)[CR]- Добавлена возможность входа по коду[CR]- Удален вход по логину и паролю[CR]- Добавлена возможность выбора сервера из настроек дополнения[CR]- Реализовано добавление сериалов в историю просмотра[CR]- Восстановена работа добавения и удаления в разделы "Смотреть позже" и "Избранное"[CR]- Для United Search установил ссылку поиска в новом формате. Требуется сброс основных настроек</news>
+        <news>v1.2.11 (2020-11-22)[CR]- Поправил совместимость со старыми ELEC системами, которые используют LibreSSL[CR]- В настройках добавлено качество 360p[CR]- Реализовано принудительное использование TLSv1.0[CR]- Исправлены мелкие ошибки</news>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>

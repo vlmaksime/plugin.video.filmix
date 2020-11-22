@@ -12,6 +12,7 @@ import shutil
 import xbmcaddon
 import xbmc
 import simpleplugin
+import simplemedia
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 
@@ -23,7 +24,7 @@ temp_dir = os.path.join(cwd, 'addon_data')
 if not os.path.exists(temp_dir):
     os.mkdir(temp_dir)
 
-sm_dir = os.path.join(cwd, sm_name)
+sm_dir = simplemedia.where()
 sm_config_dir = os.path.join(temp_dir, sm_name)
 xbmcaddon.init_addon(sm_dir, sm_config_dir)
 

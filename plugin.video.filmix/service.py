@@ -2,13 +2,14 @@
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
 from __future__ import unicode_literals
+
+import json
+
+import simplemedia
+import xbmc
 from future.utils import python_2_unicode_compatible, iteritems, PY26
 from resources.libs import Filmix, FilmixError
 from simplemedia import py2_decode, Addon
-
-import xbmc
-import json
-import simplemedia
 
 
 @python_2_unicode_compatible
@@ -21,7 +22,7 @@ class FilmixMonitor(xbmc.Monitor):
         addon.log_debug('Started {0}'.format(self))
         if not PY26:
             import ssl
-            addon.log_debug('OpenSSL version: {0}'.format(ssl.OPENSSL_VERSION))
+            addon.log_debug('SSL library: {0}'.format(ssl.OPENSSL_VERSION))
 
         self._settings = self._get_settings()
 
@@ -44,7 +45,7 @@ class FilmixMonitor(xbmc.Monitor):
                     try:
                         Filmix().add_watched(**data)
                     except (FilmixError, simplemedia.WebClientError) as e:
-                        self.log_error('{0}'.format(e))
+                        addon.log_error('{0}'.format(e))
 
     def onSettingsChanged(self):
         super(FilmixMonitor, self).onSettingsChanged()
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     while not monitor.abortRequested():
 
         if dev_check_sec <= 0 \
-          and monitor.check_device():
+                and monitor.check_device():
             dev_check_sec = 1800
 
         if monitor.waitForAbort(sleep_sec):

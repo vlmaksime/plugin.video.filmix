@@ -6,7 +6,7 @@
         <setting label="30203" type="labelenum" id="step" values="15|30|45|60" default="30" />
         <setting label="30204" type="bool" id="use_filters" default="true"/>
         <setting type="sep"/>
-        <setting label="30210" type="enum" id="video_quality" lvalues="30211|30212|30213|30214|30215" default="1"/>
+        <setting label="30210" type="enum" id="video_quality" lvalues="30211|30212|30213|30214|30215|30216" default="2"/>
         <setting label="30220" type="enum" id="video_rating" lvalues="30221|30222" default="0" />
         <setting type="bool" id="united_search" visible="false" default="true" />
         <setting type="text" id="us_command" visible="false" default="search?keyword=" />
@@ -14,16 +14,16 @@
     <category label="30300">
         <setting type="text" id="user_dev_id" visible="false" enable="false" default=""/>
         <setting type="text" id="user_dev_token" visible="false" enable="false" default=""/>
-        <setting label="30301" type="action" option="close" visible="eq(2,)" action="RunPlugin(plugin://$ID/login)" />
+        <setting label="30301" type="action" visible="eq(2,)" action="RunPlugin(plugin://$ID/login)" />
         <setting label="30302" type="text" id="user_dev_name" visible="!eq(1,)" enable="false" default=""/>
         <setting label="30303" type="text" id="user_login" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30306" type="text" id="user_name" visible="!eq(0,)" enable="false" default=""/>
         <setting label="30307" type="bool" id="is_pro" visible="!eq(-2,)" enable="false" default="false"/>
         <setting label="30308" type="bool" id="is_pro_plus" visible="!eq(-3,)" enable="false"  default="false"/>
         <setting label="30309" type="text" id="pro_date" visible="!eq(0,)" enable="false" default=""/>
-        <setting label="30312" type="action" option="close" visible="!eq(-5,)" action="RunPlugin(plugin://$ID/check_device)"/>
+        <setting label="30312" type="action" visible="!eq(-5,)" action="RunPlugin(plugin://$ID/check_device)"/>
         <setting type="sep" visible="!eq(-6,)"/>
         <setting label="30310" type="text" id="videoserver" visible="!eq(-7,)" enable="false" default=""/>
-        <setting label="30311" type="action" option="close" visible="eq(-5,true)|eq(-6,true)" action="RunPlugin(plugin://$ID/select_videoserver)"/>
+        <setting label="30311" type="action" visible="eq(-5,true)|eq(-6,true)" action="RunPlugin(plugin://$ID/select_videoserver)"/>
     </category>
 </settings>

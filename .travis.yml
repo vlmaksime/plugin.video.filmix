@@ -1,8 +1,4 @@
 dist: trusty
-branches:
-  only:
-    - develop
-    - master
 language: python
 python:
   - "2.6"
@@ -11,25 +7,18 @@ python:
 env:
   global:
     - ADDON_ID=plugin.video.filmix
-before_install:
-  - export PYTHONIOENCODING=UTF-8
-  - wget -O /tmp/simplemedia.tar.gz https://github.com/vlmaksime/script.module.simplemedia/archive/master.tar.gz
-  - tar -C /tmp -xf /tmp/simplemedia.tar.gz
-  - ln -s /tmp/script.module.simplemedia-master/script.module.simplemedia/ script.module.simplemedia
+    - PYTHONIOENCODING=UTF-8
 install:
-  - pip install -q codecov codacy-coverage mock future
-  - pip install -q git+https://github.com/romanvm/script.module.simpleplugin.git
-  - pip install -q git+https://github.com/vlmaksime/script.module.simplemedia.git
-  - pip install -q https://github.com/vlmaksime/Kodistubs/archive/develop.zip
+  - pip install -q -r requirements.txt
 script:
   - coverage run tests.py
 after_success:
   - codecov
-  - coverage xml
-  - python-codacy-coverage -r coverage.xml
+  - coverage xml -o cobertura.xml
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh)
 before_deploy:
   - pip install -q git+https://github.com/romanvm/kodi-addon-submitter.git
-  - submit-addon -s -z $ADDON_ID
+  - submit-addon -s -z -m $ADDON_ID
   - export RELEASE_ZIP=$(ls *.zip)
 deploy:
   # Publish an installable ZIP to GitHub Releases
@@ -39,6 +28,8 @@ deploy:
     file: $RELEASE_ZIP
     skip_cleanup: true
     on:
+      branch: master
+      python: "3.6"
       tags: true
 notifications:
   email: false
