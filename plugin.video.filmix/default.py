@@ -332,7 +332,7 @@ def _catalog_items(data, catalog, use_filters=False, wm_properties=None):
         is_playable = False
 
         poster = item['poster']
-        poster = poster.replace('thumbs/w220', 'big')
+        poster = poster.replace('thumbs/w220', 'orig')
 
         url = plugin.url_for('list_content', content_name='{0}-{1}'.format(item['id'], item['alt_name']), catalog=catalog)
 
