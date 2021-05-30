@@ -864,7 +864,7 @@ def _available_qualities():
 
 def _get_listitem(item):
     poster = item['poster']
-    poster = poster.replace('thumbs/w220', 'big')
+    poster = poster.replace('thumbs/w220', 'orig')
 
     ratings = _get_ratings(item)
 
