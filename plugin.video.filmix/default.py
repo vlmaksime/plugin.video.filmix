@@ -117,15 +117,14 @@ def check_device():
 @plugin.route('/toogle_favorites')
 def toogle_favorites():
     content_id = plugin.params.get('id')
-    value = plugin.params.get('value') == '1'
 
     try:
         api = Filmix()
-        api.set_favorite(content_id, value)
+        result = api.set_favorite(content_id)
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e, True)
     else:
-        if value:
+        if result.get('id') is not None:
             xbmcgui.Dialog().notification(plugin.name, _('Successfully added to Favorites'), xbmcgui.NOTIFICATION_INFO)
         else:
             xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Favorites'), xbmcgui.NOTIFICATION_INFO)
@@ -136,15 +135,14 @@ def toogle_favorites():
 @plugin.route('/toogle_watch_later')
 def toogle_watch_later():
     content_id = plugin.params.get('id')
-    value = plugin.params.get('value') == '1'
 
     try:
         api = Filmix()
-        api.set_watch_later(content_id, value)
+        result = api.set_watch_later(content_id)
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e, True)
     else:
-        if value:
+        if result.get('id') is not None:
             xbmcgui.Dialog().notification(plugin.name, _('Successfully added to Watch Later'), xbmcgui.NOTIFICATION_INFO)
         else:
             xbmcgui.Dialog().notification(plugin.name, _('Successfully removed from Watch Later'), xbmcgui.NOTIFICATION_INFO)
@@ -239,7 +237,7 @@ def list_catalog(catalog):
     page = plugin.params.get('page', '1')
     page = int(page)
 
-    per_page = plugin.get_setting('step', False)
+    per_page = 49
 
     if catalog in ['watch_history', 'watch_later', 'favorites', 'popular', 'top_views']:
         use_filters = False
@@ -780,7 +778,6 @@ def _get_movie_link(item, translation=None):
                 break
 
     api = Filmix()
-    url = api.decode_link(url)
 
     sub_a = url.find('[')
     sub_b = url.find(']')
@@ -809,8 +806,7 @@ def _get_episode_link(item, season, episode, translation=None):
     else:
         episode_info = season_translation[episode]
 
-    api = Filmix()
-    url = api.decode_link(episode_info['link'])
+    url = episode_info['link']
     qualities = episode_info['qualities']
 
     video_quality = plugin.get_setting('video_quality')
@@ -833,9 +829,6 @@ def _get_trailer_link(item):
         return ''
 
     url = player_links[0]['link']
-
-    api = Filmix()
-    url = api.decode_link(url)
 
     sub_a = url.find('[')
     sub_b = url.find(']')
@@ -1000,17 +993,16 @@ def _get_filter_values(filter_id):
 
     try:
         api = Filmix()
-        result = api.get_filter('cat', filter_id)
+        result = api.get_filter(filter_id)
     except (FilmixError, simplemedia.WebClientError) as e:
         plugin.notify_error(e)
         filter_values = []
     else:
         prefix = _get_filter_prefix(filter_id)
         filter_values = []
-        start_index = 0 if filter_id in ['years'] else 1
         for key, val in iteritems(result):
-            filter_values.append({'id': prefix + key[start_index:],
-                                  'val': val,
+            filter_values.append({'id': prefix + key[1:],
+                                  'val': '{0}'.format(val),
                                   })
 
         filter_values.sort(key=_sort_by_val)
@@ -1025,8 +1017,8 @@ def _get_filters():
     filters = [{'p': 'c', 't': 'countries'},
                {'p': 'g', 't': 'categories'},
                {'p': 'y', 't': 'years'},
-               {'p': 'q', 't': 'rip'},
-               {'p': 't', 't': 'translation'},
+               # {'p': 'q', 't': 'rip'},
+               {'p': 't', 't': 'vo'},
                ]
 
     return filters
@@ -1053,11 +1045,11 @@ def _get_filter_title(filter_name):
         result = _('Year')
     elif filter_name == 'countries':
         result = _('Country')
-    elif filter_name == 'translation':
+    elif filter_name == 'vo':
         result = _('Translation/Voice')
-    elif filter_name == 'rip':
-        result = _('Quality')
-    #    elif filter_name =='sort': result = _('Sort')
+    # elif filter_name == 'rip':
+    #     result = _('Quality')
+    # elif filter_name =='sort': result = _('Sort')
 
     return result
 

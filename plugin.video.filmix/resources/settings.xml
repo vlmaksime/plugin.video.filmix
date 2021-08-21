@@ -3,7 +3,6 @@
     <category label="30200">
         <setting label="30201" type="bool" id="use_atl_names" visible="true" default="false" />
         <setting label="30202" type="labelenum" id="history_length" values="5|10|15|20|25" default="10" />
-        <setting label="30203" type="labelenum" id="step" values="15|30|45|60" default="30" />
         <setting label="30204" type="bool" id="use_filters" default="true"/>
         <setting type="sep"/>
         <setting label="30210" type="enum" id="video_quality" lvalues="30211|30212|30213|30214|30215|30216" default="2"/>

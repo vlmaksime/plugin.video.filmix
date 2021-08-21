@@ -5,15 +5,8 @@ from __future__ import unicode_literals
 
 import math
 import random
-import ssl
-from base64 import b64decode
-from builtins import range
 
-import filmixcert
 import requests
-from future.utils import PY26
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.ssl_ import create_urllib3_context
 
 __all__ = ['FilmixClient', 'FilmixError']
 
@@ -27,54 +20,26 @@ class FilmixError(Exception):
         super(FilmixError, self).__init__(self.message)
 
 
-class FilmixAdapter(HTTPAdapter):
-    _filmix_ciphers = 'DEFAULT@SECLEVEL=0'
-    _filmix_ssl_version = ssl.PROTOCOL_TLSv1
-
-    def init_poolmanager(self, *args, **kwargs):
-        context = create_urllib3_context(ciphers=self._filmix_ciphers, ssl_version=self._filmix_ssl_version)
-        kwargs['ssl_context'] = context
-        return super(FilmixAdapter, self).init_poolmanager(*args, **kwargs)
-
-    def proxy_manager_for(self, *args, **kwargs):
-        context = create_urllib3_context(ciphers=self._filmix_ciphers, ssl_version=self._filmix_ssl_version)
-        kwargs['ssl_context'] = context
-        return super(FilmixAdapter, self).proxy_manager_for(*args, **kwargs)
-
-
 class FilmixClient(object):
-    _base_url = 'https://app.filmix.vip:8044/'
+    _base_url = 'http://filmixapp.cyou/'
 
-    def __init__(self):
+    _user_dev_apk = '1.0.2'
+    _user_dev_id = None
+    _user_dev_name = None
+    _user_dev_token = None
+    _user_dev_vendor = None
+    _user_dev_os = None
 
-        headers = {'User-Agent': None,
-                   'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    def __init__(self, api_url=None):
+
+        if api_url is not None:
+            self._base_url = api_url
+
+        headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                    }
 
         self._client = requests.Session()
         self._client.headers.update(headers)
-
-        certificate = filmixcert.certificate()
-        plainkey = filmixcert.plainkey()
-
-        self._client.cert = (certificate, plainkey)
-        self._client.verify = False#certificate
-
-        if not PY26 \
-                and ssl.OPENSSL_VERSION.split(' ')[0].upper() == 'OPENSSL' \
-                and ssl.OPENSSL_VERSION_INFO >= (1, 1, 0):
-            try:
-                adapter = FilmixAdapter()
-            except ssl.SSLError as e:
-                print('OpenSSL info: {0}'.format(ssl.OPENSSL_VERSION))
-                print('Error: {0}'.format(e))
-            else:
-                self._client.mount(self._base_url, adapter)
-
-        self._user_dev_id = None
-        self._user_dev_name = None
-        self._user_dev_token = None
-        self._user_dev_vendor = None
 
     def __del__(self):
         self._client.close()
@@ -85,6 +50,7 @@ class FilmixClient(object):
         params['user_dev_name'] = self._user_dev_name
         params['user_dev_token'] = self._user_dev_token
         params['user_dev_vendor'] = self._user_dev_vendor
+        params['user_dev_os'] = self._user_dev_os
 
         return params
 
@@ -97,16 +63,6 @@ class FilmixClient(object):
         data = self._add_device_info(data)
 
         return self._client.post(url, data=data, *args, **kwargs)
-
-    @staticmethod
-    def decode_link(link):
-
-        tmp_a = 'u,5,Y,I,E,4,7,D,6,G,j,n,2,g,T,b,L,v,S,F,X,h,1,q,=,Z'.split(',')
-        tmp_b = 'W,x,m,M,3,r,t,0,8,z,U,A,B,d,P,y,K,O,i,V,N,w,9,l,R,C'.split(',')
-        a_length = len(tmp_a)
-        for i in range(0, a_length, 1):
-            link = link.replace(tmp_b[i], '___').replace(tmp_a[i], tmp_b[i]).replace('___', tmp_a[i])
-        return b64decode(link).decode('utf8')
 
     @staticmethod
     def _extract_json(r):
@@ -138,7 +94,7 @@ class FilmixClient(object):
         return result
 
     def token_request(self):
-        url = self._base_url + 'adgvn/token_request'
+        url = self._base_url + 'api/v2/token_request'
 
         r = self._get(url)
         j = self._extract_json(r)
@@ -146,7 +102,7 @@ class FilmixClient(object):
         return j
 
     def set_videoserver(self, vs_schg):
-        url = self._base_url + 'android.php'
+        url = self._base_url + '/api/v2/change_server'
 
         data = {'vs_schg': vs_schg,
                 }
@@ -157,37 +113,30 @@ class FilmixClient(object):
         return j
 
     def user_data(self):
-        url = self._base_url + 'android.php?user_profile'
+        url = self._base_url + 'api/v2/user_profile'
 
         r = self._get(url)
         j = self._extract_json(r)
 
         if isinstance(j, dict):
-            result = j['user_data']
+            result = j.get('user_data', {})
         else:
             result = {}
 
         return result
 
-    def _get_items(self, u_params, page=1, page_params=None, **kwargs):
-        url = self._base_url + 'android.php'
+    def _get_items(self, url, u_params=None, page=1, page_params=None, **kwargs):
 
         params = kwargs or {}
 
-        per_page = params.get('per_page', '15')
+        per_page = params.get('per_page', 50)
 
-        if page > 1:
-            u_params['cstart'] = page
-
-        cookies = {'per_page_news': per_page,
-                   }
-
-        r = self._get(url, params=u_params, cookies=cookies)
+        r = self._get(url, params=u_params)
         j = self._extract_json(r) or []
 
         if page_params is not None:
             pages = {'prev': {'page': page - 1} if page > 1 else None,
-                     'next': {'page': page + 1} if int(per_page) == len(j) else None,
+                     'next': {'page': page + 1} if int(per_page) <= len(j) else None,
                      }
             if pages['prev'] is not None:
                 pages['prev'].update(page_params)
@@ -206,6 +155,7 @@ class FilmixClient(object):
         return result
 
     def get_catalog_items(self, orderby='', orderdir='', section=996, page=1, filters='', **kwargs):
+        url = self._base_url + 'api/v2/catalog'
 
         if section == 996:
             u_params = {'orderby': orderby,
@@ -215,13 +165,11 @@ class FilmixClient(object):
             filter_items = filters.split('-') if filters else []
             filter_items.append('s{0}'.format(section))
 
-            u_params = {'do': 'cat',
-                        'category': '',
-                        'orderby': orderby,
+            u_params = {'orderby': orderby,
                         'orderdir': orderdir,
-                        'requested_url': 'filters/{0}'.format('-'.join(filter_items))
+                        'filter': '{0}'.format('-'.join(filter_items)),
+                        'page': page,
                         }
-
         page_params = {'orderby': orderby,
                        'orderdir': orderdir,
                        }
@@ -229,93 +177,114 @@ class FilmixClient(object):
         if filters:
             page_params['filters'] = filters
 
-        return self._get_items(u_params, page, page_params, **kwargs)
+        return self._get_items(url, u_params, page, page_params, **kwargs)
 
     def get_movie_info(self, newsid='', alt_name=''):
-        url = self._base_url + 'android.php'
-        u_params = {'newsid': newsid,
-                    'seourl': alt_name,
-                    }
+        url = self._base_url + 'api/v2/post/{0}'.format(newsid)
 
-        r = self._get(url, params=u_params)
+        r = self._get(url)
         j = self._extract_json(r)
 
         return j
 
     def get_search_catalog(self, keyword, page=1, **kwargs):
-
-        params = {'do': 'search',
-                  'story': keyword,
+        url = self._base_url + 'api/v2/search'
+        params = {'story': keyword,
                   }
 
-        return self._get_items(params, **kwargs)
+        return self._get_items(url, params, page=page, **kwargs)
 
-    def get_favorites_items(self, page=1, **kwargs):
-        params = {'do': 'favorites',
-                  }
+    def get_favorites_items(self, orderby='', orderdir='', page=1, **kwargs):
+        url = self._base_url + 'api/v2/favourites'
 
-        return self._get_items(params, page, {}, **kwargs)
+        u_params = {'orderby': orderby,
+                    'orderdir': orderdir,
+                    'page': page,
+                    }
 
-    def get_watch_later_items(self, page=1, **kwargs):
-        params = {'do': 'watch_later',
-                  }
+        page_params = {'orderby': orderby,
+                       'orderdir': orderdir,
+                       }
 
-        return self._get_items(params, page, {}, **kwargs)
+        return self._get_items(url, u_params, page, page_params, **kwargs)
 
-    def get_history_items(self, page=1, **kwargs):
-        params = {'do': 'last_seen',
-                  }
+    def get_watch_later_items(self, orderby='', orderdir='', page=1, **kwargs):
+        url = self._base_url + 'api/v2/deferred'
 
-        return self._get_items(params, page, {}, **kwargs)
+        u_params = {'orderby': orderby,
+                    'orderdir': orderdir,
+                    'page': page,
+                    }
+
+        page_params = {'orderby': orderby,
+                       'orderdir': orderdir,
+                       }
+
+        return self._get_items(url, u_params, page, page_params, **kwargs)
+
+    def get_history_items(self, orderby='', orderdir='', page=1, **kwargs):
+        url = self._base_url + 'api/v2/history'
+
+        u_params = {'orderby': orderby,
+                    'orderdir': orderdir,
+                    'page': page,
+                    }
+
+        page_params = {'orderby': orderby,
+                       'orderdir': orderdir,
+                       }
+
+        return self._get_items(url, u_params, page, page_params, **kwargs)
 
     def get_popular_items(self, page=1, **kwargs):
-        params = {'do': 'popular',
-                  }
+        url = self._base_url + 'api/v2/popular'
 
-        return self._get_items(params, page, {}, **kwargs)
+        u_params = {'page': page,
+                    }
+
+        page_params = {}
+
+        return self._get_items(url, u_params, page, page_params, **kwargs)
 
     def get_top_views_items(self, page=1, **kwargs):
-        params = {'do': 'top_views',
-                  }
+        url = self._base_url + 'api/v2/top_views'
 
-        return self._get_items(params, page, {}, **kwargs)
+        u_params = {'page': page,
+                    }
 
-    def get_filter(self, scope, filter_id=None):
-        url = self._base_url + 'engine/ajax/get_filter.php'
+        page_params = {}
 
-        data = {'scope': scope,
-                }
+        return self._get_items(url, u_params, page, page_params, **kwargs)
+
+    def get_filter(self, filter_id=None):
+        url = self._base_url + 'api/v2/filter_list'
+
+        r = self._get(url)
+        j = self._extract_json(r)
+
         if filter_id is not None:
-            data['type'] = filter_id
+            return j[filter_id]
+        else:
+            return j
 
-        r = self._post(url, data=data)
+    def set_favorite(self, post_id):
+        url = self._base_url + 'api/v2/toggle_fav/{0}'.format(post_id)
+
+        r = self._get(url)
         j = self._extract_json(r)
 
         return j
 
-    def set_favorite(self, fav_id, value):
-        url = self._base_url + 'android.php?favorite'
+    def set_watch_later(self, post_id):
+        url = self._base_url + 'api/v2/toggle_wl/{0}'.format(post_id)
 
-        params = {'fav_id': fav_id,
-                  'action': 'plus' if value else 'minus',
-                  'skin': 'Filmix',
-                  'alert': '0',
-                  }
+        r = self._get(url)
+        j = self._extract_json(r)
 
-        self._get(url, params=params)
-
-    def set_watch_later(self, post_id, value):
-        url = self._base_url + 'android.php'
-
-        data = {'post_id': post_id,
-                'action': 'add' if value else 'rm',
-                'deferred': True,
-                }
-
-        self._post(url, data=data)
+        return j
 
     def add_watched(self, post_id, season=None, episode=None, translation=None):
-        url = self._base_url + 'android.php'
+        url = self._base_url + 'api/v2/add_watched'
 
         data = {'add_watched': 'true',
                 'id': post_id,
@@ -331,3 +300,8 @@ class FilmixClient(object):
             data['translation'] = translation
 
         self._post(url, data=data)
+
+    def check_update(self):
+        url = self._base_url + 'api/v2/check_update'
+
+        self._get(url)
