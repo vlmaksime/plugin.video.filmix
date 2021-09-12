@@ -30,9 +30,9 @@ class FilmixClient(object):
     _user_dev_vendor = None
     _user_dev_os = None
 
-    def __init__(self, api_url=None):
+    def __init__(self, api_url=''):
 
-        if api_url is not None:
+        if api_url:
             self._base_url = api_url
 
         headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -51,6 +51,7 @@ class FilmixClient(object):
         params['user_dev_token'] = self._user_dev_token
         params['user_dev_vendor'] = self._user_dev_vendor
         params['user_dev_os'] = self._user_dev_os
+        params['user_dev_apk'] = self._user_dev_apk
 
         return params
 
@@ -127,9 +128,7 @@ class FilmixClient(object):
 
     def _get_items(self, url, u_params=None, page=1, page_params=None, **kwargs):
 
-        params = kwargs or {}
-
-        per_page = params.get('per_page', 50)
+        per_page = 48
 
         r = self._get(url, params=u_params)
         j = self._extract_json(r) or []
@@ -305,3 +304,7 @@ class FilmixClient(object):
         url = self._base_url + 'api/v2/check_update'
 
         self._get(url)
+
+    def url_available(self, url):
+        r = self._client.head(url)
+        return r.status_code not in [403, 404]

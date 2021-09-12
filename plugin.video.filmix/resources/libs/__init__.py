@@ -7,12 +7,26 @@ import platform
 
 import simplemedia
 import xbmc
+import requests
 
 from .filmix import FilmixClient, FilmixError
 
 addon = simplemedia.Addon()
 
 __all__ = ['Filmix', 'FilmixError']
+
+
+class FilmixWebClient(simplemedia.WebClient):
+
+    def head(self, url, **kwargs):
+        try:
+            r = super(FilmixWebClient, self).head(url, **kwargs)
+        except simplemedia.WebClientError as e:
+            if isinstance(e.message, requests.HTTPError):
+                r = e.message.response
+            else:
+                raise e
+        return r
 
 
 class Filmix(FilmixClient):
@@ -22,18 +36,15 @@ class Filmix(FilmixClient):
         super(Filmix, self).__init__()
 
         headers = self._client.headers
+        if addon.kodi_major_version() >= '17':
+            headers['User-Agent'] = xbmc.getUserAgent()
 
-        new_client = simplemedia.WebClient(headers)
-
-        new_client.cert = self._client.cert
-        new_client.verify = self._client.verify
-        new_client.adapters = self._client.adapters
-
-        self._client = new_client
+        self._client = FilmixWebClient(headers)
 
         self._user_dev_name = addon.get_setting('user_dev_name')
         self._user_dev_id = addon.get_setting('user_dev_id')
         self._user_dev_token = addon.get_setting('user_dev_token')
+        self._user_dev_os = self._os_name()
 
         if not self._user_dev_id:
             self._user_dev_id = self.create_dev_id()
@@ -70,16 +81,19 @@ class Filmix(FilmixClient):
                   }
 
         # user_dev_name
-        if True:
-            os_name = platform.system()
-            if os_name == 'Linux':
-                if xbmc.getCondVisibility('system.platform.android'):
-                    os_name = 'Android'
-            else:
-                os_name = '{0} {1}'.format(os_name, platform.release())
-
-            user_dev_name = 'Kodi {0} ({1})_{2}'.format(addon.kodi_version(), os_name, self._user_dev_id[-5:])
-            fields['user_dev_name'] = user_dev_name
+        user_dev_name = 'Kodi {0} ({1})'.format(addon.kodi_version(), self._user_dev_id[-5:])
+        fields['user_dev_name'] = user_dev_name
 
         return fields
 
+    @staticmethod
+    def _os_name():
+        os_name = platform.system()
+        if os_name == 'Linux':
+            if xbmc.getCondVisibility('system.platform.android'):
+                os_name = 'Android'
+        else:
+            os_name = '{0} {1}'.format(os_name, platform.release())
+
+        return os_name
+    

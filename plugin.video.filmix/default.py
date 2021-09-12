@@ -656,9 +656,16 @@ def play_video(catalog, content_name):
                 listitem['info']['video']['title'] = listitem['label']
 
         if _is_movie(content_info):
-            listitem['path'] = _get_movie_link(content_info, translation)
+            path = _get_movie_link(content_info, translation)
         else:
-            listitem['path'] = _get_episode_link(content_info, season, episode, translation)
+            path = _get_episode_link(content_info, season, episode, translation)
+
+
+        if path is None:
+            plugin.resolve_url({}, False)
+            return
+
+        listitem['path'] = path
 
         data = {'post_id': content['id'],
                 'translation': translation,
@@ -790,7 +797,9 @@ def _get_movie_link(item, translation=None):
     for i, q in enumerate(quality_list):
         if (path is None or video_quality >= i) \
                 and q in qualities:
-            path = url.replace(url[sub_a:sub_b + 1], q)
+            stream_url = url.replace(url[sub_a:sub_b + 1], q)
+            if api.url_available(stream_url):
+                path = stream_url
 
     return path
 
@@ -806,7 +815,10 @@ def _get_episode_link(item, season, episode, translation=None):
     else:
         episode_info = season_translation[episode]
 
+    api = Filmix()
+
     url = episode_info['link']
+
     qualities = episode_info['qualities']
 
     video_quality = plugin.get_setting('video_quality')
@@ -816,7 +828,9 @@ def _get_episode_link(item, season, episode, translation=None):
     for i, q in enumerate(quality_list):
         if (path is None or video_quality >= i) \
                 and int(q) in qualities:
-            path = url % q
+            stream_url = url % q
+            if api.url_available(stream_url):
+                path = stream_url
 
     return path
 
@@ -830,6 +844,8 @@ def _get_trailer_link(item):
 
     url = player_links[0]['link']
 
+    api = Filmix()
+
     sub_a = url.find('[')
     sub_b = url.find(']')
     qualities = url[sub_a + 1:sub_b].split(',')
@@ -841,7 +857,9 @@ def _get_trailer_link(item):
     for i, q in enumerate(quality_list):
         if (path is None or video_quality >= i) \
                 and q in qualities:
-            path = url.replace(url[sub_a:sub_b + 1], q)
+            stream_url = url.replace(url[sub_a:sub_b + 1], q)
+            if api.url_available(stream_url):
+                path = stream_url
 
     return path
 
