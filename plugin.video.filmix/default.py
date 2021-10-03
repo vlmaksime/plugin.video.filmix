@@ -775,13 +775,13 @@ def _get_player_links(item):
 def _get_movie_link(item, translation=None):
     player_links = _get_player_links(item)
 
-    url = player_links[0]['link']
+    url = player_links[0]['link'].replace('https://', 'http://')
 
     if len(player_links) > 1 \
             and translation is not None:
         for link in player_links:
             if link['translation'] == translation:
-                url = link['link']
+                url = link['link'].replace('https://', 'http://')
                 break
 
     api = Filmix()
@@ -817,7 +817,7 @@ def _get_episode_link(item, season, episode, translation=None):
 
     api = Filmix()
 
-    url = episode_info['link']
+    url = episode_info['link'].replace('https://', 'http://')
 
     qualities = episode_info['qualities']
 
@@ -842,7 +842,7 @@ def _get_trailer_link(item):
             or len(player_links) == 0:
         return ''
 
-    url = player_links[0]['link']
+    url = player_links[0]['link'].replace('https://', 'http://')
 
     api = Filmix()
 
