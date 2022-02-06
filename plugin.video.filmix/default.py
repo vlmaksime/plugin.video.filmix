@@ -802,6 +802,8 @@ def _get_movie_link(item, translation=None):
         if (path is None or video_quality >= i) \
                 and q in qualities:
             stream_url = url.replace(url[sub_a:sub_b + 1], q)
+            if plugin.get_setting('use_http_links'):
+                stream_url = stream_url.replace('https://', 'http://')
             if api.url_available(stream_url):
                 path = stream_url
 
@@ -839,6 +841,8 @@ def _get_episode_link(item, season, episode, translation=None):
         if (path is None or video_quality >= i) \
                 and int(q) in qualities:
             stream_url = url % q
+            if plugin.get_setting('use_http_links'):
+                stream_url = stream_url.replace('https://', 'http://')
             if api.url_available(stream_url):
                 path = stream_url
 
@@ -875,6 +879,8 @@ def _get_trailer_link(item):
         if (path is None or video_quality >= i) \
                 and q in qualities:
             stream_url = url.replace(url[sub_a:sub_b + 1], q)
+            if plugin.get_setting('use_http_links'):
+                stream_url = stream_url.replace('https://', 'http://')
             if api.url_available(stream_url):
                 path = stream_url
 

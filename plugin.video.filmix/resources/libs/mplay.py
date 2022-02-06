@@ -26,7 +26,7 @@ class MplayError(Exception):
 
 class MplayClient(object):
 
-    _base_url = 'https://mplay.su/'
+    _base_url = 'http://mplay.su/'
     _box_mac = None
 
     def __init__(self):
