@@ -158,6 +158,10 @@ msgctxt "#30060"
 msgid "Connection code: [B]{0}[/B]"
 msgstr ""
 
+msgctxt "#30061"
+msgid "You have successfully logged out"
+msgstr ""
+
 msgctxt "#30361"
 msgid "Login by Code"
 msgstr ""
@@ -312,4 +316,40 @@ msgstr ""
 
 msgctxt "#30401"
 msgid "Use HTTP protocol for video streams"
+msgstr ""
+
+msgctxt "#30410"
+msgid "mPlay.su Settings"
+msgstr ""
+
+msgctxt "#30411"
+msgid "Use mPlay.su to play 1080p+ video"
+msgstr ""
+
+msgctxt "#30412"
+msgid "Activate by code"
+msgstr ""
+
+msgctxt "#30413"
+msgid "Activate by device ID"
+msgstr ""
+
+msgctxt "#30414"
+msgid "Device ID"
+msgstr ""
+
+msgctxt "#30415"
+msgid "Remove device ID"
+msgstr ""
+
+msgctxt "#30416"
+msgid "Enter device ID"
+msgstr ""
+
+msgctxt "#30417"
+msgid "Login failure! Please, check your device ID"
+msgstr ""
+
+msgctxt "#30418"
+msgid "Enter this code in your account on the page of your devices"
 msgstr ""

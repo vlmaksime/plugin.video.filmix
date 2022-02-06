@@ -27,5 +27,11 @@
     </category>
    <category label="30400">
         <setting label="30401" type="bool" id="use_http_links" visible="true" default="false"/>
+        <setting label="30410" type="lsep"/>
+        <setting label="30411" type="bool" id="use_mplay_token" visible="true" default="false"/>
+        <setting label="30412" type="action" visible="eq(-1,true)+eq(2,)" action="RunPlugin(plugin://$ID/mplay_activate)"/>
+        <setting label="30413" type="action" visible="eq(-2,true)+eq(1,)" action="RunPlugin(plugin://$ID/mplay_enter_token)"/>
+        <setting label="30414" type="text" id="mplay_token" visible="eq(-3,true)+!eq(0,)" enable="false" default=""/>
+        <setting label="30415" type="action" visible="eq(-4,true)+!eq(-1,)" action="RunPlugin(plugin://$ID/mplay_remove_token)"/>
     </category>
 </settings>

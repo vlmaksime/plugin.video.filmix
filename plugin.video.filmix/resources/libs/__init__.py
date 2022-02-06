@@ -10,10 +10,12 @@ import xbmc
 import requests
 
 from .filmix import FilmixClient, FilmixError
+from .mplay import MplayClient, MplayError
 
 addon = simplemedia.Addon()
 
-__all__ = ['Filmix', 'FilmixError']
+__all__ = ['Filmix', 'FilmixError',
+           'Mplay', 'MplayError']
 
 
 class FilmixWebClient(simplemedia.WebClient):
@@ -96,4 +98,33 @@ class Filmix(FilmixClient):
             os_name = '{0} {1}'.format(os_name, platform.release())
 
         return os_name
-    
+
+
+class Mplay(MplayClient):
+
+    def __init__(self):
+
+        super(Mplay, self).__init__()
+
+        headers = self._client.headers
+        if addon.kodi_major_version() >= '17':
+            headers['User-Agent'] = xbmc.getUserAgent()
+
+        self._client = simplemedia.WebClient(headers)
+
+        self._box_mac = addon.get_setting('mplay_token')
+
+    @staticmethod
+    def create_token():
+        import math
+        import random
+
+        result = ''
+        charsets = '0123456789abcdef'
+        while len(result) < 16:
+            index = int(math.floor(random.random() * 15))
+            result = result + charsets[index]
+        return 'kodi' + result
+
+    def update_box_token(self, box_mac):
+        self._box_mac = box_mac

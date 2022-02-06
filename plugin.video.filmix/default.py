@@ -10,8 +10,9 @@ import xbmc
 import xbmcgui
 import xbmcplugin
 from future.utils import iteritems
-from resources.libs import Filmix, FilmixError
 from simplemedia import py2_decode
+
+from resources.libs import Filmix, FilmixError, Mplay, MplayError
 
 plugin = simplemedia.RoutedPlugin()
 _ = plugin.initialize_gettext()
@@ -784,6 +785,9 @@ def _get_movie_link(item, translation=None):
                 url = link['link']
                 break
 
+    if _use_mplay():
+        url = _replace_token(url)
+
     api = Filmix()
 
     sub_a = url.find('[')
@@ -822,6 +826,9 @@ def _get_episode_link(item, season, episode, translation=None):
 
     url = episode_info['link']
 
+    if _use_mplay():
+        url = _replace_token(url)
+
     qualities = episode_info['qualities']
 
     video_quality = plugin.get_setting('video_quality')
@@ -850,6 +857,9 @@ def _get_trailer_link(item):
         return ''
 
     url = player_links[0]['link']
+
+    if _use_mplay():
+        url = _replace_token(url)
 
     api = Filmix()
 
@@ -884,13 +894,18 @@ def _get_http_link(path):
         return direct_path.replace('https://', 'http://')
 
 def _available_qualities():
-    if plugin.get_setting('is_pro_plus'):
+    if plugin.get_setting('is_pro_plus')\
+            or _use_mplay():
         return ['360', '480', '720', '1080', '1440', '2160']
     elif plugin.get_setting('user_login'):
         return ['360', '480', '720']
     else:
         return ['360', '480']
 
+def _use_mplay():
+    use_mplay = plugin.get_setting('use_mplay_token') \
+                 and plugin.get_setting('mplay_token')
+    return use_mplay
 
 def _get_listitem(item):
     poster = item['poster']
@@ -1415,6 +1430,97 @@ def _openmeta_compare_title(title, item_title, part_match):
         return item_title.startswith(title) or title.startswith(item_title)
     else:
         return item_title == title
+
+@plugin.route('/mplay_activate')
+def mplay_activate():
+    try:
+        api = Mplay()
+
+        mplay_token = api.create_token()
+        api.update_box_token(mplay_token)
+
+        activation_code = api.activation_code_request()
+    except (MplayError, simplemedia.WebClientError) as e:
+        plugin.notify_error(e, True)
+    else:
+        progress = plugin.dialog_progress_create(_('Login by Code'),
+                                                 activation_code,
+                                                 _('Enter this code in your account on the page of your devices'))
+
+        wait_sec = 300
+        step_sec = 2
+        pass_sec = 0
+        check_sec = 20
+
+        activation_status = False
+
+        while pass_sec < wait_sec:
+            if progress.iscanceled():
+                return
+
+            xbmc.sleep(step_sec * 1000)
+            pass_sec += step_sec
+
+            plugin.dialog_progress_update(progress, int(100 * pass_sec / wait_sec))
+
+            if (pass_sec % check_sec) == 0:
+                try:
+                    activation_status = api.activation_status()
+                except (MplayError, simplemedia.WebClientError) as e:
+                    plugin.notify_error(e)
+                else:
+                    if activation_status:
+                        break
+
+        progress.close()
+
+        if activation_status:
+            plugin.set_setting('mplay_token', mplay_token)
+            plugin.dialog_ok(_('You have successfully logged in'))
+        else:
+            plugin.dialog_ok(_('Login failure! Please, try later'))
+
+@plugin.route('/mplay_enter_token')
+def mplay_enter_token():
+    mplay_token = plugin.get_keyboard_text('', _('Enter device ID'))
+    if mplay_token:
+
+        try:
+            api = Mplay()
+            api.update_box_token(mplay_token)
+
+            activation_status = api.activation_status()
+
+        except (MplayError, simplemedia.WebClientError) as e:
+            plugin.notify_error(e, True)
+        else:
+            if activation_status:
+                plugin.set_setting('mplay_token', mplay_token)
+                plugin.dialog_ok(_('You have successfully logged in'))
+            else:
+                plugin.dialog_ok(_('Login failure! Please, check your device ID'))
+
+
+@plugin.route('/mplay_remove_token')
+def mplay_remove_token():
+    plugin.set_setting('mplay_token', '')
+
+    plugin.dialog_ok(_('You have successfully logged out'))
+
+
+def _replace_token(stream_url):
+    try:
+        api = Mplay()
+
+        hd_token = api.get_filmix_hd_token()
+    except (MplayError, simplemedia.WebClientError):
+        return stream_url
+    else:
+        if hd_token:
+            stream_token = api.get_token_from_filmix_url(stream_url)
+            return stream_url.replace(stream_token, hd_token)
+
+    return stream_url
 
 
 def _sort_by_val(item):

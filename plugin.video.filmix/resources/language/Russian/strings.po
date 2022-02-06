@@ -108,7 +108,7 @@ msgstr "Вы успешно вошли в систему"
 
 msgctxt "#30046"
 msgid "Login failure! Please, try later"
-msgstr "Ошибка входа! Пожалуйста, попробуйте позднее."
+msgstr "Ошибка входа! Пожалуйста, попробуйте позднее"
 
 msgctxt "#30047"
 msgid "Server sent an empty response"
@@ -157,6 +157,10 @@ msgstr "или в меню сайта [B]'Профиль' -> 'Приставки
 msgctxt "#30060"
 msgid "Connection code: [B]{0}[/B]"
 msgstr "Код подключения: [B]{0}[/B]"
+
+msgctxt "#30061"
+msgid "You have successfully logged out"
+msgstr "Вы успешно вышли из системы"
 
 msgctxt "#30361"
 msgid "Login by Code"
@@ -305,3 +309,47 @@ msgstr "Язык"
 msgctxt "#30347"
 msgid "Order"
 msgstr "Порядок"
+
+msgctxt "#30400"
+msgid "Advanced"
+msgstr "Расширенные"
+
+msgctxt "#30401"
+msgid "Use HTTP protocol for video streams"
+msgstr "Использовать протокол HTTP для видеопотоков"
+
+msgctxt "#30410"
+msgid "mPlay.su Settings"
+msgstr "Настройки mPlay.su"
+
+msgctxt "#30411"
+msgid "Use mPlay.su to play 1080p+ video"
+msgstr "Использовать mPlay.su для воспроизведения видео 1080p+"
+
+msgctxt "#30412"
+msgid "Activate by code"
+msgstr "Активировать по коду"
+
+msgctxt "#30413"
+msgid "Activate by device ID"
+msgstr "Активировать по ID устройства"
+
+msgctxt "#30414"
+msgid "Device ID"
+msgstr "ID устройства"
+
+msgctxt "#30415"
+msgid "Remove device ID"
+msgstr "Удалить ID устройства"
+
+msgctxt "#30416"
+msgid "Enter device ID"
+msgstr "Введите ID устройства"
+
+msgctxt "#30417"
+msgid "Login failure! Please, check your device ID"
+msgstr "Ошибка входа! Пожалуйста, проверьте ID устройства"
+
+msgctxt "#30418"
+msgid "Enter this code in your account on the page of your devices"
+msgstr "Введите этот код в личном кабинете на странице ваших устройств"
