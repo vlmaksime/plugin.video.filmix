@@ -3,9 +3,6 @@
 
 from __future__ import unicode_literals
 
-import math
-import random
-
 import requests
 
 __all__ = ['FilmixClient', 'FilmixError']
@@ -86,6 +83,8 @@ class FilmixClient(object):
 
     @staticmethod
     def create_dev_id():
+        import math
+        import random
 
         result = ''
         charsets = '0123456789abcdef'
@@ -308,3 +307,7 @@ class FilmixClient(object):
     def url_available(self, url):
         r = self._client.head(url)
         return r.status_code not in [403, 404]
+
+    def get_direct_link(self, url):
+        r = self._client.head(url, allow_redirects=True)
+        return r.url

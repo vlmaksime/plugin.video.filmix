@@ -25,4 +25,7 @@
         <setting label="30310" type="text" id="videoserver" visible="!eq(-7,)" enable="false" default=""/>
         <setting label="30311" type="action" visible="eq(-5,true)|eq(-6,true)" action="RunPlugin(plugin://$ID/select_videoserver)"/>
     </category>
+   <category label="30400">
+        <setting label="30401" type="bool" id="use_http_links" visible="true" default="false"/>
+    </category>
 </settings>

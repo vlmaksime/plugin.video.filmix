@@ -775,13 +775,13 @@ def _get_player_links(item):
 def _get_movie_link(item, translation=None):
     player_links = _get_player_links(item)
 
-    url = player_links[0]['link'].replace('https://', 'http://')
+    url = player_links[0]['link']
 
     if len(player_links) > 1 \
             and translation is not None:
         for link in player_links:
             if link['translation'] == translation:
-                url = link['link'].replace('https://', 'http://')
+                url = link['link']
                 break
 
     api = Filmix()
@@ -801,6 +801,9 @@ def _get_movie_link(item, translation=None):
             if api.url_available(stream_url):
                 path = stream_url
 
+    if plugin.get_setting('use_http_links'):
+        path = _get_http_link(path)
+
     return path
 
 
@@ -817,7 +820,7 @@ def _get_episode_link(item, season, episode, translation=None):
 
     api = Filmix()
 
-    url = episode_info['link'].replace('https://', 'http://')
+    url = episode_info['link']
 
     qualities = episode_info['qualities']
 
@@ -832,6 +835,10 @@ def _get_episode_link(item, season, episode, translation=None):
             if api.url_available(stream_url):
                 path = stream_url
 
+
+    if plugin.get_setting('use_http_links'):
+        path = _get_http_link(path)
+
     return path
 
 
@@ -842,7 +849,7 @@ def _get_trailer_link(item):
             or len(player_links) == 0:
         return ''
 
-    url = player_links[0]['link'].replace('https://', 'http://')
+    url = player_links[0]['link']
 
     api = Filmix()
 
@@ -861,8 +868,20 @@ def _get_trailer_link(item):
             if api.url_available(stream_url):
                 path = stream_url
 
+    if plugin.get_setting('use_http_links'):
+        path = _get_http_link(path)
+
     return path
 
+
+def _get_http_link(path):
+    try:
+        api = Filmix()
+        direct_path = api.get_direct_link(path)
+    except (FilmixError, simplemedia.WebClientError) as e:
+        return path
+    else:
+        return direct_path.replace('https://', 'http://')
 
 def _available_qualities():
     if plugin.get_setting('is_pro_plus'):

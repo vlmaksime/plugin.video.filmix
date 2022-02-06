@@ -305,3 +305,11 @@ msgstr ""
 msgctxt "#30347"
 msgid "Order"
 msgstr ""
+
+msgctxt "#30400"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#30401"
+msgid "Use HTTP protocol for video streams"
+msgstr ""
