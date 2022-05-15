@@ -785,8 +785,14 @@ def _get_movie_link(item, translation=None):
                 url = link['link']
                 break
 
-    if _use_mplay():
-        url = _replace_token(url)
+    use_mplay = _use_mplay()
+    if use_mplay:
+        try:
+            url = _replace_token(url)
+        except (MplayError, simplemedia.WebClientError) as e:
+            use_mplay = False
+            if isinstance(e, MplayError):
+                plugin.notify_error(e)
 
     api = Filmix()
 
@@ -795,7 +801,7 @@ def _get_movie_link(item, translation=None):
     qualities = url[sub_a + 1:sub_b].split(',')
 
     video_quality = plugin.get_setting('video_quality')
-    quality_list = _available_qualities()
+    quality_list = _available_qualities(use_mplay)
 
     path = None
     for i, q in enumerate(quality_list):
@@ -820,7 +826,7 @@ def _get_episode_link(item, season, episode, translation=None):
         return None
 
     if isinstance(season_translation, list):
-        episode_info = season_translation[int(episode) - 1]
+        episode_info = season_translation[int(episode)]
     else:
         episode_info = season_translation[episode]
 
@@ -828,13 +834,19 @@ def _get_episode_link(item, season, episode, translation=None):
 
     url = episode_info['link']
 
-    if _use_mplay():
-        url = _replace_token(url)
+    use_mplay = _use_mplay()
+    if use_mplay:
+        try:
+            url = _replace_token(url)
+        except (MplayError, simplemedia.WebClientError) as e:
+            use_mplay = False
+            if isinstance(e, MplayError):
+                plugin.notify_error(e)
 
     qualities = episode_info['qualities']
 
     video_quality = plugin.get_setting('video_quality')
-    quality_list = _available_qualities()
+    quality_list = _available_qualities(use_mplay)
 
     path = None
     for i, q in enumerate(quality_list):
@@ -845,7 +857,6 @@ def _get_episode_link(item, season, episode, translation=None):
                 stream_url = stream_url.replace('https://', 'http://')
             if api.url_available(stream_url):
                 path = stream_url
-
 
     if plugin.get_setting('use_http_links'):
         path = _get_http_link(path)
@@ -862,8 +873,14 @@ def _get_trailer_link(item):
 
     url = player_links[0]['link']
 
-    if _use_mplay():
-        url = _replace_token(url)
+    use_mplay = _use_mplay()
+    if use_mplay:
+        try:
+            url = _replace_token(url)
+        except (MplayError, simplemedia.WebClientError) as e:
+            use_mplay = False
+            if isinstance(e, MplayError):
+                plugin.notify_error(e)
 
     api = Filmix()
 
@@ -872,7 +889,7 @@ def _get_trailer_link(item):
     qualities = url[sub_a + 1:sub_b].split(',')
 
     video_quality = plugin.get_setting('video_quality')
-    quality_list = _available_qualities()
+    quality_list = _available_qualities(use_mplay)
 
     path = None
     for i, q in enumerate(quality_list):
@@ -899,19 +916,22 @@ def _get_http_link(path):
     else:
         return direct_path.replace('https://', 'http://')
 
-def _available_qualities():
-    if plugin.get_setting('is_pro_plus')\
-            or _use_mplay():
+
+def _available_qualities(use_mplay=False):
+    if plugin.get_setting('is_pro_plus') \
+            or use_mplay:
         return ['360', '480', '720', '1080', '1440', '2160']
     elif plugin.get_setting('user_login'):
         return ['360', '480', '720']
     else:
         return ['360', '480']
 
+
 def _use_mplay():
-    use_mplay = plugin.get_setting('use_mplay_token') \
-                 and plugin.get_setting('mplay_token')
+    use_mplay = (plugin.get_setting('use_mplay_token') \
+                 and plugin.get_setting('mplay_token') != '')
     return use_mplay
+
 
 def _get_listitem(item):
     poster = item['poster']
@@ -1515,16 +1535,12 @@ def mplay_remove_token():
 
 
 def _replace_token(stream_url):
-    try:
-        api = Mplay()
+    api = Mplay()
 
-        hd_token = api.get_filmix_hd_token()
-    except (MplayError, simplemedia.WebClientError):
-        return stream_url
-    else:
-        if hd_token:
-            stream_token = api.get_token_from_filmix_url(stream_url)
-            return stream_url.replace(stream_token, hd_token)
+    hd_token = api.get_filmix_hd_token()
+    if hd_token:
+        stream_token = api.get_token_from_filmix_url(stream_url)
+        stream_url = stream_url.replace(stream_token, hd_token)
 
     return stream_url
 

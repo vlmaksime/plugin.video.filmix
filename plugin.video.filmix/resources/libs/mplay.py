@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 from future.utils import PY3
 
 if PY3:
-    from urllib.parse import urlencode, urlparse
+    from urllib.parse import urlparse
 else:
-    from future.backports.urllib.parse import urlencode, urlparse
+    from future.backports.urllib.parse import urlparse
 
 import requests
 
@@ -25,7 +25,6 @@ class MplayError(Exception):
 
 
 class MplayClient(object):
-
     _base_url = 'http://mplay.su/'
     _box_mac = None
 
@@ -119,12 +118,17 @@ class MplayClient(object):
 
         r = self._head(url, params=params)
         if r.status_code not in [302]:
-            raise MplayError('Filmix token dont receaved')
+            raise MplayError('Filmix token don\'t receaved')
 
         hd_stream_url = r.headers.get('Location')
         return self.get_token_from_filmix_url(hd_stream_url)
 
+    @staticmethod
+    def get_token_from_filmix_url(stream_url):
 
-    def get_token_from_filmix_url(self, stream_url):
         url_parts = urlparse(stream_url)
+
+        if url_parts.netloc == 'mplay.su':
+            raise MplayError('Filmix token don\'t receaved')
+
         return url_parts.path.split('/')[2]
