@@ -90,6 +90,22 @@ msgctxt "#30021"
 msgid "All"
 msgstr "Все"
 
+msgctxt "#30022"
+msgid "Ended"
+msgstr "Завершён"
+
+msgctxt "#30023"
+msgid "Continuing"
+msgstr "Продолжается"
+
+msgctxt "#30024"
+msgid "Episodes"
+msgstr "Серии"
+
+msgctxt "#30025"
+msgid "Seasons"
+msgstr "Сезоны"
+
 msgctxt "#30041"
 msgid "Connection error"
 msgstr "Ошибка подключения"
@@ -147,8 +163,8 @@ msgid "Successfully removed from Watch Later"
 msgstr "Успешно удалено из Смотреть позже"
 
 msgctxt "#30058"
-msgid "Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)"
-msgstr "Введите код на страничке [B]{0}[/B] ([B]{1}[/B] для жителей РФ)"
+msgid "Enter code on the page [B]{0}/consoles[/B]"
+msgstr "Введите код на страничке [B]{0}/consoles[/B]"
 
 msgctxt "#30059"
 msgid "or in the site menu [B]'Profile' -> 'Consoles'[/B]"
@@ -162,17 +178,29 @@ msgctxt "#30061"
 msgid "You have successfully logged out"
 msgstr "Вы успешно вышли из системы"
 
-msgctxt "#30361"
+msgctxt "#30062"
 msgid "Login by Code"
 msgstr "Вход по коду"
 
-msgctxt "#30362"
+msgctxt "#30062"
+msgid "Login by Code"
+msgstr "Вход по коду"
+
+msgctxt "#30063"
+msgid "Authorization"
+msgstr "Авторизация"
+
+msgctxt "#30064"
 msgid "Select video server"
 msgstr "Выберите видеосервер"
 
-msgctxt "#30363"
+msgctxt "#30065"
 msgid "Video server successfully changed"
 msgstr "Видеосервер успешно изменен"
+
+msgctxt "#30066"
+msgid "Filmix token don't received from mPlay"
+msgstr "Токен Filmix не получен от mPlay"
 
 msgctxt "#30200"
 msgid "General"

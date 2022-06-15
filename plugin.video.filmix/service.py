@@ -7,9 +7,10 @@ import json
 
 import simplemedia
 import xbmc
-from future.utils import python_2_unicode_compatible, iteritems, PY26
-from resources.libs import Filmix, FilmixError
+from future.utils import python_2_unicode_compatible, iteritems
 from simplemedia import py2_decode, Addon
+
+from resources.libs.web import Filmix, FilmixError
 
 
 @python_2_unicode_compatible
@@ -20,14 +21,11 @@ class FilmixMonitor(xbmc.Monitor):
         super(FilmixMonitor, self).__init__()
         addon = Addon()
         addon.log_debug('Started {0}'.format(self))
-        if not PY26:
-            import ssl
-            addon.log_debug('SSL library: {0}'.format(ssl.OPENSSL_VERSION))
 
         self._settings = self._get_settings()
 
     def __del__(self):
-        Addon().log_debug('Stoped {0}'.format(self))
+        Addon().log_debug('Stopped {0}'.format(self))
 
     def __str__(self):
         return '<FilmixMonitor>'
@@ -74,14 +72,13 @@ class FilmixMonitor(xbmc.Monitor):
 
         try:
             Filmix().check_device()
-        except (FilmixError, simplemedia.WebClientError) as e:
+        except (FilmixError, simplemedia.WebClientError):
             return False
         else:
             return True
 
 
-if __name__ == '__main__':
-
+def run():
     sleep_sec = 30
     dev_check_sec = 0
 
@@ -96,3 +93,7 @@ if __name__ == '__main__':
             break
 
         dev_check_sec -= sleep_sec
+
+
+if __name__ == '__main__':
+    run()

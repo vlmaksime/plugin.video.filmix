@@ -90,6 +90,22 @@ msgctxt "#30021"
 msgid "All"
 msgstr ""
 
+msgctxt "#30022"
+msgid "Ended"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Continuing"
+msgstr ""
+
+msgctxt "#30024"
+msgid "Episodes"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Seasons"
+msgstr ""
+
 msgctxt "#30041"
 msgid "Connection error"
 msgstr ""
@@ -147,7 +163,7 @@ msgid "Successfully removed from Watch Later"
 msgstr ""
 
 msgctxt "#30058"
-msgid "Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)"
+msgid "Enter code on the page [B]{0}/consoles[/B]"
 msgstr ""
 
 msgctxt "#30059"
@@ -162,16 +178,24 @@ msgctxt "#30061"
 msgid "You have successfully logged out"
 msgstr ""
 
-msgctxt "#30361"
+msgctxt "#30062"
 msgid "Login by Code"
 msgstr ""
 
-msgctxt "#30362"
+msgctxt "#30063"
+msgid "Authorization"
+msgstr ""
+
+msgctxt "#30064"
 msgid "Select video server"
 msgstr ""
 
-msgctxt "#30363"
+msgctxt "#30065"
 msgid "Video server successfully changed"
+msgstr ""
+
+msgctxt "#30066"
+msgid "Filmix token don't received from mPlay"
 msgstr ""
 
 msgctxt "#30200"
