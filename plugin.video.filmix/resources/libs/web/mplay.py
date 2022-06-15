@@ -113,15 +113,20 @@ class MplayClient(object):
         params = {'cmd': 'mediateka',
                   'su': 'get',
                   'su_n': '2273e9819b547497298980075323b05b',
-                  'su_str': 'Дубльований [Український]',
+                  'su_str': 'Дубльований [Український | 1080p+]',
                   }
 
-        r = self._head(url, params=params)
-        if r.status_code not in [302]:
-            raise MplayError('Filmix token don\'t receaved')
+        token = ''
 
-        hd_stream_url = r.headers.get('Location')
-        return self.get_token_from_filmix_url(hd_stream_url)
+        r = self._head(url, params=params)
+        if r.status_code in [302]:
+            hd_stream_url = r.headers.get('Location')
+            token = self.get_token_from_filmix_url(hd_stream_url)
+
+        if token == '':
+            raise MplayError('Filmix token don\'t received from mPlay')
+
+        return token
 
     @staticmethod
     def get_token_from_filmix_url(stream_url):
@@ -129,6 +134,6 @@ class MplayClient(object):
         url_parts = urlparse(stream_url)
 
         if url_parts.netloc == 'mplay.su':
-            raise MplayError('Filmix token don\'t receaved')
+            return ''
 
         return url_parts.path.split('/')[2]
