@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 
 import platform
 
+import requests
 import simplemedia
 import xbmc
-import requests
 
 from .filmix import FilmixClient, FilmixError
 from .mplay import MplayClient, MplayError

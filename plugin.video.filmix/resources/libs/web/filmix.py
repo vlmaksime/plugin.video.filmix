@@ -125,8 +125,7 @@ class FilmixClient(object):
 
         return result
 
-    def _get_items(self, url, u_params=None, page=1, page_params=None, **kwargs):
-
+    def _get_items(self, url, u_params=None, page=1, page_params=None):
         per_page = 48
 
         r = self._get(url, params=u_params)
@@ -152,107 +151,97 @@ class FilmixClient(object):
 
         return result
 
-    def get_catalog_items(self, orderby='', orderdir='', section=996, page=1, filters='', **kwargs):
+    def catalog(self, page=1, section=0, filters='', orderby='date', orderdir='desc'):
         url = self._base_url + 'api/v2/catalog'
 
-        if section == 996:
-            u_params = {'orderby': orderby,
-                        'orderdir': orderdir,
-                        }
-        else:
-            filter_items = filters.split('-') if filters else []
-            filter_items.append('s{0}'.format(section))
+        filter_items = filters.split('-') if filters else []
+        filter_items.append('s{0}'.format(section))
 
-            u_params = {'orderby': orderby,
-                        'orderdir': orderdir,
-                        'filter': '{0}'.format('-'.join(filter_items)),
-                        'page': page,
-                        }
-        page_params = {'orderby': orderby,
-                       'orderdir': orderdir,
-                       }
+        params = {'orderby': orderby,
+                  'orderdir': orderdir,
+                  'filter': '{0}'.format('-'.join(filter_items)),
+                  'page': page,
+                  }
 
-        if filters:
-            page_params['filters'] = filters
+        r = self._get(url, params)
+        j = self._extract_json(r)
 
-        return self._get_items(url, u_params, page, page_params, **kwargs)
+        return j
 
-    def get_movie_info(self, newsid='', alt_name=''):
-        url = self._base_url + 'api/v2/post/{0}'.format(newsid)
+    def popular(self, page=1):
+        url = self._base_url + 'api/v2/popular'
+
+        params = {'page': page,
+                  }
+
+        r = self._get(url, params)
+        j = self._extract_json(r)
+
+        return j
+
+    def top_views(self, page=1):
+        url = self._base_url + 'api/v2/top_views'
+
+        params = {'page': page,
+                  }
+
+        r = self._get(url, params)
+        j = self._extract_json(r)
+
+        return j
+
+    def favourites(self, orderby='date', orderdir='desc', page=1):
+        url = self._base_url + 'api/v2/favourites'
+
+        params = {'orderby': orderby,
+                  'orderdir': orderdir,
+                  'page': page,
+                  }
+
+        r = self._get(url, params)
+        j = self._extract_json(r)
+
+        return j
+
+    def deferred(self, page=1):
+        url = self._base_url + 'api/v2/deferred'
+
+        params = {'page': page,
+                  }
+
+        r = self._get(url, params)
+        j = self._extract_json(r)
+
+        return j
+
+    def history(self, page=1):
+        url = self._base_url + 'api/v2/history'
+
+        params = {'page': page,
+                  }
+
+        r = self._get(url, params)
+        j = self._extract_json(r)
+
+        return j
+
+    def post(self, post_id=''):
+        url = self._base_url + 'api/v2/post/{0}'.format(post_id)
 
         r = self._get(url)
         j = self._extract_json(r)
 
         return j
 
-    def get_search_catalog(self, keyword, page=1, **kwargs):
+    def search(self, story):
         url = self._base_url + 'api/v2/search'
-        params = {'story': keyword,
+        params = {'story': story,
                   }
 
-        return self._get_items(url, params, page=page, **kwargs)
+        r = self._get(url, params)
+        j = self._extract_json(r)
 
-    def get_favorites_items(self, orderby='', orderdir='', page=1, **kwargs):
-        url = self._base_url + 'api/v2/favourites'
-
-        u_params = {'orderby': orderby,
-                    'orderdir': orderdir,
-                    'page': page,
-                    }
-
-        page_params = {'orderby': orderby,
-                       'orderdir': orderdir,
-                       }
-
-        return self._get_items(url, u_params, page, page_params, **kwargs)
-
-    def get_watch_later_items(self, orderby='', orderdir='', page=1, **kwargs):
-        url = self._base_url + 'api/v2/deferred'
-
-        u_params = {'orderby': orderby,
-                    'orderdir': orderdir,
-                    'page': page,
-                    }
-
-        page_params = {'orderby': orderby,
-                       'orderdir': orderdir,
-                       }
-
-        return self._get_items(url, u_params, page, page_params, **kwargs)
-
-    def get_history_items(self, orderby='', orderdir='', page=1, **kwargs):
-        url = self._base_url + 'api/v2/history'
-
-        u_params = {'orderby': orderby,
-                    'orderdir': orderdir,
-                    'page': page,
-                    }
-
-        page_params = {'orderby': orderby,
-                       'orderdir': orderdir,
-                       }
-
-        return self._get_items(url, u_params, page, page_params, **kwargs)
-
-    def get_popular_items(self, page=1, **kwargs):
-        url = self._base_url + 'api/v2/popular'
-
-        u_params = {'page': page,
-                    }
-
-        page_params = {}
-
-        return self._get_items(url, u_params, page, page_params, **kwargs)
-
-    def get_top_views_items(self, page=1, **kwargs):
-        url = self._base_url + 'api/v2/top_views'
-
-        u_params = {'page': page,
-                    }
-
-        page_params = {}
-
-        return self._get_items(url, u_params, page, page_params, **kwargs)
+        return j
 
     def get_filter(self, filter_id=None):
         url = self._base_url + 'api/v2/filter_list'
@@ -302,7 +291,8 @@ class FilmixClient(object):
     def check_update(self):
         url = self._base_url + 'api/v2/check_update'
 
-        self._get(url)
+        r = self._get(url)
+        return self._extract_json(r)
 
     def url_available(self, url):
         r = self._client.head(url)
