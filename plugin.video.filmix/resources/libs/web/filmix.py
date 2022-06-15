@@ -246,12 +246,16 @@ class FilmixClient(object):
     def get_filter(self, filter_id=None):
         url = self._base_url + 'api/v2/filter_list'
 
+        if filter_id == 'rip':
+            return self._filters_rip()
+
         r = self._get(url)
         j = self._extract_json(r)
 
         if filter_id is not None:
             return j[filter_id]
         else:
+            j['rip'] = self._filters_rip()
             return j
 
     def set_favorite(self, post_id):
@@ -301,3 +305,16 @@ class FilmixClient(object):
     def get_direct_link(self, url):
         r = self._client.head(url, allow_redirects=True)
         return r.url
+
+    @staticmethod
+    def _filters_rip():
+        result = {
+            'fb': 'Плохое (CAM, TS)',
+            'fn': 'Хорошее (DVDRip, HDRip, SAT...)',
+            'fg': 'Отличное (HD 720)',
+            'fh': 'Шедевральное (FHD 1080)',
+            'f2': '1080p+ (FHD Ultra+)',
+            'f4': '4К (UHD 2160р)'
+        }
+
+        return result
