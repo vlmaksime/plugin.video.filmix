@@ -152,7 +152,7 @@ class FilmixCatalogs(object):
             result = {'items': cls._list_serial_seasons(content_info),
                       'content': 'seasons',
                       'category': content_info['title'],
-                      'sort_methods': xbmcplugin.SORT_METHOD_NONE,
+                      'sort_methods': xbmcplugin.SORT_METHOD_TITLE,
                       }
 
             plugin.create_directory(**result)
