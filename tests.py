@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function, unicode_literals
-from future.utils import PY26
-import os
-import sys
-import ssl
-import unittest
+
 import imp
-import mock
+import os
 import shutil
-import xbmcaddon
-import xbmc
-import simpleplugin
+import sys
+import unittest
+
+import mock
 import simplemedia
+import simpleplugin
+import xbmc
+import xbmcaddon
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 addon_name = 'plugin.video.filmix'
-sm_name = 'script.module.simplemedia'
 
 temp_dir = os.path.join(cwd, 'addon_data')
 
@@ -25,7 +24,7 @@ if not os.path.exists(temp_dir):
     os.mkdir(temp_dir)
 
 sm_dir = simplemedia.where()
-sm_config_dir = os.path.join(temp_dir, sm_name)
+sm_config_dir = os.path.join(temp_dir, 'script.module.simplemedia')
 xbmcaddon.init_addon(sm_dir, sm_config_dir)
 
 addon_dir = os.path.join(cwd, addon_name)
@@ -33,14 +32,14 @@ addon_config_dir = os.path.join(temp_dir, addon_name)
 xbmcaddon.init_addon(addon_dir, addon_config_dir, True)
 
 # Import our module being tested
-sys.path.append(os.path.join(cwd, 'script.module.filmix.cert', 'libs'))
 sys.path.append(addon_dir)
+
 
 def run_script():
     imp.load_source('__main__', os.path.join(addon_dir, 'default.py'))
 
-def setUpModule():
 
+def setUpModule():
     # prepare search history
     addon = simpleplugin.Addon()
     with addon.get_storage('__history__.pcl') as storage:
@@ -50,7 +49,6 @@ def setUpModule():
 
 
 def tearDownModule():
-
     print('Removing temporary directory: {0}'.format(temp_dir))
     shutil.rmtree(temp_dir, True)
 
@@ -73,13 +71,13 @@ class PluginActionsTestCase(unittest.TestCase):
             mock_sys.argv = ['plugin://{0}/check_device'.format(addon_name), '0', '']
 
             addon = xbmcaddon.Addon()
-            
+
             user_dev_id = os.getenv('user_dev_id', None)
             if user_dev_id is not None:
                 addon.setSetting('user_dev_id', user_dev_id)
             else:
                 print('user_dev_id not defined')
-    
+
             user_dev_token = os.getenv('user_dev_token', None)
             if user_dev_token is not None:
                 addon.setSetting('user_dev_token', user_dev_token)
@@ -100,50 +98,63 @@ class PluginActionsTestCase(unittest.TestCase):
 
         run_script()
 
-    @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/'.format(addon_name), '3', ''])
-    def test_03_video_info_movie():
+    # @staticmethod
+    # @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/'.format(addon_name), '3', ''])
+    # def test_03_video_info_movie():
+    #
+    #     run_script()
 
-        run_script()
-
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play/'.format(addon_name), '4', '?strm=1'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play/'.format(addon_name), '4', '?strm=1'])
     def test_04_play_video_movie():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play/'.format(addon_name), '5', '?t=%D0%94%D1%83%D0%B1%D0%BB%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B9+%5B4%D0%9A%2C+SDR%5D'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/movies/2896-ya-legenda-i-am-legend-2007/play/'.format(addon_name), '5',
+                 '?t=%D0%94%D1%83%D0%B1%D0%BB%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%BD%D1%8B%D0%B9+%5B4%D0%9A%2C+SDR%5D'])
     def test_05_play_video_movie_translation():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/'.format(addon_name), '6', ''])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/serials/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/'.format(addon_name), '6',
+                 ''])
     def test_06_serial_info():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/episodes/'.format(addon_name), '7', '?s=8'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/serials/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/episodes/'.format(addon_name),
+                 '7', '?s=8'])
     def test_07_serial_episodes():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/episodes/'.format(addon_name), '8', '?s=8&t=LostFilm'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/serials/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/episodes/'.format(addon_name),
+                 '8', '?s=8&t=LostFilm'])
     def test_08_serial_episodes_translation():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/play/'.format(addon_name), '9', '?e=18&s=8'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/serials/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/play/'.format(addon_name),
+                 '9', '?e=18&s=8'])
     def test_09_play_video_serial_episodes():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/play/'.format(addon_name), '10', '?e=18&s=8&t=LostFilm'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/serials/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/play/'.format(addon_name),
+                 '10', '?e=18&s=8&t=LostFilm'])
     def test_10_play_video_serial_episodes_translation():
 
         run_script()
@@ -163,7 +174,7 @@ class PluginActionsTestCase(unittest.TestCase):
 
     @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/favorites/'.format(addon_name), '13', ''])
-    def test_13_favourites():
+    def test_13_favorites():
 
         run_script()
 
@@ -192,61 +203,74 @@ class PluginActionsTestCase(unittest.TestCase):
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/dokumentalenye/14624-skorost-zhizni-2010/'.format(addon_name), '18', ''])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/dokumentalenye/14624-skorost-zhizni-2010/'.format(addon_name), '18', ''])
     def test_18_serial_seasons_without_seasons():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/dokumentalenye/14624-skorost-zhizni-2010/episodes/'.format(addon_name), '19', ''])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/dokumentalenye/14624-skorost-zhizni-2010/episodes/'.format(addon_name), '19', ''])
     def test_19_serial_episodes_without_seasons():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/dokumentalenye/14624-skorost-zhizni-2010/episodes/'.format(addon_name), '20', '?t=%D0%9F%D0%BB%D0%B5%D0%B5%D1%80+1'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/dokumentalenye/14624-skorost-zhizni-2010/episodes/'.format(addon_name), '20',
+                 '?t=%D0%9F%D0%BB%D0%B5%D0%B5%D1%80+1'])
     def test_20_serial_episodes_without_seasons_translation():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/search'.format(addon_name), '21', '?keyword=%D0%A1%D0%BC%D0%B5%D1%88%D0%B0%D1%80%D0%B8%D0%BA%D0%B8'])
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/search'.format(addon_name), '21',
+                                          '?keyword=%D0%A1%D0%BC%D0%B5%D1%88%D0%B0%D1%80%D0%B8%D0%BA%D0%B8'])
     def test_21_search_keyword():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_favorites'.format(addon_name), '22', '?id=14624&value=1'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/toogle_favorites'.format(addon_name), '22', '?id=14624&value=1'])
     def test_22_add_favorite():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_favorites'.format(addon_name), '23', '?id=14624&value=0'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/toogle_favorites'.format(addon_name), '23', '?id=14624&value=0'])
     def test_23_remove_favorite():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_watch_later'.format(addon_name), '24', '?id=14624&value=1'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/toogle_watch_later'.format(addon_name), '24', '?id=14624&value=1'])
     def test_24_add_watch_later():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/toogle_watch_later'.format(addon_name), '25', '?id=14624&value=0'])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/toogle_watch_later'.format(addon_name), '25', '?id=14624&value=0'])
     def test_25_remove_watch_later():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/movies/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/trailer'.format(addon_name), '26', ''])
+    @mock.patch('simpleplugin.sys.argv',
+                ['plugin://{0}/movies/6379-smotret-onlajn-sverxestestvennoe-6-sezon-2010/trailer'.format(addon_name),
+                 '26', ''])
     def test_26_play_trailer():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/serialy/70388-transformery-energon-transformer-super-link-multserial-2004/'.format(addon_name), '27', ''])
+    @mock.patch('simpleplugin.sys.argv', [
+        'plugin://{0}/serialy/70388-transformery-energon-transformer-super-link-multserial-2004/'.format(addon_name),
+        '27', ''])
     def test_27_serial_seasons_without_seasons():
 
         run_script()
@@ -264,13 +288,15 @@ class PluginActionsTestCase(unittest.TestCase):
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/movies/'.format(addon_name), '30', '?year=2015&title=%D0%A4%D0%BE%D1%80%D1%81%D0%B0%D0%B6+7'])
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/movies/'.format(addon_name), '30',
+                                          '?year=2015&title=%D0%A4%D0%BE%D1%80%D1%81%D0%B0%D0%B6+7'])
     def test_30_openmeta_movies():
 
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/tvshows/'.format(addon_name), '31', '?season=1&year=2005&episode=1&title=%D0%A1%D0%B2%D0%B5%D1%80%D1%85%D1%8A%D0%B5%D1%81%D1%82%D0%B5%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5'])
+    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/tvshows/'.format(addon_name), '31',
+                                          '?season=1&year=2005&episode=1&title=%D0%A1%D0%B2%D0%B5%D1%80%D1%85%D1%8A%D0%B5%D1%81%D1%82%D0%B5%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5'])
     def test_31_openmeta_tvshows():
 
         run_script()
