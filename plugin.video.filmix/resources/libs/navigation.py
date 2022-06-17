@@ -355,6 +355,10 @@ class FilmixCatalogs(object):
         if link_item is None:
             return None
 
+        if link_item['translation'] == 'Заблокировано правообладателем!':
+            plugin.notify_error(link_item['translation'], True)
+            return None
+
         url = link_item['link']
 
         use_mplay = Utilities.use_mplay()
