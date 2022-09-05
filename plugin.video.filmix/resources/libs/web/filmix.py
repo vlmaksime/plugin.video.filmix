@@ -20,7 +20,7 @@ class FilmixError(Exception):
 class FilmixClient(object):
     _base_url = 'http://filmixapp.cyou/'
 
-    _user_dev_apk = '1.0.2'
+    _user_dev_apk = '1.1.7'
     _user_dev_id = None
     _user_dev_name = None
     _user_dev_token = None
