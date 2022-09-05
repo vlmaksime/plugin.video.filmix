@@ -22,6 +22,9 @@ class FilmixCache(object):
         if not db_exist:
             self.create_database()
 
+    def __del__(self):
+        self.conn.close()
+
     @staticmethod
     def _dict_factory(cursor, row):
         d = {}
