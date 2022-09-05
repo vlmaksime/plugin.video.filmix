@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import simplemedia
+import simpleplugin
 import xbmc
 import xbmcplugin
 from future.utils import iteritems
@@ -120,8 +121,13 @@ class FilmixCatalogs(object):
             post_info = cache.get_post_details(item['id'])
             if post_info is None \
                     or item['date_atom'] != post_info['date_atom']:
-                post_info = api.post(item['id'])
-                cache.set_post_details(item['id'], post_info)
+                try:
+                    post_info = api.post(item['id'])
+                except simplemedia.WebClientError as e:
+                    simpleplugin.log_exception(e)
+                    continue
+                else:
+                    cache.set_post_details(item['id'], post_info)
 
             item_info = PostInfo(post_info)
 
