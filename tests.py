@@ -288,20 +288,6 @@ class PluginActionsTestCase(unittest.TestCase):
         run_script()
 
     @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/movies/'.format(addon_name), '30',
-                                          '?year=2015&title=%D0%A4%D0%BE%D1%80%D1%81%D0%B0%D0%B6+7'])
-    def test_30_openmeta_movies():
-
-        run_script()
-
-    @staticmethod
-    @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/openmeta/tvshows/'.format(addon_name), '31',
-                                          '?season=1&year=2005&episode=1&title=%D0%A1%D0%B2%D0%B5%D1%80%D1%85%D1%8A%D0%B5%D1%81%D1%82%D0%B5%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D0%BE%D0%B5'])
-    def test_31_openmeta_tvshows():
-
-        run_script()
-
-    @staticmethod
     @mock.patch('simpleplugin.sys.argv', ['plugin://{0}/select_videoserver'.format(addon_name), '32', ''])
     def test_32_select_videoserver():
 
