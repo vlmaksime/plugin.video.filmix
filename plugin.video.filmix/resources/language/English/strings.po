@@ -90,6 +90,22 @@ msgctxt "#30021"
 msgid "All"
 msgstr ""
 
+msgctxt "#30022"
+msgid "Ended"
+msgstr ""
+
+msgctxt "#30023"
+msgid "Continuing"
+msgstr ""
+
+msgctxt "#30024"
+msgid "Episodes"
+msgstr ""
+
+msgctxt "#30025"
+msgid "Seasons"
+msgstr ""
+
 msgctxt "#30041"
 msgid "Connection error"
 msgstr ""
@@ -147,7 +163,7 @@ msgid "Successfully removed from Watch Later"
 msgstr ""
 
 msgctxt "#30058"
-msgid "Enter code on the page [B]{0}[/B] ([B]{1}[/B] for residents of the RF)"
+msgid "Enter code on the page [B]{0}/consoles[/B]"
 msgstr ""
 
 msgctxt "#30059"
@@ -158,16 +174,28 @@ msgctxt "#30060"
 msgid "Connection code: [B]{0}[/B]"
 msgstr ""
 
-msgctxt "#30361"
+msgctxt "#30061"
+msgid "You have successfully logged out"
+msgstr ""
+
+msgctxt "#30062"
 msgid "Login by Code"
 msgstr ""
 
-msgctxt "#30362"
+msgctxt "#30063"
+msgid "Authorization"
+msgstr ""
+
+msgctxt "#30064"
 msgid "Select video server"
 msgstr ""
 
-msgctxt "#30363"
+msgctxt "#30065"
 msgid "Video server successfully changed"
+msgstr ""
+
+msgctxt "#30066"
+msgid "Filmix token don't received from mPlay"
 msgstr ""
 
 msgctxt "#30200"
@@ -304,4 +332,48 @@ msgstr ""
 
 msgctxt "#30347"
 msgid "Order"
+msgstr ""
+
+msgctxt "#30400"
+msgid "Advanced"
+msgstr ""
+
+msgctxt "#30401"
+msgid "Use HTTP protocol for video streams"
+msgstr ""
+
+msgctxt "#30410"
+msgid "mPlay.su Settings"
+msgstr ""
+
+msgctxt "#30411"
+msgid "Use mPlay.su to play 1080p+ video"
+msgstr ""
+
+msgctxt "#30412"
+msgid "Activate by code"
+msgstr ""
+
+msgctxt "#30413"
+msgid "Activate by device ID"
+msgstr ""
+
+msgctxt "#30414"
+msgid "Device ID"
+msgstr ""
+
+msgctxt "#30415"
+msgid "Remove device ID"
+msgstr ""
+
+msgctxt "#30416"
+msgid "Enter device ID"
+msgstr ""
+
+msgctxt "#30417"
+msgid "Login failure! Please, check your device ID"
+msgstr ""
+
+msgctxt "#30418"
+msgid "Enter this code in your account on the page of your devices"
 msgstr ""
