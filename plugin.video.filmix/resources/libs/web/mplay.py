@@ -102,7 +102,7 @@ class MplayClient(object):
         if channels is not None:
             activation_url = self._activation_url()
             for channel in channels:
-                if channel['playlist_url'] == activation_url:
+                if 'activation=true' in channel['playlist_url']:
                     return channel['title']
 
         raise MplayError('Activation code not received')
