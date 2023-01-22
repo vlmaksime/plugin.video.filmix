@@ -190,7 +190,7 @@ class FilmixClient(object):
 
         return j
 
-    def favourites(self, orderby='date', orderdir='desc', page=1):
+    def favourites(self, page=1, orderby='date', orderdir='desc'):
         url = self._base_url + 'api/v2/favourites'
 
         params = {'orderby': orderby,
