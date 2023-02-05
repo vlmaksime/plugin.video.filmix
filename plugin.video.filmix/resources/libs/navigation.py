@@ -11,7 +11,7 @@ from future.utils import iteritems
 from simplemedia import py2_decode
 
 from .filters import Filters
-from .listitems import PostInfo, SeasonInfo, VideoInfo, EmptyListItem, ListItem, MainMenuItem
+from .listitems import ItemInfo, PostInfo, SeasonInfo, VideoInfo, EmptyListItem, ListItem, MainMenuItem
 from .utilities import Utilities
 from .utilities import plugin, cache, _
 from .web import (Filmix, FilmixError,
@@ -103,6 +103,8 @@ class FilmixCatalogs(object):
 
         wm_link = (plugin.params.get('wm_link') == '1')
 
+        load_content_info = False
+
         if not wm_link:
             for filter_item in filters:
                 yield filter_item.get_item()
@@ -119,8 +121,9 @@ class FilmixCatalogs(object):
                 continue
 
             post_info = cache.get_post_details(item['id'])
-            if post_info is None \
-                    or item['date_atom'] != post_info['date_atom']:
+            if load_content_info \
+                    and (post_info is None
+                         or item['date_atom'] != post_info['date_atom']):
                 try:
                     post_info = api.post(item['id'])
                 except simplemedia.WebClientError as e:
@@ -129,7 +132,10 @@ class FilmixCatalogs(object):
                 else:
                     cache.set_post_details(item['id'], post_info)
 
-            item_info = PostInfo(post_info)
+            if post_info is not None:
+                item_info = PostInfo(post_info)
+            else:
+                item_info = ItemInfo(item)
 
             listitem = ListItem(item_info)
 
@@ -155,6 +161,8 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
+            cache.set_post_details(content['id'], content_info)
+
             result = {'items': cls._list_serial_seasons(content_info),
                       'content': 'seasons',
                       'category': content_info['title'],
@@ -202,6 +210,8 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
+            cache.set_post_details(content['id'], serial_info)
+
             season = plugin.params.s
             translation = plugin.params.get('t')
 

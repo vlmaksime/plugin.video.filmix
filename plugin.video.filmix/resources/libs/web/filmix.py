@@ -20,7 +20,7 @@ class FilmixError(Exception):
 class FilmixClient(object):
     _base_url = 'http://filmixapp.cyou/'
 
-    _user_dev_apk = '1.1.7'
+    _user_dev_apk = '2.0.9'
     _user_dev_id = None
     _user_dev_name = None
     _user_dev_token = None
@@ -32,7 +32,11 @@ class FilmixClient(object):
         if api_url:
             self._base_url = api_url
 
-        headers = {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        headers = {#'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                   'Accept-Encoding': 'gzip',
+                   'Content-Length': '0',
+                   'Accept': None,
+                   'User-Agent': None
                    }
 
         self._client = requests.Session()

@@ -38,8 +38,8 @@ class Filmix(FilmixClient):
         super(Filmix, self).__init__()
 
         headers = self._client.headers
-        if addon.kodi_major_version() >= '17':
-            headers['User-Agent'] = xbmc.getUserAgent()
+        # if addon.kodi_major_version() >= '17':
+        #     headers['User-Agent'] = xbmc.getUserAgent()
 
         self._client = FilmixWebClient(headers)
 
