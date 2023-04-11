@@ -103,7 +103,7 @@ class FilmixCatalogs(object):
 
         wm_link = (plugin.params.get('wm_link') == '1')
 
-        load_content_info = False
+        load_content_info = plugin.get_setting('load_content_info')
 
         if not wm_link:
             for filter_item in filters:
@@ -128,7 +128,7 @@ class FilmixCatalogs(object):
                     post_info = api.post(item['id'])
                 except simplemedia.WebClientError as e:
                     simpleplugin.log_exception(e)
-                    continue
+                    # continue
                 else:
                     cache.set_post_details(item['id'], post_info)
 
@@ -273,6 +273,7 @@ class FilmixCatalogs(object):
             succeeded = False
             listitem = EmptyListItem()
         else:
+            cache.set_post_details(content['id'], post_info)
 
             translation = plugin.params.get('t')
             season = plugin.params.get('s')
@@ -316,13 +317,14 @@ class FilmixCatalogs(object):
 
         try:
             api = Filmix()
-            content_info = api.post(content['id'])
+            post_info = api.post(content['id'])
         except (FilmixError, simplemedia.WebClientError) as e:
             plugin.notify_error(e)
             plugin.resolve_url({}, False)
         else:
+            cache.set_post_details(content['id'], post_info)
 
-            listitem = {'path': cls._get_trailer_link(content_info),
+            listitem = {'path': cls._get_trailer_link(post_info),
                         }
 
             plugin.resolve_url(listitem)

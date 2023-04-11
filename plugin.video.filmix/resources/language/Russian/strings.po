@@ -222,6 +222,10 @@ msgctxt "#30204"
 msgid "Use filters"
 msgstr "Использовать фильтры"
 
+msgctxt "#30205"
+msgid "Load content info"
+msgstr "Загружать информацию о контенте"
+
 msgctxt "#30210"
 msgid "Video Quality"
 msgstr "Качество видео"

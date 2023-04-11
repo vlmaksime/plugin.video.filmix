@@ -218,6 +218,10 @@ msgctxt "#30204"
 msgid "Use filters"
 msgstr ""
 
+msgctxt "#30205"
+msgid "Load content info"
+msgstr ""
+
 msgctxt "#30210"
 msgid "Video Quality"
 msgstr ""
