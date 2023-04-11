@@ -303,12 +303,20 @@ class FilmixClient(object):
         return self._extract_json(r)
 
     def url_available(self, url):
-        r = self._client.head(url)
-        return r.status_code not in [403, 404]
+        try:
+            r = self._client.head(url)
+        except:
+            return True
+        else:
+            return r.status_code not in [403, 404]
 
     def get_direct_link(self, url):
-        r = self._client.head(url, allow_redirects=True)
-        return r.url
+        try:
+            r = self._client.head(url, allow_redirects=True)
+        except:
+            return url
+        else:
+            return r.url
 
     @staticmethod
     def _filters_rip():
