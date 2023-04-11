@@ -262,6 +262,18 @@ msgctxt "#30222"
 msgid "KinoPoisk"
 msgstr ""
 
+msgctxt "#30230"
+msgid "Web cache"
+msgstr ""
+
+msgctxt "#30231"
+msgid "Use web cache"
+msgstr ""
+
+msgctxt "#30232"
+msgid "Cache duration (minutes)"
+msgstr ""
+
 msgctxt "#30300"
 msgid "My profile"
 msgstr ""
