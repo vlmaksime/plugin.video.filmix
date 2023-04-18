@@ -8,14 +8,10 @@ import xbmcgui
 from future.utils import iteritems
 from simplemedia import py2_decode, WebClientError
 
-from .cache import FilmixCache
-
 plugin = simplemedia.RoutedPlugin()
 _ = plugin.initialize_gettext()
 
-cache = FilmixCache(plugin.profile_dir)
-
-__all__ = ['plugin', 'py2_decode', '_', 'WebClientError', 'cache', 'Utilities']
+__all__ = ['plugin', 'py2_decode', '_', 'WebClientError', 'Utilities']
 
 
 class Utilities(object):

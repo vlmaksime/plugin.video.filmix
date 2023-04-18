@@ -13,7 +13,8 @@ from simplemedia import py2_decode
 from .filters import Filters
 from .listitems import ItemInfo, PostInfo, SeasonInfo, VideoInfo, EmptyListItem, ListItem, MainMenuItem
 from .utilities import Utilities
-from .utilities import plugin, cache, _
+from .utilities import plugin, _
+from .cache import FilmixCache
 from .web import (Filmix, FilmixError,
                   Mplay, MplayError)
 
@@ -115,6 +116,8 @@ class FilmixCatalogs(object):
 
         api = Filmix()
 
+        cache = FilmixCache(plugin.profile_dir)
+
         for item in items:
 
             if not isinstance(item, dict):
@@ -161,6 +164,8 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
             cache.set_post_details(content['id'], content_info)
 
             result = {'items': cls._list_serial_seasons(content_info),
@@ -180,6 +185,8 @@ class FilmixCatalogs(object):
         player_links = cls._get_player_links(item)
 
         translations = Utilities.get_tvshow_translations(player_links)
+
+        cache = FilmixCache(plugin.profile_dir)
 
         translation = cache.get_post_translation(item['id'])
         if translation is None \
@@ -210,6 +217,8 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
             cache.set_post_details(content['id'], serial_info)
 
             season = plugin.params.s
@@ -273,6 +282,8 @@ class FilmixCatalogs(object):
             succeeded = False
             listitem = EmptyListItem()
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
             cache.set_post_details(content['id'], post_info)
 
             translation = plugin.params.get('t')
@@ -322,6 +333,8 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.resolve_url({}, False)
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
             cache.set_post_details(content['id'], post_info)
 
             listitem = {'path': cls._get_trailer_link(post_info),
@@ -673,6 +686,8 @@ class FilmixCatalogs(object):
 
         post_id = plugin.params.id or ''
         # translation = plugin.params.translation
+
+        cache = FilmixCache(plugin.profile_dir)
 
         post_info = cache.get_post_details(post_id)
         player_links = cls._get_player_links(post_info)
