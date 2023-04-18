@@ -393,3 +393,7 @@ msgstr ""
 msgctxt "#30418"
 msgid "Enter this code in your account on the page of your devices"
 msgstr ""
+
+msgctxt "#30419"
+msgid "Select translation"
+msgstr ""

@@ -397,3 +397,7 @@ msgstr "Ошибка входа! Пожалуйста, проверьте ID у�
 msgctxt "#30418"
 msgid "Enter this code in your account on the page of your devices"
 msgstr "Введите этот код в личном кабинете на странице ваших устройств"
+
+msgctxt "#30419"
+msgid "Select translation"
+msgstr "Выберите озвучку"

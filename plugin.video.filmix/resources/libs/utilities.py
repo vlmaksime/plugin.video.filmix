@@ -134,7 +134,7 @@ class Utilities(object):
 
             translations.append(translation_title)
 
-        selected = xbmcgui.Dialog().select('Select translation', translations)
+        selected = xbmcgui.Dialog().select(_('Select translation'), translations)
 
         if selected >= 0:
             return player_links[selected]

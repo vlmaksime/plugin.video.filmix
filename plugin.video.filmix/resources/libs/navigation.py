@@ -711,7 +711,7 @@ class FilmixCatalogs(object):
             translation_values.append(translation)
 
         import xbmcgui
-        selected = xbmcgui.Dialog().select('Select translation', translation_titles)
+        selected = xbmcgui.Dialog().select(_('Select translation'), translation_titles)
         if selected >= 0:
             cache.set_post_translation(post_id, translation_values[selected])
 
