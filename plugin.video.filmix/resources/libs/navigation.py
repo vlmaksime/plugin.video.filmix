@@ -392,38 +392,13 @@ class FilmixCatalogs(object):
 
         url = link_item['link']
 
-        use_mplay = Utilities.use_mplay()
-        if use_mplay:
-            try:
-                url = cls._replace_token(url)
-            except (MplayError, simplemedia.WebClientError) as e:
-                use_mplay = False
-                if isinstance(e, MplayError):
-                    plugin.notify_error(e)
-
-        api = Filmix()
-
         sub_a = url.find('[')
         sub_b = url.find(']')
+
         qualities = url[sub_a + 1:sub_b].split(',')
+        url = url.replace(url[sub_a:sub_b + 1], '%s')
 
-        video_quality = plugin.get_setting('video_quality')
-        quality_list = cls._available_qualities(use_mplay)
-
-        path = None
-        for i, q in enumerate(quality_list):
-            if (path is None or video_quality >= i) \
-                    and q in qualities:
-                stream_url = url.replace(url[sub_a:sub_b + 1], q)
-                if plugin.get_setting('use_http_links'):
-                    stream_url = stream_url.replace('https://', 'http://')
-                if api.url_available(stream_url):
-                    path = stream_url
-
-        if plugin.get_setting('use_http_links'):
-            path = cls._get_http_link(path)
-
-        return path
+        return cls._get_stream_url(url, qualities)
 
     @classmethod
     def _get_episode_link(cls, item, season, episode, translation=None):
@@ -437,38 +412,10 @@ class FilmixCatalogs(object):
         else:
             episode_info = season_translation[episode]
 
-        api = Filmix()
-
         url = episode_info['link']
-
-        use_mplay = Utilities.use_mplay()
-        if use_mplay:
-            try:
-                url = cls._replace_token(url)
-            except (MplayError, simplemedia.WebClientError) as e:
-                use_mplay = False
-                if isinstance(e, MplayError):
-                    plugin.notify_error(e)
-
         qualities = episode_info['qualities']
 
-        video_quality = plugin.get_setting('video_quality')
-        quality_list = cls._available_qualities(use_mplay)
-
-        path = None
-        for i, q in enumerate(quality_list):
-            if (path is None or video_quality >= i) \
-                    and int(q) in qualities:
-                stream_url = url % q
-                if plugin.get_setting('use_http_links'):
-                    stream_url = stream_url.replace('https://', 'http://')
-                if api.url_available(stream_url):
-                    path = stream_url
-
-        if plugin.get_setting('use_http_links'):
-            path = cls._get_http_link(path)
-
-        return path
+        return cls._get_stream_url(url, qualities)
 
     @classmethod
     def _get_trailer_link(cls, item):
@@ -489,39 +436,64 @@ class FilmixCatalogs(object):
                 if isinstance(e, MplayError):
                     plugin.notify_error(e)
 
-        api = Filmix()
-
         sub_a = url.find('[')
         sub_b = url.find(']')
+
         qualities = url[sub_a + 1:sub_b].split(',')
+        url = url.replace(url[sub_a:sub_b + 1], '%s')
+
+        return cls._get_stream_url(url, qualities)
+
+    @classmethod
+    def _get_stream_url(cls, url, qualities):
+
+        use_mplay = Utilities.use_mplay()
+        if use_mplay:
+            try:
+                url = cls._replace_token(url)
+            except (MplayError, simplemedia.WebClientError) as e:
+                use_mplay = False
+                if isinstance(e, MplayError):
+                    plugin.notify_error(e)
+
+        str_qualities = []
+        for quality in qualities:
+            if not quality:
+                continue
+            if isinstance(quality, str):
+                str_qualities.append(quality)
+            else:
+                str_qualities.append('%s' % quality)
+
+        api = Filmix()
 
         video_quality = plugin.get_setting('video_quality')
         quality_list = cls._available_qualities(use_mplay)
 
+        use_http_links = plugin.get_setting('use_http_links')
+        check_source_link = plugin.get_setting('check_source_link')
+
         path = None
         for i, q in enumerate(quality_list):
             if (path is None or video_quality >= i) \
-                    and q in qualities:
-                stream_url = url.replace(url[sub_a:sub_b + 1], q)
-                if plugin.get_setting('use_http_links'):
+                    and q in str_qualities:
+                stream_url = url % q
+                if use_http_links:
                     stream_url = stream_url.replace('https://', 'http://')
-                if api.url_available(stream_url):
+                if not check_source_link \
+                        or api.url_available(stream_url):
                     path = stream_url
 
-        if plugin.get_setting('use_http_links'):
-            path = cls._get_http_link(path)
+        if use_http_links \
+                and path is not None:
+            try:
+                api = Filmix()
+                direct_path = api.get_direct_link(path)
+            except (FilmixError, simplemedia.WebClientError):
+                direct_path = path
+            path = direct_path.replace('https://', 'http://')
 
         return path
-
-    @classmethod
-    def _get_http_link(cls, path):
-        try:
-            api = Filmix()
-            direct_path = api.get_direct_link(path)
-        except (FilmixError, simplemedia.WebClientError):
-            return path
-        else:
-            return direct_path.replace('https://', 'http://')
 
     @classmethod
     def _available_qualities(cls, use_mplay=False):

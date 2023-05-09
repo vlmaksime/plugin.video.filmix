@@ -362,6 +362,10 @@ msgctxt "#30401"
 msgid "Use HTTP protocol for video streams"
 msgstr "Использовать протокол HTTP для видеопотоков"
 
+msgctxt "#30402"
+msgid "Check source link"
+msgstr "Проверить ссылку на источник"
+
 msgctxt "#30410"
 msgid "mPlay.su Settings"
 msgstr "Настройки mPlay.su"

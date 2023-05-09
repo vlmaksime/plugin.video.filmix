@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmix" version="1.4.4~beta2" name="Filmix" provider-name="vl.maksime">
+<addon id="plugin.video.filmix" version="1.4.4~beta3" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
         <import addon="script.module.simplemedia" version="1.3.2"/>

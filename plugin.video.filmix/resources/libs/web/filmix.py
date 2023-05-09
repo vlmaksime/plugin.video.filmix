@@ -311,12 +311,8 @@ class FilmixClient(object):
             return r.status_code not in [403, 404]
 
     def get_direct_link(self, url):
-        try:
-            r = self._client.head(url, allow_redirects=True)
-        except:
-            return url
-        else:
-            return r.url
+        r = self._client.head(url, allow_redirects=True)
+        return r.url
 
     @staticmethod
     def _filters_rip():

@@ -8,9 +8,6 @@
         <setting type="sep"/>
         <setting label="30210" type="enum" id="video_quality" lvalues="30211|30212|30213|30214|30215|30216" default="2"/>
         <setting label="30220" type="enum" id="video_rating" lvalues="30221|30222" default="0"/>
-        <setting label="30230" type="lsep"/>
-        <setting label="30231" type="bool" id="use_web_cache" default="true"/>
-	    <setting label="30232" type="slider" id="web_cache_duration" default="5" range="1,1,60" option="int"  visible="eq(-1,true)"/>
         <setting type="bool" id="united_search" visible="false" default="true"/>
         <setting type="text" id="us_command" visible="false" default="search?keyword="/>
     </category>
@@ -31,6 +28,10 @@
     </category>
     <category label="30400">
         <setting label="30401" type="bool" id="use_http_links" visible="true" default="false"/>
+        <setting label="30402" type="bool" id="check_source_link" visible="true" default="false"/>
+        <setting label="30230" type="lsep"/>
+        <setting label="30231" type="bool" id="use_web_cache" default="true"/>
+	    <setting label="30232" type="slider" id="web_cache_duration" default="5" range="1,1,60" option="int"  visible="eq(-1,true)"/>
         <setting label="30410" type="lsep"/>
         <setting label="30411" type="bool" id="use_mplay_token" visible="true" default="false"/>
         <setting label="30412" type="action" visible="eq(-1,true)+eq(2,)" action="RunPlugin(plugin://$ID/mplay_activate)"/>
