@@ -202,6 +202,7 @@ class Filmix(FilmixClient):
         self._user_dev_id = addon.get_setting('user_dev_id')
         self._user_dev_token = addon.get_setting('user_dev_token')
         self._user_dev_os = self._os_name()
+        self._user_dev_vendor = 'KODI'
 
         if not self._user_dev_id:
             self._user_dev_id = self.create_dev_id()
