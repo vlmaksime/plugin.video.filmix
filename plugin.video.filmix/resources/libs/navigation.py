@@ -11,9 +11,10 @@ from future.utils import iteritems
 from simplemedia import py2_decode
 
 from .filters import Filters
-from .listitems import PostInfo, SeasonInfo, VideoInfo, EmptyListItem, ListItem, MainMenuItem
+from .listitems import ItemInfo, PostInfo, SeasonInfo, VideoInfo, EmptyListItem, ListItem, MainMenuItem
 from .utilities import Utilities
-from .utilities import plugin, cache, _
+from .utilities import plugin, _
+from .cache import FilmixCache
 from .web import (Filmix, FilmixError,
                   Mplay, MplayError)
 
@@ -103,6 +104,8 @@ class FilmixCatalogs(object):
 
         wm_link = (plugin.params.get('wm_link') == '1')
 
+        load_content_info = plugin.get_setting('load_content_info')
+
         if not wm_link:
             for filter_item in filters:
                 yield filter_item.get_item()
@@ -113,23 +116,29 @@ class FilmixCatalogs(object):
 
         api = Filmix()
 
+        cache = FilmixCache(plugin.profile_dir)
+
         for item in items:
 
             if not isinstance(item, dict):
                 continue
 
             post_info = cache.get_post_details(item['id'])
-            if post_info is None \
-                    or item['date_atom'] != post_info['date_atom']:
+            if load_content_info \
+                    and (post_info is None
+                         or item['date_atom'] != post_info['date_atom']):
                 try:
                     post_info = api.post(item['id'])
                 except simplemedia.WebClientError as e:
                     simpleplugin.log_exception(e)
-                    continue
+                    # continue
                 else:
                     cache.set_post_details(item['id'], post_info)
 
-            item_info = PostInfo(post_info)
+            if post_info is not None:
+                item_info = PostInfo(post_info)
+            else:
+                item_info = ItemInfo(item)
 
             listitem = ListItem(item_info)
 
@@ -155,6 +164,10 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
+            cache.set_post_details(content['id'], content_info)
+
             result = {'items': cls._list_serial_seasons(content_info),
                       'content': 'seasons',
                       'category': content_info['title'],
@@ -172,6 +185,8 @@ class FilmixCatalogs(object):
         player_links = cls._get_player_links(item)
 
         translations = Utilities.get_tvshow_translations(player_links)
+
+        cache = FilmixCache(plugin.profile_dir)
 
         translation = cache.get_post_translation(item['id'])
         if translation is None \
@@ -202,6 +217,10 @@ class FilmixCatalogs(object):
             plugin.notify_error(e)
             plugin.create_directory([], succeeded=False)
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
+            cache.set_post_details(content['id'], serial_info)
+
             season = plugin.params.s
             translation = plugin.params.get('t')
 
@@ -263,6 +282,9 @@ class FilmixCatalogs(object):
             succeeded = False
             listitem = EmptyListItem()
         else:
+            cache = FilmixCache(plugin.profile_dir)
+
+            cache.set_post_details(content['id'], post_info)
 
             translation = plugin.params.get('t')
             season = plugin.params.get('s')
@@ -306,13 +328,16 @@ class FilmixCatalogs(object):
 
         try:
             api = Filmix()
-            content_info = api.post(content['id'])
+            post_info = api.post(content['id'])
         except (FilmixError, simplemedia.WebClientError) as e:
             plugin.notify_error(e)
             plugin.resolve_url({}, False)
         else:
+            cache = FilmixCache(plugin.profile_dir)
 
-            listitem = {'path': cls._get_trailer_link(content_info),
+            cache.set_post_details(content['id'], post_info)
+
+            listitem = {'path': cls._get_trailer_link(post_info),
                         }
 
             plugin.resolve_url(listitem)
@@ -367,38 +392,13 @@ class FilmixCatalogs(object):
 
         url = link_item['link']
 
-        use_mplay = Utilities.use_mplay()
-        if use_mplay:
-            try:
-                url = cls._replace_token(url)
-            except (MplayError, simplemedia.WebClientError) as e:
-                use_mplay = False
-                if isinstance(e, MplayError):
-                    plugin.notify_error(e)
-
-        api = Filmix()
-
         sub_a = url.find('[')
         sub_b = url.find(']')
+
         qualities = url[sub_a + 1:sub_b].split(',')
+        url = url.replace(url[sub_a:sub_b + 1], '%s')
 
-        video_quality = plugin.get_setting('video_quality')
-        quality_list = cls._available_qualities(use_mplay)
-
-        path = None
-        for i, q in enumerate(quality_list):
-            if (path is None or video_quality >= i) \
-                    and q in qualities:
-                stream_url = url.replace(url[sub_a:sub_b + 1], q)
-                if plugin.get_setting('use_http_links'):
-                    stream_url = stream_url.replace('https://', 'http://')
-                if api.url_available(stream_url):
-                    path = stream_url
-
-        if plugin.get_setting('use_http_links'):
-            path = cls._get_http_link(path)
-
-        return path
+        return cls._get_stream_url(url, qualities)
 
     @classmethod
     def _get_episode_link(cls, item, season, episode, translation=None):
@@ -412,38 +412,10 @@ class FilmixCatalogs(object):
         else:
             episode_info = season_translation[episode]
 
-        api = Filmix()
-
         url = episode_info['link']
-
-        use_mplay = Utilities.use_mplay()
-        if use_mplay:
-            try:
-                url = cls._replace_token(url)
-            except (MplayError, simplemedia.WebClientError) as e:
-                use_mplay = False
-                if isinstance(e, MplayError):
-                    plugin.notify_error(e)
-
         qualities = episode_info['qualities']
 
-        video_quality = plugin.get_setting('video_quality')
-        quality_list = cls._available_qualities(use_mplay)
-
-        path = None
-        for i, q in enumerate(quality_list):
-            if (path is None or video_quality >= i) \
-                    and int(q) in qualities:
-                stream_url = url % q
-                if plugin.get_setting('use_http_links'):
-                    stream_url = stream_url.replace('https://', 'http://')
-                if api.url_available(stream_url):
-                    path = stream_url
-
-        if plugin.get_setting('use_http_links'):
-            path = cls._get_http_link(path)
-
-        return path
+        return cls._get_stream_url(url, qualities)
 
     @classmethod
     def _get_trailer_link(cls, item):
@@ -464,39 +436,64 @@ class FilmixCatalogs(object):
                 if isinstance(e, MplayError):
                     plugin.notify_error(e)
 
-        api = Filmix()
-
         sub_a = url.find('[')
         sub_b = url.find(']')
+
         qualities = url[sub_a + 1:sub_b].split(',')
+        url = url.replace(url[sub_a:sub_b + 1], '%s')
+
+        return cls._get_stream_url(url, qualities)
+
+    @classmethod
+    def _get_stream_url(cls, url, qualities):
+
+        use_mplay = Utilities.use_mplay()
+        if use_mplay:
+            try:
+                url = cls._replace_token(url)
+            except (MplayError, simplemedia.WebClientError) as e:
+                use_mplay = False
+                if isinstance(e, MplayError):
+                    plugin.notify_error(e)
+
+        str_qualities = []
+        for quality in qualities:
+            if not quality:
+                continue
+            if isinstance(quality, str):
+                str_qualities.append(quality)
+            else:
+                str_qualities.append('%s' % quality)
+
+        api = Filmix()
 
         video_quality = plugin.get_setting('video_quality')
         quality_list = cls._available_qualities(use_mplay)
 
+        use_http_links = plugin.get_setting('use_http_links')
+        check_source_link = plugin.get_setting('check_source_link')
+
         path = None
         for i, q in enumerate(quality_list):
             if (path is None or video_quality >= i) \
-                    and q in qualities:
-                stream_url = url.replace(url[sub_a:sub_b + 1], q)
-                if plugin.get_setting('use_http_links'):
+                    and q in str_qualities:
+                stream_url = url % q
+                if use_http_links:
                     stream_url = stream_url.replace('https://', 'http://')
-                if api.url_available(stream_url):
+                if not check_source_link \
+                        or api.url_available(stream_url):
                     path = stream_url
 
-        if plugin.get_setting('use_http_links'):
-            path = cls._get_http_link(path)
+        if use_http_links \
+                and path is not None:
+            try:
+                api = Filmix()
+                direct_path = api.get_direct_link(path)
+            except (FilmixError, simplemedia.WebClientError):
+                direct_path = path
+            path = direct_path.replace('https://', 'http://')
 
         return path
-
-    @classmethod
-    def _get_http_link(cls, path):
-        try:
-            api = Filmix()
-            direct_path = api.get_direct_link(path)
-        except (FilmixError, simplemedia.WebClientError):
-            return path
-        else:
-            return direct_path.replace('https://', 'http://')
 
     @classmethod
     def _available_qualities(cls, use_mplay=False):
@@ -662,6 +659,8 @@ class FilmixCatalogs(object):
         post_id = plugin.params.id or ''
         # translation = plugin.params.translation
 
+        cache = FilmixCache(plugin.profile_dir)
+
         post_info = cache.get_post_details(post_id)
         player_links = cls._get_player_links(post_info)
 
@@ -684,7 +683,7 @@ class FilmixCatalogs(object):
             translation_values.append(translation)
 
         import xbmcgui
-        selected = xbmcgui.Dialog().select('Select translation', translation_titles)
+        selected = xbmcgui.Dialog().select(_('Select translation'), translation_titles)
         if selected >= 0:
             cache.set_post_translation(post_id, translation_values[selected])
 

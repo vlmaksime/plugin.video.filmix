@@ -8,14 +8,10 @@ import xbmcgui
 from future.utils import iteritems
 from simplemedia import py2_decode, WebClientError
 
-from .cache import FilmixCache
-
 plugin = simplemedia.RoutedPlugin()
 _ = plugin.initialize_gettext()
 
-cache = FilmixCache(plugin.profile_dir)
-
-__all__ = ['plugin', 'py2_decode', '_', 'WebClientError', 'cache', 'Utilities']
+__all__ = ['plugin', 'py2_decode', '_', 'WebClientError', 'Utilities']
 
 
 class Utilities(object):
@@ -138,7 +134,7 @@ class Utilities(object):
 
             translations.append(translation_title)
 
-        selected = xbmcgui.Dialog().select('Select translation', translations)
+        selected = xbmcgui.Dialog().select(_('Select translation'), translations)
 
         if selected >= 0:
             return player_links[selected]

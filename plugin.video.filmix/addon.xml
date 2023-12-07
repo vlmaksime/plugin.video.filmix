@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.filmix" version="1.4.3" name="Filmix" provider-name="vl.maksime">
+<addon id="plugin.video.filmix" version="1.4.4" name="Filmix" provider-name="vl.maksime">
     <requires>
         <import addon="xbmc.python" version="2.19.0"/>
         <import addon="script.module.simplemedia" version="1.3.2"/>
@@ -17,10 +17,10 @@
         <platform>all</platform>
         <license>GPL-3.0-only</license>
         <forum>http://xbmc.ru/forum/showthread.php?t=16408</forum>
-        <website>https://filmix.co/</website>
+        <website>https://filmix.ac/</website>
         <email>vl.maksime@gmail.com</email>
         <source>https://github.com/vlmaksime/plugin.video.filmix</source>
-        <news>v1.4.3(2023-01-22)[CR]- Исправлено перелистывание страниц в разделе "Избранное"[CR][CR]v1.4.2(2023-01-07)[CR]- Добавлена возможность воспроизведения видео 1080+ с помощью сервиса mplay.su[CR]- Восстановлен фильтр по качеству видео[CR]- Ускорена повторная загрузка списка контента</news>
+        <news>v1.4.4(2023-12-07)[CR]- Реализовано кэширование запросов к серверу[CR]- Исправлены выявленные ошибки[CR][CR]v1.4.3(2023-01-22)[CR]- Исправлено перелистывание страниц в разделе "Избранное"[CR][CR]v1.4.2(2023-01-07)[CR]- Добавлена возможность воспроизведения видео 1080+ с помощью сервиса mplay.su[CR]- Восстановлен фильтр по качеству видео[CR]- Ускорена повторная загрузка списка контента</news>
         <assets>
             <icon>icon.png</icon>
             <fanart>fanart.jpg</fanart>

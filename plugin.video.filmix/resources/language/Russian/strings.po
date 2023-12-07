@@ -222,6 +222,10 @@ msgctxt "#30204"
 msgid "Use filters"
 msgstr "Использовать фильтры"
 
+msgctxt "#30205"
+msgid "Load content info"
+msgstr "Загружать информацию о контенте"
+
 msgctxt "#30210"
 msgid "Video Quality"
 msgstr "Качество видео"
@@ -261,6 +265,18 @@ msgstr "iMDB"
 msgctxt "#30222"
 msgid "KinoPoisk"
 msgstr "КиноПоиск"
+
+msgctxt "#30230"
+msgid "Web cache"
+msgstr "Веб-кэш"
+
+msgctxt "#30231"
+msgid "Use web cache"
+msgstr "Использовать веб-кэш"
+
+msgctxt "#30232"
+msgid "Cache duration (minutes)"
+msgstr "Длительность кэширования (минут)"
 
 msgctxt "#30300"
 msgid "My profile"
@@ -346,6 +362,10 @@ msgctxt "#30401"
 msgid "Use HTTP protocol for video streams"
 msgstr "Использовать протокол HTTP для видеопотоков"
 
+msgctxt "#30402"
+msgid "Check source link"
+msgstr "Проверить ссылку на источник"
+
 msgctxt "#30410"
 msgid "mPlay.su Settings"
 msgstr "Настройки mPlay.su"
@@ -381,3 +401,7 @@ msgstr "Ошибка входа! Пожалуйста, проверьте ID у�
 msgctxt "#30418"
 msgid "Enter this code in your account on the page of your devices"
 msgstr "Введите этот код в личном кабинете на странице ваших устройств"
+
+msgctxt "#30419"
+msgid "Select translation"
+msgstr "Выберите озвучку"

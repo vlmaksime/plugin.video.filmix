@@ -3,14 +3,24 @@
 
 from __future__ import unicode_literals
 
+import json
+import os
 import platform
+import sqlite3
+import time
 
 import requests
 import simplemedia
 import xbmc
+from future.utils import PY3, iteritems
 
 from .filmix import FilmixClient, FilmixError
 from .mplay import MplayClient, MplayError
+
+if PY3:
+    from urllib.parse import urlencode, urlparse
+else:
+    from future.backports.urllib.parse import urlencode, urlparse
 
 addon = simplemedia.Addon()
 
@@ -18,7 +28,129 @@ __all__ = ['Filmix', 'FilmixError',
            'Mplay', 'MplayError']
 
 
+class WebCacheResponse(object):
+    status_code = None
+    text = None
+
+    def __init__(self, data):
+        self.status_code = data['status_code']
+        self.text = data['text']
+
+    def json(self):
+        return json.loads(self.text)
+
+
+class FilmixWebCache(object):
+
+    def __init__(self, cache_dir, cache_duration=300):
+        self._version = 1
+
+        if not os.path.exists(cache_dir):
+            os.makedirs(cache_dir)
+
+        self._cache_duration = cache_duration
+
+        db_path = os.path.join(cache_dir, 'web_cache{0}.db'.format(self._version))
+        db_exist = os.path.exists(db_path)
+
+        self.conn = sqlite3.connect(db_path)
+        self.conn.row_factory = self._dict_factory
+
+        if not db_exist:
+            self.create_database()
+
+    def __del__(self):
+        self.conn.close()
+
+    @staticmethod
+    def _dict_factory(cursor, row):
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
+    def create_database(self):
+
+        c = self.conn.cursor()
+        # requests
+        c.execute('CREATE TABLE requests (url text, params text, text text, status_code num, time num)')
+        c.execute('CREATE UNIQUE INDEX requests_idx ON requests(url, params)')
+
+        self.conn.commit()
+
+    def get_request_details(self, url, params):
+        url_parts = urlparse(url)
+
+        if not self._is_cached_path(url_parts.path):
+            return None
+
+        sql_params = {'url': url_parts.path,
+                      'params': self._get_params_str(params),
+                      'time': time.time() - self._cache_duration
+                      }
+
+        c = self.conn.cursor()
+        c.execute(
+            'SELECT status_code, text FROM requests WHERE url = :url AND params = :params AND time >= :time LIMIT 1',
+            sql_params)
+
+        result = c.fetchone()
+        if result is not None:
+            return WebCacheResponse(result)
+
+    def set_request_details(self, url, params, response):
+
+        url_parts = urlparse(url)
+
+        if not self._is_cached_path(url_parts.path):
+            return
+
+        sql_params = {'url': url_parts.path,
+                      'params': self._get_params_str(params),
+                      'status_code': response.status_code,
+                      'text': response.text,
+                      'time': time.time()
+                      }
+
+        c = self.conn.cursor()
+        c.execute(
+            'INSERT OR REPLACE INTO requests (url, params, status_code, text, time) VALUES (:url, :params, '
+            ':status_code, :text, :time)',
+            sql_params)
+
+        self.conn.commit()
+
+    @staticmethod
+    def _get_params_str(params):
+        if params is None:
+            return ''
+
+        params_copy = {}
+        params_copy.update(params)
+
+        for key, val in iteritems(params):
+            if key.startswith('user_dev'):
+                del params_copy[key]
+
+        return urlencode(params_copy)
+
+    @staticmethod
+    def _is_cached_path(path):
+        cached_paths = ['/api/v2/catalog', '/api/v2/popular', '/api/v2/top_views', '/api/v2/favourites',
+                        '/api/v2/deferred', '/api/v2/history', '/api/v2/search', '/api/v2/filter_list']
+
+        return (path in cached_paths \
+            or path.startswith('/api/v2/post/'))
+
+
 class FilmixWebClient(simplemedia.WebClient):
+    _web_cache = None
+
+    def __init__(self, cache_dir=None, cache_duration=300, **kwargs):
+        super(FilmixWebClient, self).__init__(**kwargs)
+
+        if cache_dir is not None:
+            self._web_cache = FilmixWebCache(cache_dir, cache_duration)
 
     def head(self, url, **kwargs):
         try:
@@ -30,6 +162,24 @@ class FilmixWebClient(simplemedia.WebClient):
                 raise e
         return r
 
+    def get(self, url, **kwargs):
+
+        if self._web_cache is not None:
+            params = kwargs.get('params')
+
+            r = self._web_cache.get_request_details(url, params)
+            if r is not None:
+                return r
+
+        r = super(FilmixWebClient, self).get(url, **kwargs)
+
+        if self._web_cache is not None \
+                and r.status_code in [200] \
+                and r.text:
+            self._web_cache.set_request_details(url, params, r)
+
+        return r
+
 
 class Filmix(FilmixClient):
 
@@ -38,15 +188,21 @@ class Filmix(FilmixClient):
         super(Filmix, self).__init__()
 
         headers = self._client.headers
-        if addon.kodi_major_version() >= '17':
-            headers['User-Agent'] = xbmc.getUserAgent()
+        # if addon.kodi_major_version() >= '17':
+        #     headers['User-Agent'] = xbmc.getUserAgent()
 
-        self._client = FilmixWebClient(headers)
+        if addon.get_setting('use_web_cache'):
+            cache_dir = addon.profile_dir
+            cache_duration = addon.get_setting('web_cache_duration') * 60
+            self._client = FilmixWebClient(headers=headers, cache_dir=cache_dir, cache_duration=cache_duration)
+        else:
+            self._client = FilmixWebClient(headers=headers)
 
         self._user_dev_name = addon.get_setting('user_dev_name')
         self._user_dev_id = addon.get_setting('user_dev_id')
         self._user_dev_token = addon.get_setting('user_dev_token')
         self._user_dev_os = self._os_name()
+        self._user_dev_vendor = 'KODI'
 
         if not self._user_dev_id:
             self._user_dev_id = self.create_dev_id()

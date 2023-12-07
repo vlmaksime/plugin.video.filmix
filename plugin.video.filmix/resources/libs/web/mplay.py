@@ -108,23 +108,48 @@ class MplayClient(object):
         raise MplayError('Activation code not received')
 
     def get_filmix_hd_token(self):
-        url = self._base_url + '?.mp4'
-
-        params = {'cmd': 'mediateka',
-                  'su': 'get',
-                  'su_n': '2273e9819b547497298980075323b05b',
-                  'su_str': 'Дубльований [Український | 1080p+]',
-                  }
 
         token = ''
 
-        r = self._head(url, params=params)
-        if r.status_code in [302]:
-            hd_stream_url = r.headers.get('Location')
-            token = self.get_token_from_filmix_url(hd_stream_url)
+        playlist_item = self.search('Sing 2')
+        if playlist_item is not None:
+            r = self._get(playlist_item['playlist_url'])
+            j = self._extract_json(r)
+
+            for channel in j['channels']:
+                if channel['title'].startswith('#6'):
+                    token = self._get_filmix_token(channel['stream_url'])
+                    if token != '':
+                        break
 
         if token == '':
             raise MplayError('Filmix token don\'t received from mPlay')
+
+        return token
+
+
+    def search(self, title):
+        url = self._base_url
+
+        params = {'cmd': 'mediateka',
+                  'su': 'search',
+                  'search': title
+                  }
+
+        r = self._get(url, params=params)
+        j = self._extract_json(r)
+        for channel in j['channels']:
+            if 'su=full' in channel['playlist_url']:
+                return channel
+
+    def _get_filmix_token(self, url):
+
+        token = ''
+
+        r = self._client.head(url)
+        if r.status_code in [302]:
+            hd_stream_url = r.headers.get('Location')
+            token = self.get_token_from_filmix_url(hd_stream_url)
 
         return token
 
