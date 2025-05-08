@@ -9,8 +9,7 @@ import xbmcgui
 from future.utils import iteritems
 
 from .utilities import plugin, WebClientError, _
-from .web import (Filmix, FilmixError,
-                  Mplay, MplayError)
+from .web import Filmix, FilmixError
 
 
 class FilmixActions(object):
@@ -146,79 +145,3 @@ class FilmixActions(object):
             xbmc.executebuiltin('Container.Refresh()')
 
 
-class MplayActions(object):
-
-    @staticmethod
-    def enter_token():
-        mplay_token = plugin.get_keyboard_text('', _('Enter device ID'))
-        if mplay_token:
-
-            try:
-                api = Mplay()
-                api.update_box_token(mplay_token)
-
-                activation_status = api.activation_status()
-
-            except (MplayError, simplemedia.WebClientError) as e:
-                plugin.notify_error(e, True)
-            else:
-                if activation_status:
-                    plugin.set_setting('mplay_token', mplay_token)
-                    plugin.dialog_ok(_('You have successfully logged in'))
-                else:
-                    plugin.dialog_ok(_('Login failure! Please, check your device ID'))
-
-    @staticmethod
-    def activate():
-        try:
-            api = Mplay()
-
-            mplay_token = api.create_token()
-            api.update_box_token(mplay_token)
-
-            activation_code = api.activation_code_request()
-        except (MplayError, simplemedia.WebClientError) as e:
-            plugin.notify_error(e, True)
-        else:
-            progress = plugin.dialog_progress_create(_('Login by Code'),
-                                                     activation_code,
-                                                     _('Enter this code in your account on the page of your devices'))
-
-            wait_sec = 300
-            step_sec = 2
-            pass_sec = 0
-            check_sec = 20
-
-            activation_status = False
-
-            while pass_sec < wait_sec:
-                if progress.iscanceled():
-                    return
-
-                xbmc.sleep(step_sec * 1000)
-                pass_sec += step_sec
-
-                plugin.dialog_progress_update(progress, int(100 * pass_sec / wait_sec))
-
-                if (pass_sec % check_sec) == 0:
-                    try:
-                        activation_status = api.activation_status()
-                    except (MplayError, simplemedia.WebClientError) as e:
-                        plugin.notify_error(e)
-                    else:
-                        if activation_status:
-                            break
-
-            progress.close()
-
-            if activation_status:
-                plugin.set_setting('mplay_token', mplay_token)
-                plugin.dialog_ok(_('You have successfully logged in'))
-            else:
-                plugin.dialog_ok(_('Login failure! Please, try later'))
-
-    @staticmethod
-    def remove_token():
-        plugin.set_setting('mplay_token', '')
-
-        plugin.dialog_ok(_('You have successfully logged out'))

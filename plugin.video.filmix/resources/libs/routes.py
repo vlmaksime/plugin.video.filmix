@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # License: GPL v.3 https://www.gnu.org/copyleft/gpl.html
 
-from .actions import FilmixActions, MplayActions
+from .actions import FilmixActions
 from .filters import Filters
 from .navigation import FilmixCatalogs
 from .utilities import plugin
@@ -137,18 +137,3 @@ def search_clear():
 @plugin.route('/select_filter')
 def select_filter():
     Filters.select_filter()
-
-
-@plugin.route('/mplay_activate')
-def mplay_activate():
-    MplayActions.activate()
-
-
-@plugin.route('/mplay_enter_token')
-def mplay_enter_token():
-    MplayActions.enter_token()
-
-
-@plugin.route('/mplay_remove_token')
-def mplay_remove_token():
-    MplayActions.remove_token()

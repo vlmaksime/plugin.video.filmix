@@ -15,8 +15,7 @@ from .listitems import ItemInfo, PostInfo, SeasonInfo, VideoInfo, EmptyListItem,
 from .utilities import Utilities
 from .utilities import plugin, _
 from .cache import FilmixCache
-from .web import (Filmix, FilmixError,
-                  Mplay, MplayError)
+from .web import Filmix, FilmixError
 
 
 class FilmixCatalogs(object):
@@ -427,15 +426,6 @@ class FilmixCatalogs(object):
 
         url = player_links[0]['link']
 
-        use_mplay = Utilities.use_mplay()
-        if use_mplay:
-            try:
-                url = cls._replace_token(url)
-            except (MplayError, simplemedia.WebClientError) as e:
-                use_mplay = False
-                if isinstance(e, MplayError):
-                    plugin.notify_error(e)
-
         sub_a = url.find('[')
         sub_b = url.find(']')
 
@@ -446,15 +436,6 @@ class FilmixCatalogs(object):
 
     @classmethod
     def _get_stream_url(cls, url, qualities):
-
-        use_mplay = Utilities.use_mplay()
-        if use_mplay:
-            try:
-                url = cls._replace_token(url)
-            except (MplayError, simplemedia.WebClientError) as e:
-                use_mplay = False
-                if isinstance(e, MplayError):
-                    plugin.notify_error(e)
 
         str_qualities = []
         for quality in qualities:
@@ -468,7 +449,7 @@ class FilmixCatalogs(object):
         api = Filmix()
 
         video_quality = plugin.get_setting('video_quality')
-        quality_list = cls._available_qualities(use_mplay)
+        quality_list = cls._available_qualities()
 
         use_http_links = plugin.get_setting('use_http_links')
         check_source_link = plugin.get_setting('check_source_link')
@@ -496,9 +477,8 @@ class FilmixCatalogs(object):
         return path
 
     @classmethod
-    def _available_qualities(cls, use_mplay=False):
-        if plugin.get_setting('is_pro_plus') \
-                or use_mplay:
+    def _available_qualities(cls):
+        if plugin.get_setting('is_pro_plus'):
             return ['360', '480', '720', '1080', '1440', '2160']
         elif plugin.get_setting('user_login'):
             return ['360', '480', '720']
@@ -588,17 +568,6 @@ class FilmixCatalogs(object):
                     context_menu.append((_('Add to Watch Later'), 'RunPlugin({0})'.format(url)))
 
         return context_menu
-
-    @staticmethod
-    def _replace_token(stream_url):
-        api = Mplay()
-
-        hd_token = api.get_filmix_hd_token()
-        if hd_token:
-            stream_token = api.get_token_from_filmix_url(stream_url)
-            stream_url = stream_url.replace(stream_token, hd_token)
-
-        return stream_url
 
     @staticmethod
     def _get_listitem_url(item_info, use_atl_names=False):

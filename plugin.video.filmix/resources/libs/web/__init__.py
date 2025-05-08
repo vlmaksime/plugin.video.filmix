@@ -15,7 +15,6 @@ import xbmc
 from future.utils import PY3, iteritems
 
 from .filmix import FilmixClient, FilmixError
-from .mplay import MplayClient, MplayError
 
 if PY3:
     from urllib.parse import urlencode, urlparse
@@ -24,8 +23,7 @@ else:
 
 addon = simplemedia.Addon()
 
-__all__ = ['Filmix', 'FilmixError',
-           'Mplay', 'MplayError']
+__all__ = ['Filmix', 'FilmixError']
 
 
 class WebCacheResponse(object):
@@ -255,32 +253,3 @@ class Filmix(FilmixClient):
 
         return os_name
 
-
-class Mplay(MplayClient):
-
-    def __init__(self):
-
-        super(Mplay, self).__init__()
-
-        headers = self._client.headers
-        if addon.kodi_major_version() >= '17':
-            headers['User-Agent'] = xbmc.getUserAgent()
-
-        self._client = simplemedia.WebClient(headers)
-
-        self._box_mac = addon.get_setting('mplay_token')
-
-    @staticmethod
-    def create_token():
-        import math
-        import random
-
-        result = ''
-        charsets = '0123456789abcdef'
-        while len(result) < 16:
-            index = int(math.floor(random.random() * 15))
-            result = result + charsets[index]
-        return 'kodi' + result
-
-    def update_box_token(self, box_mac):
-        self._box_mac = box_mac

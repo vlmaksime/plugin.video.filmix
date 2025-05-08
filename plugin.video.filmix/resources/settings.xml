@@ -32,11 +32,5 @@
         <setting label="30230" type="lsep"/>
         <setting label="30231" type="bool" id="use_web_cache" default="true"/>
 	    <setting label="30232" type="slider" id="web_cache_duration" default="5" range="1,1,60" option="int"  visible="eq(-1,true)"/>
-        <setting label="30410" type="lsep"/>
-        <setting label="30411" type="bool" id="use_mplay_token" visible="true" default="false"/>
-        <setting label="30412" type="action" visible="eq(-1,true)+eq(2,)" action="RunPlugin(plugin://$ID/mplay_activate)"/>
-        <setting label="30413" type="action" visible="eq(-2,true)+eq(1,)" action="RunPlugin(plugin://$ID/mplay_enter_token)"/>
-        <setting label="30414" type="text" id="mplay_token" visible="eq(-3,true)+!eq(0,)" enable="false" default=""/>
-        <setting label="30415" type="action" visible="eq(-4,true)+!eq(-1,)" action="RunPlugin(plugin://$ID/mplay_remove_token)"/>
     </category>
 </settings>

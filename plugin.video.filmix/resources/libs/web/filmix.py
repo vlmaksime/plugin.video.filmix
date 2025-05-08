@@ -106,7 +106,7 @@ class FilmixClient(object):
         return j
 
     def set_videoserver(self, vs_schg):
-        url = self._base_url + '/api/v2/change_server'
+        url = self._base_url + 'api/v2/change_server'
 
         data = {'vs_schg': vs_schg,
                 }
