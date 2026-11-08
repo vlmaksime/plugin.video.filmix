@@ -246,6 +246,8 @@ class Filmix(FilmixClient):
 
     @staticmethod
     def _os_name():
+        if xbmc.getCondVisibility('system.platform.uwp'):
+            return 'Windows 10'
         os_name = platform.system()
         if os_name == 'Linux':
             if xbmc.getCondVisibility('system.platform.android'):
